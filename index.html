@@ -79,91 +79,132 @@
           <span class="text-xs text-slate-500">Record daily symptoms to automatically answer clinical assessments</span>
         </div>
         <form id="entryForm" class="space-y-6">
-          <div>
-            <label for="entryDate" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Date</label>
-            <input type="date" id="entryDate" required class="w-full sm:w-64 px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <label for="entryDate" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Date</label>
+              <input type="date" id="entryDate" required class="w-full sm:w-64 px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+            <div class="flex items-center gap-2 self-start sm:self-end">
+              <button type="button" onclick="toggleAllQuestionSections(true)" class="px-2.5 py-1 text-xs font-medium text-slate-600 hover:text-indigo-600 bg-slate-100 hover:bg-slate-200/80 rounded transition-colors">
+                Expand All
+              </button>
+              <button type="button" onclick="toggleAllQuestionSections(false)" class="px-2.5 py-1 text-xs font-medium text-slate-600 hover:text-indigo-600 bg-slate-100 hover:bg-slate-200/80 rounded transition-colors">
+                Collapse All
+              </button>
+            </div>
           </div>
 
-          <!-- Section 1: ASRS v1.1 Part A Screener -->
-          <div class="space-y-3">
-            <div class="flex items-center justify-between pb-1 border-b border-slate-100">
-              <span class="text-xs font-bold uppercase tracking-wider text-indigo-900 flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-indigo-600"></span>
-                ASRS v1.1 Screener (Adult ADHD Indicators)
-              </span>
-              <span class="text-[11px] text-slate-500">6 core questions</span>
-            </div>
-            <div class="grid grid-cols-1 gap-2.5" id="symptomsList">
-              <label class="flex items-start gap-3 p-3 rounded-lg border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
-                <input type="checkbox" name="symptom" value="details" class="mt-0.5 h-4 w-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500">
-                <div>
-                  <div class="flex items-center gap-2">
-                    <span class="text-xs font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">Q1</span>
-                    <span class="text-sm font-medium text-slate-800">Trouble Finishing Final Details</span>
-                  </div>
-                  <p class="text-xs text-slate-500 mt-0.5">Difficulty wrapping up project details once challenging parts are done.</p>
-                </div>
-              </label>
+          <!-- Section 1: ASRS v1.1 Part A Screener (Collapsible) -->
+          <details open id="asrsSection" class="group border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm transition-all">
+            <summary class="flex items-center justify-between p-4 bg-slate-50/90 hover:bg-slate-100/80 cursor-pointer list-none select-none transition-colors [&::-webkit-details-marker]:hidden">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="w-2.5 h-2.5 rounded-full bg-indigo-600"></span>
+                <span class="text-xs font-bold uppercase tracking-wider text-indigo-950">
+                  ASRS v1.1 Screener (Adult ADHD Indicators)
+                </span>
+                <span id="asrsSelectedBadge" class="hidden px-2 py-0.5 rounded-full text-[10px] font-semibold bg-indigo-100 text-indigo-700">0 selected</span>
+              </div>
+              <div class="flex items-center gap-2 flex-shrink-0">
+                <span class="text-[11px] text-slate-500 font-medium hidden sm:inline">6 core questions</span>
+                <svg class="w-4 h-4 text-slate-500 transition-transform duration-200 group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </div>
+            </summary>
 
-              <label class="flex items-start gap-3 p-3 rounded-lg border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
-                <input type="checkbox" name="symptom" value="disorganized" class="mt-0.5 h-4 w-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500">
-                <div>
+            <div class="p-4 space-y-4 pt-3 border-t border-slate-100">
+              <!-- Sub-section 1A: Part A Core Questions -->
+              <details open id="asrsCoreSubSection" class="group/sub rounded-lg border border-slate-200 overflow-hidden bg-white">
+                <summary class="flex items-center justify-between p-3 bg-slate-50/70 hover:bg-slate-100/70 cursor-pointer list-none select-none text-xs font-semibold text-slate-700 [&::-webkit-details-marker]:hidden">
                   <div class="flex items-center gap-2">
-                    <span class="text-xs font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">Q2</span>
-                    <span class="text-sm font-medium text-slate-800">Difficulty Getting Organized</span>
+                    <span class="font-medium text-slate-800">Part A Core Screening Questions (Q1–Q6)</span>
+                    <span id="asrsCoreSelectedBadge" class="hidden px-1.5 py-0.5 rounded text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">0 selected</span>
                   </div>
-                  <p class="text-xs text-slate-500 mt-0.5">Trouble putting things in order when a task requires organization.</p>
-                </div>
-              </label>
+                  <svg class="w-3.5 h-3.5 text-slate-400 transition-transform duration-200 group-open/sub:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </summary>
+                <div class="p-3 grid grid-cols-1 gap-2.5 border-t border-slate-100" id="symptomsList">
+                  <label class="flex items-start gap-3 p-3 rounded-lg border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
+                    <input type="checkbox" name="symptom" value="details" class="mt-0.5 h-4 w-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500">
+                    <div>
+                      <div class="flex items-center gap-2">
+                        <span class="text-xs font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">Q1</span>
+                        <span class="text-sm font-medium text-slate-800">Trouble Finishing Final Details</span>
+                      </div>
+                      <p class="text-xs text-slate-500 mt-0.5">Difficulty wrapping up project details once challenging parts are done.</p>
+                    </div>
+                  </label>
 
-              <label class="flex items-start gap-3 p-3 rounded-lg border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
-                <input type="checkbox" name="symptom" value="remembering" class="mt-0.5 h-4 w-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500">
-                <div>
+                  <label class="flex items-start gap-3 p-3 rounded-lg border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
+                    <input type="checkbox" name="symptom" value="disorganized" class="mt-0.5 h-4 w-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500">
+                    <div>
+                      <div class="flex items-center gap-2">
+                        <span class="text-xs font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">Q2</span>
+                        <span class="text-sm font-medium text-slate-800">Difficulty Getting Organized</span>
+                      </div>
+                      <p class="text-xs text-slate-500 mt-0.5">Trouble putting things in order when a task requires organization.</p>
+                    </div>
+                  </label>
+
+                  <label class="flex items-start gap-3 p-3 rounded-lg border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
+                    <input type="checkbox" name="symptom" value="remembering" class="mt-0.5 h-4 w-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500">
+                    <div>
+                      <div class="flex items-center gap-2">
+                        <span class="text-xs font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">Q3</span>
+                        <span class="text-sm font-medium text-slate-800">Remembering Appointments or Tasks</span>
+                      </div>
+                      <p class="text-xs text-slate-500 mt-0.5">Problems remembering scheduled commitments or daily obligations.</p>
+                    </div>
+                  </label>
+
+                  <label class="flex items-start gap-3 p-3 rounded-lg border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
+                    <input type="checkbox" name="symptom" value="procrastination" class="mt-0.5 h-4 w-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500">
+                    <div>
+                      <div class="flex items-center gap-2">
+                        <span class="text-xs font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">Q4</span>
+                        <span class="text-sm font-medium text-slate-800">Avoiding Demanding Tasks</span>
+                      </div>
+                      <p class="text-xs text-slate-500 mt-0.5">Delaying or putting off tasks requiring sustained mental effort.</p>
+                    </div>
+                  </label>
+
+                  <label class="flex items-start gap-3 p-3 rounded-lg border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
+                    <input type="checkbox" name="symptom" value="restless" class="mt-0.5 h-4 w-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500">
+                    <div>
+                      <div class="flex items-center gap-2">
+                        <span class="text-xs font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">Q5</span>
+                        <span class="text-sm font-medium text-slate-800">Fidgety, Restless, or Squirming</span>
+                      </div>
+                      <p class="text-xs text-slate-500 mt-0.5">Fidgeting with hands/feet or squirming when seated for a while.</p>
+                    </div>
+                  </label>
+
+                  <label class="flex items-start gap-3 p-3 rounded-lg border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
+                    <input type="checkbox" name="symptom" value="motor" class="mt-0.5 h-4 w-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500">
+                    <div>
+                      <div class="flex items-center gap-2">
+                        <span class="text-xs font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">Q6</span>
+                        <span class="text-sm font-medium text-slate-800">Overly Active / Driven by a Motor</span>
+                      </div>
+                      <p class="text-xs text-slate-500 mt-0.5">Feeling compelled to keep moving or doing things like driven by a motor.</p>
+                    </div>
+                  </label>
+                </div>
+              </details>
+
+              <!-- Sub-section 1B: General Focus & Rest Context -->
+              <details open id="asrsGeneralSubSection" class="group/sub rounded-lg border border-slate-200 overflow-hidden bg-white">
+                <summary class="flex items-center justify-between p-3 bg-slate-50/70 hover:bg-slate-100/70 cursor-pointer list-none select-none text-xs font-semibold text-slate-700 [&::-webkit-details-marker]:hidden">
                   <div class="flex items-center gap-2">
-                    <span class="text-xs font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">Q3</span>
-                    <span class="text-sm font-medium text-slate-800">Remembering Appointments or Tasks</span>
+                    <span class="font-medium text-slate-800">General Focus &amp; Rest Indicators</span>
+                    <span id="asrsGeneralSelectedBadge" class="hidden px-1.5 py-0.5 rounded text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">0 selected</span>
                   </div>
-                  <p class="text-xs text-slate-500 mt-0.5">Problems remembering scheduled commitments or daily obligations.</p>
-                </div>
-              </label>
-
-              <label class="flex items-start gap-3 p-3 rounded-lg border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
-                <input type="checkbox" name="symptom" value="procrastination" class="mt-0.5 h-4 w-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500">
-                <div>
-                  <div class="flex items-center gap-2">
-                    <span class="text-xs font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">Q4</span>
-                    <span class="text-sm font-medium text-slate-800">Avoiding Demanding Tasks</span>
-                  </div>
-                  <p class="text-xs text-slate-500 mt-0.5">Delaying or putting off tasks requiring sustained mental effort.</p>
-                </div>
-              </label>
-
-              <label class="flex items-start gap-3 p-3 rounded-lg border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
-                <input type="checkbox" name="symptom" value="restless" class="mt-0.5 h-4 w-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500">
-                <div>
-                  <div class="flex items-center gap-2">
-                    <span class="text-xs font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">Q5</span>
-                    <span class="text-sm font-medium text-slate-800">Fidgety, Restless, or Squirming</span>
-                  </div>
-                  <p class="text-xs text-slate-500 mt-0.5">Fidgeting with hands/feet or squirming when seated for a while.</p>
-                </div>
-              </label>
-
-              <label class="flex items-start gap-3 p-3 rounded-lg border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
-                <input type="checkbox" name="symptom" value="motor" class="mt-0.5 h-4 w-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500">
-                <div>
-                  <div class="flex items-center gap-2">
-                    <span class="text-xs font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">Q6</span>
-                    <span class="text-sm font-medium text-slate-800">Overly Active / Driven by a Motor</span>
-                  </div>
-                  <p class="text-xs text-slate-500 mt-0.5">Feeling compelled to keep moving or doing things like driven by a motor.</p>
-                </div>
-              </label>
-
-              <!-- General Focus & Rest Context -->
-              <div class="pt-2">
-                <span class="text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2 block">General Focus & Rest Indicators</span>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                  <svg class="w-3.5 h-3.5 text-slate-400 transition-transform duration-200 group-open/sub:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                  </svg>
+                </summary>
+                <div class="p-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs border-t border-slate-100">
                   <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-slate-200 hover:bg-slate-50 cursor-pointer">
                     <input type="checkbox" name="symptom" value="concentrating" class="mt-0.5 h-3.5 w-3.5 text-indigo-600 rounded border-slate-300">
                     <div>
@@ -179,134 +220,168 @@
                     </div>
                   </label>
                 </div>
-              </div>
+              </details>
             </div>
-          </div>
+          </details>
 
-          <!-- Section 2: DASS-21 Questionnaire Items -->
-          <div class="space-y-4 pt-2">
-            <div class="flex items-center justify-between pb-1 border-b border-slate-100">
-              <span class="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
-                DASS-21 Assessment Indicators (Depression, Anxiety, Stress)
-              </span>
-              <span class="text-[11px] text-slate-500">21 standardized clinical items</span>
-            </div>
+          <!-- Section 2: DASS-21 Questionnaire Items (Collapsible) -->
+          <details open id="dassSection" class="group border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm transition-all">
+            <summary class="flex items-center justify-between p-4 bg-slate-50/90 hover:bg-slate-100/80 cursor-pointer list-none select-none transition-colors [&::-webkit-details-marker]:hidden">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-800">
+                  DASS-21 Assessment Indicators (Depression, Anxiety, Stress)
+                </span>
+                <span id="dassTotalSelectedBadge" class="hidden px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-100 text-emerald-800">0 selected</span>
+              </div>
+              <div class="flex items-center gap-2 flex-shrink-0">
+                <span class="text-[11px] text-slate-500 font-medium hidden sm:inline">21 standardized clinical items</span>
+                <svg class="w-4 h-4 text-slate-500 transition-transform duration-200 group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </div>
+            </summary>
 
-            <!-- DASS-21 Depression Subscale (7 items) -->
-            <div class="bg-blue-50/40 p-4 rounded-xl border border-blue-100 space-y-2.5">
-              <div class="flex items-center justify-between">
-                <span class="text-xs font-bold text-blue-900 uppercase tracking-wide">Depression Scale (DASS-D)</span>
-                <span class="text-[11px] text-blue-700 font-medium">Dysphoria, Hopelessness, Inertia</span>
-              </div>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-blue-100 hover:bg-blue-50/50 cursor-pointer">
-                  <input type="checkbox" name="symptom" value="dass_d1" class="mt-0.5 h-3.5 w-3.5 text-blue-600 rounded border-slate-300">
-                  <span>Couldn't experience positive feelings</span>
-                </label>
-                <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-blue-100 hover:bg-blue-50/50 cursor-pointer">
-                  <input type="checkbox" name="symptom" value="dass_d2" class="mt-0.5 h-3.5 w-3.5 text-blue-600 rounded border-slate-300">
-                  <span>Hard to work up initiative to do things</span>
-                </label>
-                <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-blue-100 hover:bg-blue-50/50 cursor-pointer">
-                  <input type="checkbox" name="symptom" value="dass_d3" class="mt-0.5 h-3.5 w-3.5 text-blue-600 rounded border-slate-300">
-                  <span>Felt nothing to look forward to</span>
-                </label>
-                <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-blue-100 hover:bg-blue-50/50 cursor-pointer">
-                  <input type="checkbox" name="symptom" value="dass_d4" class="mt-0.5 h-3.5 w-3.5 text-blue-600 rounded border-slate-300">
-                  <span>Felt down-hearted and blue</span>
-                </label>
-                <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-blue-100 hover:bg-blue-50/50 cursor-pointer">
-                  <input type="checkbox" name="symptom" value="dass_d5" class="mt-0.5 h-3.5 w-3.5 text-blue-600 rounded border-slate-300">
-                  <span>Unable to become enthusiastic</span>
-                </label>
-                <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-blue-100 hover:bg-blue-50/50 cursor-pointer">
-                  <input type="checkbox" name="symptom" value="dass_d6" class="mt-0.5 h-3.5 w-3.5 text-blue-600 rounded border-slate-300">
-                  <span>Felt not worth much as a person</span>
-                </label>
-                <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-blue-100 hover:bg-blue-50/50 cursor-pointer sm:col-span-2">
-                  <input type="checkbox" name="symptom" value="dass_d7" class="mt-0.5 h-3.5 w-3.5 text-blue-600 rounded border-slate-300">
-                  <span>Felt life was meaningless</span>
-                </label>
-              </div>
-            </div>
+            <div class="p-4 space-y-4 pt-3 border-t border-slate-100">
+              <!-- DASS-21 Depression Subscale (7 items) -->
+              <details open id="dassDepSubSection" class="group/sub rounded-xl border border-blue-100 bg-blue-50/40 overflow-hidden">
+                <summary class="flex items-center justify-between p-3.5 bg-blue-50/80 hover:bg-blue-100/60 cursor-pointer list-none select-none [&::-webkit-details-marker]:hidden">
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold text-blue-900 uppercase tracking-wide">Depression Scale (DASS-D)</span>
+                    <span id="dassDepSelectedBadge" class="hidden px-2 py-0.5 rounded text-[10px] font-semibold bg-blue-100 text-blue-800">0 selected</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-[11px] text-blue-700 font-medium hidden sm:inline">Dysphoria, Hopelessness, Inertia</span>
+                    <svg class="w-3.5 h-3.5 text-blue-500 transition-transform duration-200 group-open/sub:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                  </div>
+                </summary>
+                <div class="p-3.5 pt-2 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs border-t border-blue-100/60">
+                  <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-blue-100 hover:bg-blue-50/50 cursor-pointer">
+                    <input type="checkbox" name="symptom" value="dass_d1" class="mt-0.5 h-3.5 w-3.5 text-blue-600 rounded border-slate-300">
+                    <span>Couldn't experience positive feelings</span>
+                  </label>
+                  <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-blue-100 hover:bg-blue-50/50 cursor-pointer">
+                    <input type="checkbox" name="symptom" value="dass_d2" class="mt-0.5 h-3.5 w-3.5 text-blue-600 rounded border-slate-300">
+                    <span>Hard to work up initiative to do things</span>
+                  </label>
+                  <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-blue-100 hover:bg-blue-50/50 cursor-pointer">
+                    <input type="checkbox" name="symptom" value="dass_d3" class="mt-0.5 h-3.5 w-3.5 text-blue-600 rounded border-slate-300">
+                    <span>Felt nothing to look forward to</span>
+                  </label>
+                  <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-blue-100 hover:bg-blue-50/50 cursor-pointer">
+                    <input type="checkbox" name="symptom" value="dass_d4" class="mt-0.5 h-3.5 w-3.5 text-blue-600 rounded border-slate-300">
+                    <span>Felt down-hearted and blue</span>
+                  </label>
+                  <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-blue-100 hover:bg-blue-50/50 cursor-pointer">
+                    <input type="checkbox" name="symptom" value="dass_d5" class="mt-0.5 h-3.5 w-3.5 text-blue-600 rounded border-slate-300">
+                    <span>Unable to become enthusiastic</span>
+                  </label>
+                  <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-blue-100 hover:bg-blue-50/50 cursor-pointer">
+                    <input type="checkbox" name="symptom" value="dass_d6" class="mt-0.5 h-3.5 w-3.5 text-blue-600 rounded border-slate-300">
+                    <span>Felt not worth much as a person</span>
+                  </label>
+                  <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-blue-100 hover:bg-blue-50/50 cursor-pointer sm:col-span-2">
+                    <input type="checkbox" name="symptom" value="dass_d7" class="mt-0.5 h-3.5 w-3.5 text-blue-600 rounded border-slate-300">
+                    <span>Felt life was meaningless</span>
+                  </label>
+                </div>
+              </details>
 
-            <!-- DASS-21 Anxiety Subscale (7 items) -->
-            <div class="bg-amber-50/40 p-4 rounded-xl border border-amber-100 space-y-2.5">
-              <div class="flex items-center justify-between">
-                <span class="text-xs font-bold text-amber-900 uppercase tracking-wide">Anxiety Scale (DASS-A)</span>
-                <span class="text-[11px] text-amber-800 font-medium">Autonomic Arousal, Panic, Tremor</span>
-              </div>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-amber-100 hover:bg-amber-50/50 cursor-pointer">
-                  <input type="checkbox" name="symptom" value="dass_a1" class="mt-0.5 h-3.5 w-3.5 text-amber-600 rounded border-slate-300">
-                  <span>Aware of dry mouth</span>
-                </label>
-                <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-amber-100 hover:bg-amber-50/50 cursor-pointer">
-                  <input type="checkbox" name="symptom" value="dass_a2" class="mt-0.5 h-3.5 w-3.5 text-amber-600 rounded border-slate-300">
-                  <span>Difficulty breathing / shortness of breath</span>
-                </label>
-                <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-amber-100 hover:bg-amber-50/50 cursor-pointer">
-                  <input type="checkbox" name="symptom" value="dass_a3" class="mt-0.5 h-3.5 w-3.5 text-amber-600 rounded border-slate-300">
-                  <span>Shakiness or trembling (e.g. hands)</span>
-                </label>
-                <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-amber-100 hover:bg-amber-50/50 cursor-pointer">
-                  <input type="checkbox" name="symptom" value="dass_a4" class="mt-0.5 h-3.5 w-3.5 text-amber-600 rounded border-slate-300">
-                  <span>Worried about panic situations</span>
-                </label>
-                <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-amber-100 hover:bg-amber-50/50 cursor-pointer">
-                  <input type="checkbox" name="symptom" value="dass_a5" class="mt-0.5 h-3.5 w-3.5 text-amber-600 rounded border-slate-300">
-                  <span>Felt close to panic</span>
-                </label>
-                <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-amber-100 hover:bg-amber-50/50 cursor-pointer">
-                  <input type="checkbox" name="symptom" value="dass_a6" class="mt-0.5 h-3.5 w-3.5 text-amber-600 rounded border-slate-300">
-                  <span>Aware of rapid heart action / palpitations</span>
-                </label>
-                <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-amber-100 hover:bg-amber-50/50 cursor-pointer sm:col-span-2">
-                  <input type="checkbox" name="symptom" value="dass_a7" class="mt-0.5 h-3.5 w-3.5 text-amber-600 rounded border-slate-300">
-                  <span>Felt scared without any good reason</span>
-                </label>
-              </div>
-            </div>
+              <!-- DASS-21 Anxiety Subscale (7 items) -->
+              <details open id="dassAnxSubSection" class="group/sub rounded-xl border border-amber-100 bg-amber-50/40 overflow-hidden">
+                <summary class="flex items-center justify-between p-3.5 bg-amber-50/80 hover:bg-amber-100/60 cursor-pointer list-none select-none [&::-webkit-details-marker]:hidden">
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold text-amber-900 uppercase tracking-wide">Anxiety Scale (DASS-A)</span>
+                    <span id="dassAnxSelectedBadge" class="hidden px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-100 text-amber-800">0 selected</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-[11px] text-amber-800 font-medium hidden sm:inline">Autonomic Arousal, Panic, Tremor</span>
+                    <svg class="w-3.5 h-3.5 text-amber-500 transition-transform duration-200 group-open/sub:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                  </div>
+                </summary>
+                <div class="p-3.5 pt-2 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs border-t border-amber-100/60">
+                  <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-amber-100 hover:bg-amber-50/50 cursor-pointer">
+                    <input type="checkbox" name="symptom" value="dass_a1" class="mt-0.5 h-3.5 w-3.5 text-amber-600 rounded border-slate-300">
+                    <span>Aware of dry mouth</span>
+                  </label>
+                  <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-amber-100 hover:bg-amber-50/50 cursor-pointer">
+                    <input type="checkbox" name="symptom" value="dass_a2" class="mt-0.5 h-3.5 w-3.5 text-amber-600 rounded border-slate-300">
+                    <span>Difficulty breathing / shortness of breath</span>
+                  </label>
+                  <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-amber-100 hover:bg-amber-50/50 cursor-pointer">
+                    <input type="checkbox" name="symptom" value="dass_a3" class="mt-0.5 h-3.5 w-3.5 text-amber-600 rounded border-slate-300">
+                    <span>Shakiness or trembling (e.g. hands)</span>
+                  </label>
+                  <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-amber-100 hover:bg-amber-50/50 cursor-pointer">
+                    <input type="checkbox" name="symptom" value="dass_a4" class="mt-0.5 h-3.5 w-3.5 text-amber-600 rounded border-slate-300">
+                    <span>Worried about panic situations</span>
+                  </label>
+                  <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-amber-100 hover:bg-amber-50/50 cursor-pointer">
+                    <input type="checkbox" name="symptom" value="dass_a5" class="mt-0.5 h-3.5 w-3.5 text-amber-600 rounded border-slate-300">
+                    <span>Felt close to panic</span>
+                  </label>
+                  <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-amber-100 hover:bg-amber-50/50 cursor-pointer">
+                    <input type="checkbox" name="symptom" value="dass_a6" class="mt-0.5 h-3.5 w-3.5 text-amber-600 rounded border-slate-300">
+                    <span>Aware of rapid heart action / palpitations</span>
+                  </label>
+                  <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-amber-100 hover:bg-amber-50/50 cursor-pointer sm:col-span-2">
+                    <input type="checkbox" name="symptom" value="dass_a7" class="mt-0.5 h-3.5 w-3.5 text-amber-600 rounded border-slate-300">
+                    <span>Felt scared without any good reason</span>
+                  </label>
+                </div>
+              </details>
 
-            <!-- DASS-21 Stress Subscale (7 items) -->
-            <div class="bg-rose-50/40 p-4 rounded-xl border border-rose-100 space-y-2.5">
-              <div class="flex items-center justify-between">
-                <span class="text-xs font-bold text-rose-900 uppercase tracking-wide">Stress Scale (DASS-S)</span>
-                <span class="text-[11px] text-rose-800 font-medium">Tension, Irritability, Difficulty Relaxing</span>
-              </div>
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-rose-100 hover:bg-rose-50/50 cursor-pointer">
-                  <input type="checkbox" name="symptom" value="dass_s1" class="mt-0.5 h-3.5 w-3.5 text-rose-600 rounded border-slate-300">
-                  <span>Hard to wind down / unwind</span>
-                </label>
-                <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-rose-100 hover:bg-rose-50/50 cursor-pointer">
-                  <input type="checkbox" name="symptom" value="dass_s2" class="mt-0.5 h-3.5 w-3.5 text-rose-600 rounded border-slate-300">
-                  <span>Tended to over-react to situations</span>
-                </label>
-                <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-rose-100 hover:bg-rose-50/50 cursor-pointer">
-                  <input type="checkbox" name="symptom" value="dass_s3" class="mt-0.5 h-3.5 w-3.5 text-rose-600 rounded border-slate-300">
-                  <span>Felt using lots of nervous energy</span>
-                </label>
-                <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-rose-100 hover:bg-rose-50/50 cursor-pointer">
-                  <input type="checkbox" name="symptom" value="dass_s4" class="mt-0.5 h-3.5 w-3.5 text-rose-600 rounded border-slate-300">
-                  <span>Getting agitated or irritable</span>
-                </label>
-                <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-rose-100 hover:bg-rose-50/50 cursor-pointer">
-                  <input type="checkbox" name="symptom" value="dass_s5" class="mt-0.5 h-3.5 w-3.5 text-rose-600 rounded border-slate-300">
-                  <span>Found it difficult to relax</span>
-                </label>
-                <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-rose-100 hover:bg-rose-50/50 cursor-pointer">
-                  <input type="checkbox" name="symptom" value="dass_s6" class="mt-0.5 h-3.5 w-3.5 text-rose-600 rounded border-slate-300">
-                  <span>Intolerant of interruptions / delays</span>
-                </label>
-                <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-rose-100 hover:bg-rose-50/50 cursor-pointer sm:col-span-2">
-                  <input type="checkbox" name="symptom" value="dass_s7" class="mt-0.5 h-3.5 w-3.5 text-rose-600 rounded border-slate-300">
-                  <span>Felt rather touchy or sensitive</span>
-                </label>
-              </div>
+              <!-- DASS-21 Stress Subscale (7 items) -->
+              <details open id="dassStrSubSection" class="group/sub rounded-xl border border-rose-100 bg-rose-50/40 overflow-hidden">
+                <summary class="flex items-center justify-between p-3.5 bg-rose-50/80 hover:bg-rose-100/60 cursor-pointer list-none select-none [&::-webkit-details-marker]:hidden">
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold text-rose-900 uppercase tracking-wide">Stress Scale (DASS-S)</span>
+                    <span id="dassStrSelectedBadge" class="hidden px-2 py-0.5 rounded text-[10px] font-semibold bg-rose-100 text-rose-800">0 selected</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-[11px] text-rose-800 font-medium hidden sm:inline">Tension, Irritability, Difficulty Relaxing</span>
+                    <svg class="w-3.5 h-3.5 text-rose-500 transition-transform duration-200 group-open/sub:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                  </div>
+                </summary>
+                <div class="p-3.5 pt-2 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs border-t border-rose-100/60">
+                  <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-rose-100 hover:bg-rose-50/50 cursor-pointer">
+                    <input type="checkbox" name="symptom" value="dass_s1" class="mt-0.5 h-3.5 w-3.5 text-rose-600 rounded border-slate-300">
+                    <span>Hard to wind down / unwind</span>
+                  </label>
+                  <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-rose-100 hover:bg-rose-50/50 cursor-pointer">
+                    <input type="checkbox" name="symptom" value="dass_s2" class="mt-0.5 h-3.5 w-3.5 text-rose-600 rounded border-slate-300">
+                    <span>Tended to over-react to situations</span>
+                  </label>
+                  <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-rose-100 hover:bg-rose-50/50 cursor-pointer">
+                    <input type="checkbox" name="symptom" value="dass_s3" class="mt-0.5 h-3.5 w-3.5 text-rose-600 rounded border-slate-300">
+                    <span>Felt using lots of nervous energy</span>
+                  </label>
+                  <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-rose-100 hover:bg-rose-50/50 cursor-pointer">
+                    <input type="checkbox" name="symptom" value="dass_s4" class="mt-0.5 h-3.5 w-3.5 text-rose-600 rounded border-slate-300">
+                    <span>Getting agitated or irritable</span>
+                  </label>
+                  <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-rose-100 hover:bg-rose-50/50 cursor-pointer">
+                    <input type="checkbox" name="symptom" value="dass_s5" class="mt-0.5 h-3.5 w-3.5 text-rose-600 rounded border-slate-300">
+                    <span>Found it difficult to relax</span>
+                  </label>
+                  <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-rose-100 hover:bg-rose-50/50 cursor-pointer">
+                    <input type="checkbox" name="symptom" value="dass_s6" class="mt-0.5 h-3.5 w-3.5 text-rose-600 rounded border-slate-300">
+                    <span>Intolerant of interruptions / delays</span>
+                  </label>
+                  <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-rose-100 hover:bg-rose-50/50 cursor-pointer sm:col-span-2">
+                    <input type="checkbox" name="symptom" value="dass_s7" class="mt-0.5 h-3.5 w-3.5 text-rose-600 rounded border-slate-300">
+                    <span>Felt rather touchy or sensitive</span>
+                  </label>
+                </div>
+              </details>
             </div>
-          </div>
+          </details>
 
           <div>
             <label for="entryNotes" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
@@ -1362,6 +1437,36 @@
       }
     }
 
+    // Section Collapsing & Badge Helpers
+    window.toggleAllQuestionSections = function(openState) {
+      document.querySelectorAll('#entryForm details').forEach(d => {
+        d.open = openState;
+      });
+    };
+
+    window.updateSectionSelectedCounts = function() {
+      const updateBadge = (containerSelector, badgeId) => {
+        const container = document.querySelector(containerSelector);
+        const badge = document.getElementById(badgeId);
+        if (!container || !badge) return;
+        const count = container.querySelectorAll('input[name="symptom"]:checked').length;
+        if (count > 0) {
+          badge.textContent = `${count} selected`;
+          badge.classList.remove('hidden');
+        } else {
+          badge.classList.add('hidden');
+        }
+      };
+
+      updateBadge('#asrsSection', 'asrsSelectedBadge');
+      updateBadge('#asrsCoreSubSection', 'asrsCoreSelectedBadge');
+      updateBadge('#asrsGeneralSubSection', 'asrsGeneralSelectedBadge');
+      updateBadge('#dassSection', 'dassTotalSelectedBadge');
+      updateBadge('#dassDepSubSection', 'dassDepSelectedBadge');
+      updateBadge('#dassAnxSubSection', 'dassAnxSelectedBadge');
+      updateBadge('#dassStrSubSection', 'dassStrSelectedBadge');
+    };
+
     // 8. Initialization
     document.addEventListener('DOMContentLoaded', () => {
       const dateInput = document.getElementById('entryDate');
@@ -1376,6 +1481,9 @@
       loadEntries();
       renderEntries();
       registerServiceWorker();
+
+      form.addEventListener('change', updateSectionSelectedCounts);
+      updateSectionSelectedCounts();
 
       form.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -1405,6 +1513,7 @@
 
         document.querySelectorAll('input[name="symptom"]').forEach(cb => cb.checked = false);
         document.getElementById('entryNotes').value = '';
+        updateSectionSelectedCounts();
         
         statusEl.classList.remove('hidden');
         setTimeout(() => {
