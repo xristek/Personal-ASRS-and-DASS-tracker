@@ -1,9 +1,11 @@
-const CACHE_NAME = 'mental-health-pwa-v1';
+const CACHE_NAME = 'mental-health-pwa-v2';
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
-  './icon.svg'
+  './icon.svg',
+  './icon-192.png',
+  './icon-512.png'
 ];
 
 self.addEventListener('install', (e) => {
