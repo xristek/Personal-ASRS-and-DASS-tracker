@@ -685,21 +685,20 @@
 
     function loadEntries() {
       try {
-        const stored = localStorage.getItem('mental_health_tracker_entries_v5');
+        const stored = localStorage.getItem('mental_health_tracker_entries_v6');
         if (stored) {
           entries = JSON.parse(stored);
         } else {
-          entries = defaultEntries;
-          saveToStorage();
+          entries = [];
         }
       } catch (e) {
-        entries = defaultEntries;
+        entries = [];
       }
     }
 
     function saveToStorage() {
       try {
-        localStorage.setItem('mental_health_tracker_entries_v5', JSON.stringify(entries));
+        localStorage.setItem('mental_health_tracker_entries_v6', JSON.stringify(entries));
       } catch (e) {
         console.warn('Unable to persist to localStorage', e);
       }
