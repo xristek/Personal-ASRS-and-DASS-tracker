@@ -64,6 +64,9 @@
           <span>14-Day Assessment Report</span>
           <span id="tabReportBadge" class="bg-indigo-100 text-indigo-700 text-xs px-2 py-0.5 rounded-full font-medium">New</span>
         </button>
+        <button id="tabSettings" onclick="switchTab('settings')" class="pb-3 text-sm font-semibold text-slate-500 hover:text-slate-800 border-b-2 border-transparent flex items-center gap-2">
+          <span>Entry Settings</span>
+        </button>
         <button id="tabData" onclick="switchTab('data')" class="pb-3 text-sm font-semibold text-slate-500 hover:text-slate-800 border-b-2 border-transparent flex items-center gap-2">
           <span>Backup &amp; Export</span>
         </button>
@@ -200,35 +203,6 @@
                         <span class="text-sm font-medium text-slate-800">Overly Active / Driven by a Motor</span>
                       </div>
                       <p class="text-xs text-slate-500 mt-0.5">Feeling compelled to keep moving or doing things like driven by a motor.</p>
-                    </div>
-                  </label>
-                </div>
-              </details>
-
-              <!-- Sub-section 1B: General Focus & Rest Context -->
-              <details open id="asrsGeneralSubSection" class="group/sub rounded-lg border border-slate-200 overflow-hidden bg-white">
-                <summary class="flex items-center justify-between p-3 bg-slate-50/70 hover:bg-slate-100/70 cursor-pointer list-none select-none text-xs font-semibold text-slate-700 [&::-webkit-details-marker]:hidden">
-                  <div class="flex items-center gap-2">
-                    <span class="font-medium text-slate-800">General Focus &amp; Rest Indicators</span>
-                    <span id="asrsGeneralSelectedBadge" class="hidden px-1.5 py-0.5 rounded text-[10px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200">0 selected</span>
-                  </div>
-                  <svg class="w-3.5 h-3.5 text-slate-400 transition-transform duration-200 group-open/sub:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-                  </svg>
-                </summary>
-                <div class="p-3 grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs border-t border-slate-100">
-                  <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-slate-200 hover:bg-slate-50 cursor-pointer">
-                    <input type="checkbox" name="symptom" value="concentrating" class="mt-0.5 h-3.5 w-3.5 text-indigo-600 rounded border-slate-300">
-                    <div>
-                      <span class="font-medium text-slate-800">Difficulty Concentrating</span>
-                      <p class="text-[11px] text-slate-500">Trouble focusing during reading or discussions.</p>
-                    </div>
-                  </label>
-                  <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-slate-200 hover:bg-slate-50 cursor-pointer">
-                    <input type="checkbox" name="symptom" value="unwinding" class="mt-0.5 h-3.5 w-3.5 text-indigo-600 rounded border-slate-300">
-                    <div>
-                      <span class="font-medium text-slate-800">Trouble Unwinding</span>
-                      <p class="text-[11px] text-slate-500">Hard to quiet thoughts down during rest hours.</p>
                     </div>
                   </label>
                 </div>
@@ -395,6 +369,32 @@
             </div>
           </details>
 
+          <!-- Section 3: Custom & Additional Indicators (User-Defined) -->
+          <details open id="customSection" class="group border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm transition-all">
+            <summary class="flex items-center justify-between p-4 bg-slate-50/90 hover:bg-slate-100/80 cursor-pointer list-none select-none transition-colors [&::-webkit-details-marker]:hidden">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="w-2.5 h-2.5 rounded-full bg-purple-600"></span>
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-800">
+                  Custom &amp; Additional Indicators
+                </span>
+                <span id="customSelectedBadge" class="hidden px-2 py-0.5 rounded-full text-[10px] font-semibold bg-purple-100 text-purple-800">0 selected</span>
+              </div>
+              <div class="flex items-center gap-3 flex-shrink-0">
+                <button type="button" onclick="switchTab('settings')" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium inline-flex items-center gap-1">
+                  <span>Manage in Settings</span>
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+                </button>
+                <svg class="w-4 h-4 text-slate-500 transition-transform duration-200 group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </div>
+            </summary>
+
+            <div id="customCheckboxesContainer" class="p-4 border-t border-slate-100">
+              <!-- Rendered via JavaScript -->
+            </div>
+          </details>
+
           <div>
             <label for="entryNotes" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
               Personal Notes & Triggers
@@ -462,9 +462,10 @@
         <div class="mb-6 p-4 rounded-xl border border-slate-200 bg-slate-50/70">
           <div class="flex items-center justify-between mb-2">
             <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700">14-Day Daily Symptom Volume Trend</h3>
-            <div class="flex items-center gap-3 text-[11px]">
+            <div class="flex items-center gap-3 text-[11px] flex-wrap">
               <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-indigo-500"></span> ASRS Items</span>
               <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-emerald-500"></span> DASS Items</span>
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-purple-500"></span> Custom Items</span>
             </div>
           </div>
           <div id="trendChartContainer" class="h-28 flex items-end gap-1.5 pt-3 pb-1">
@@ -543,6 +544,34 @@
           </div>
         </div>
 
+        <!-- Custom & Additional Items Results Table -->
+        <div id="customReportSection" class="mb-6">
+          <div class="flex items-center justify-between mb-2">
+            <div>
+              <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider">Custom &amp; Additional Indicators</h3>
+              <p class="text-xs text-slate-500 mt-0.5">Occurrence frequencies for personalized daily tracking questions over this 14-day window.</p>
+            </div>
+            <button type="button" onclick="switchTab('settings')" class="text-xs text-indigo-600 hover:text-indigo-800 font-medium no-print">
+              Edit Questions &rarr;
+            </button>
+          </div>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-sm">
+              <thead>
+                <tr class="border-b border-slate-200 text-xs font-semibold text-slate-600 uppercase tracking-wider bg-slate-50">
+                  <th class="py-2.5 px-3">Custom Item &amp; Daily Prompt</th>
+                  <th class="py-2.5 px-3 text-center">Days Reported</th>
+                  <th class="py-2.5 px-3">Frequency</th>
+                  <th class="py-2.5 px-3 text-right">Occurrence Rating</th>
+                </tr>
+              </thead>
+              <tbody id="customReportTableBody" class="divide-y divide-slate-100 text-slate-800">
+                <!-- Rendered via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         <!-- Action / Copy Summary -->
         <div class="mt-6 pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 no-print">
           <p class="text-xs text-slate-500">Take this combined summary to your clinical appointment to complete your assessment accurately.</p>
@@ -559,7 +588,99 @@
       </section>
     </div>
 
-    <!-- TAB 3: BACKUP & DATA MANAGEMENT -->
+    <!-- TAB 3: ENTRY SETTINGS -->
+    <div id="viewSettings" class="hidden space-y-6">
+      <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 mb-6 border-b border-slate-100 gap-2">
+          <div>
+            <h2 class="text-lg font-semibold text-slate-900">Daily Entry Settings</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Customize your personal tracking questions and symptom indicators.</p>
+          </div>
+          <button type="button" onclick="switchTab('daily')" class="text-xs font-medium text-indigo-600 hover:text-indigo-800 inline-flex items-center gap-1 self-start sm:self-auto">
+            <span>&larr; Back to Daily Entry</span>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- Card 1: Add / Edit Question Form -->
+          <div class="lg:col-span-5 bg-slate-50/80 border border-slate-200 rounded-xl p-5 space-y-4">
+            <div>
+              <h3 id="customQFormHeading" class="text-sm font-bold text-slate-900">Add Tracking Question</h3>
+              <p class="text-xs text-slate-500 mt-0.5">Create a symptom, habit, or feeling to track each day.</p>
+            </div>
+
+            <form id="customQuestionForm" onsubmit="handleSaveCustomQuestion(event)" class="space-y-3.5">
+              <input type="hidden" id="customQEditId" value="">
+
+              <div>
+                <label for="customQName" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+                  Question / Symptom Name *
+                </label>
+                <input type="text" id="customQName" required placeholder="e.g. Brain Fog, Sleep Quality, Fatigue" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+              </div>
+
+              <div>
+                <label for="customQPrompt" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+                  Daily Prompt / Description
+                </label>
+                <textarea id="customQPrompt" rows="2" placeholder="e.g. Sluggish thinking, forgetfulness, or trouble finding words during work" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+              </div>
+
+              <!-- Quick Presets -->
+              <div>
+                <span class="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Quick Presets</span>
+                <div class="flex flex-wrap gap-1.5">
+                  <button type="button" onclick="applyCustomQPreset('Brain Fog', 'Sluggish thinking, forgetfulness, or trouble finding words.')" class="px-2 py-1 bg-white hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 text-slate-700 hover:text-indigo-700 rounded text-xs transition-colors">
+                    + Brain Fog
+                  </button>
+                  <button type="button" onclick="applyCustomQPreset('Sleep Disruption', 'Difficulty falling asleep, frequent waking, or unrefreshing rest.')" class="px-2 py-1 bg-white hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 text-slate-700 hover:text-indigo-700 rounded text-xs transition-colors">
+                    + Sleep Disruption
+                  </button>
+                  <button type="button" onclick="applyCustomQPreset('Sensory Overload', 'Feeling overwhelmed by bright lights, loud noises, or crowded environments.')" class="px-2 py-1 bg-white hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 text-slate-700 hover:text-indigo-700 rounded text-xs transition-colors">
+                    + Sensory Overload
+                  </button>
+                  <button type="button" onclick="applyCustomQPreset('Medication Effects', 'Experienced nausea, jitters, appetite loss, or headaches after medication.')" class="px-2 py-1 bg-white hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 text-slate-700 hover:text-indigo-700 rounded text-xs transition-colors">
+                    + Medication Effects
+                  </button>
+                  <button type="button" onclick="applyCustomQPreset('Social Exhaustion', 'Felt completely drained from social interactions or meetings.')" class="px-2 py-1 bg-white hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 text-slate-700 hover:text-indigo-700 rounded text-xs transition-colors">
+                    + Social Exhaustion
+                  </button>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2 pt-2">
+                <button type="submit" id="saveCustomQBtn" class="flex-1 py-2 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-colors shadow-sm">
+                  Add Question
+                </button>
+                <button type="button" id="cancelCustomQEditBtn" onclick="resetCustomQForm()" class="hidden py-2 px-3 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-lg text-xs font-semibold transition-colors">
+                  Cancel
+                </button>
+              </div>
+              <div id="customQFormStatus" class="text-xs font-medium text-emerald-600 hidden"></div>
+            </form>
+          </div>
+
+          <!-- Card 2: Active Custom Questions List -->
+          <div class="lg:col-span-7 space-y-3">
+            <div class="flex items-center justify-between pb-1">
+              <div>
+                <h3 class="text-sm font-bold text-slate-900">Configured Questions (<span id="customQuestionsCount">0</span>)</h3>
+                <p class="text-xs text-slate-500">These questions appear in Section 3 of your Daily Entry Form and in the 14-day analysis.</p>
+              </div>
+              <button type="button" onclick="restoreDefaultCustomQuestions()" class="text-[11px] font-medium text-slate-500 hover:text-indigo-600 underline">
+                Restore Defaults
+              </button>
+            </div>
+
+            <div id="customQuestionsList" class="space-y-2.5">
+              <!-- Rendered via JavaScript -->
+            </div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- TAB 4: BACKUP & DATA MANAGEMENT -->
     <div id="viewData" class="hidden space-y-6">
       <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
         <h2 class="text-lg font-semibold text-slate-900 mb-1">Data Backup &amp; PWA Configuration</h2>
@@ -685,6 +806,23 @@
       </div>
     </div>
 
+    <!-- In-Page Confirmation Modal for Delete Custom Question -->
+    <div id="confirmDeleteCustomQModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+      <div class="bg-white rounded-xl shadow-xl border border-slate-200 max-w-sm w-full p-6 space-y-4">
+        <h3 class="text-base font-bold text-slate-900">Remove custom question?</h3>
+        <p id="confirmDeleteCustomQText" class="text-xs text-slate-600"></p>
+        <p class="text-[11px] text-slate-400">Past logs containing this symptom will remain in your history, but it won't appear on future daily forms.</p>
+        <div class="flex items-center justify-end gap-2.5 pt-2">
+          <button type="button" onclick="closeDeleteCustomQModal()" class="px-3.5 py-2 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors">
+            Cancel
+          </button>
+          <button type="button" id="confirmDeleteCustomQBtn" onclick="executeDeleteCustomQuestion()" class="px-3.5 py-2 text-xs font-medium text-white bg-rose-600 hover:bg-rose-700 rounded-lg transition-colors shadow-sm">
+            Remove Question
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- In-Page Confirmation Modal for Reset (No native confirm/alert) -->
     <div id="confirmResetModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
       <div class="bg-white rounded-xl shadow-xl border border-slate-200 max-w-sm w-full p-6 space-y-4">
@@ -767,16 +905,48 @@
       { id: "dass_s7", scale: "Stress", label: "Rather touchy", desc: "Felt that I was rather touchy" }
     ];
 
-    const extraConfig = [
-      { id: "concentrating", qNum: "Extra", name: "Difficulty Concentrating", question: "Trouble focusing or concentrating on reading, discussions, or work tasks.", thresholdDays: 4, thresholdLabel: "Optional" },
-      { id: "unwinding", qNum: "Extra", name: "Difficulty Unwinding", question: "Trouble relaxing or quieting racing thoughts during personal rest hours.", thresholdDays: 4, thresholdLabel: "Optional" }
+    const defaultCustomQuestions = [
+      { id: "concentrating", name: "Difficulty Concentrating", question: "Trouble focusing or concentrating on reading, discussions, or work tasks." },
+      { id: "unwinding", name: "Difficulty Unwinding", question: "Trouble relaxing or quieting racing thoughts during personal rest hours." }
     ];
 
-    const allSymptoms = [...asrsConfig, ...dassConfig, ...extraConfig];
-    const symptomLabels = allSymptoms.reduce((acc, curr) => {
-      acc[curr.id] = curr.name || curr.label;
-      return acc;
-    }, {});
+    let customQuestions = [];
+    let allSymptoms = [];
+    let symptomLabels = {};
+
+    function refreshSymptomRegistry() {
+      allSymptoms = [...asrsConfig, ...dassConfig, ...customQuestions];
+      symptomLabels = allSymptoms.reduce((acc, curr) => {
+        acc[curr.id] = curr.name || curr.label;
+        return acc;
+      }, {});
+    }
+
+    function loadCustomQuestions() {
+      try {
+        const stored = localStorage.getItem('mental_health_tracker_custom_questions_v1');
+        if (stored) {
+          customQuestions = JSON.parse(stored);
+        } else {
+          customQuestions = [...defaultCustomQuestions];
+          saveCustomQuestions();
+        }
+      } catch (e) {
+        customQuestions = [...defaultCustomQuestions];
+      }
+      refreshSymptomRegistry();
+    }
+
+    function saveCustomQuestions() {
+      try {
+        localStorage.setItem('mental_health_tracker_custom_questions_v1', JSON.stringify(customQuestions));
+      } catch (e) {
+        console.warn('Unable to persist custom questions to localStorage', e);
+      }
+      refreshSymptomRegistry();
+    }
+
+    refreshSymptomRegistry();
 
     // Starter sample history
     const defaultEntries = [
@@ -819,15 +989,19 @@
     window.switchTab = function(tab) {
       const viewDaily = document.getElementById('viewDaily');
       const viewReport = document.getElementById('viewReport');
+      const viewSettings = document.getElementById('viewSettings');
       const viewData = document.getElementById('viewData');
       const tabDaily = document.getElementById('tabDaily');
       const tabReport = document.getElementById('tabReport');
+      const tabSettings = document.getElementById('tabSettings');
       const tabData = document.getElementById('tabData');
 
-      [tabDaily, tabReport, tabData].forEach(t => {
-        t.className = "pb-3 text-sm font-semibold text-slate-500 hover:text-slate-800 border-b-2 border-transparent flex items-center gap-2";
+      [tabDaily, tabReport, tabSettings, tabData].forEach(t => {
+        if (t) t.className = "pb-3 text-sm font-semibold text-slate-500 hover:text-slate-800 border-b-2 border-transparent flex items-center gap-2";
       });
-      [viewDaily, viewReport, viewData].forEach(v => v.classList.add('hidden'));
+      [viewDaily, viewReport, viewSettings, viewData].forEach(v => {
+        if (v) v.classList.add('hidden');
+      });
 
       if (tab === 'daily') {
         viewDaily.classList.remove('hidden');
@@ -836,10 +1010,187 @@
         viewReport.classList.remove('hidden');
         tabReport.className = "pb-3 text-sm font-semibold text-indigo-600 border-b-2 border-indigo-600 flex items-center gap-2";
         generateReport();
+      } else if (tab === 'settings') {
+        viewSettings.classList.remove('hidden');
+        tabSettings.className = "pb-3 text-sm font-semibold text-indigo-600 border-b-2 border-indigo-600 flex items-center gap-2";
+        renderCustomQuestionsList();
       } else if (tab === 'data') {
         viewData.classList.remove('hidden');
         tabData.className = "pb-3 text-sm font-semibold text-indigo-600 border-b-2 border-indigo-600 flex items-center gap-2";
       }
+    };
+
+    // 2B. Custom Questions Handlers & Rendering
+    function renderCustomCheckboxes() {
+      const container = document.getElementById('customCheckboxesContainer');
+      if (!container) return;
+
+      if (customQuestions.length === 0) {
+        container.innerHTML = `
+          <div class="py-4 text-center">
+            <p class="text-xs text-slate-500 mb-2">No custom questions configured.</p>
+            <button type="button" onclick="switchTab('settings')" class="inline-flex items-center gap-1 px-3 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-700 text-xs font-semibold rounded-lg transition-colors">
+              <span>Go to Entry Settings to add questions</span> &rarr;
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = `
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+          ${customQuestions.map(q => `
+            <label class="flex items-start gap-2.5 p-2.5 bg-white rounded-lg border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
+              <input type="checkbox" name="symptom" value="${q.id}" class="mt-0.5 h-3.5 w-3.5 text-purple-600 rounded border-slate-300 focus:ring-purple-500">
+              <div>
+                <span class="font-medium text-slate-800">${escapeHTML(q.name)}</span>
+                ${q.question ? `<p class="text-[11px] text-slate-500 mt-0.5">${escapeHTML(q.question)}</p>` : ''}
+              </div>
+            </label>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function renderCustomQuestionsList() {
+      const listEl = document.getElementById('customQuestionsList');
+      const countEl = document.getElementById('customQuestionsCount');
+      if (countEl) countEl.textContent = customQuestions.length;
+      if (!listEl) return;
+
+      if (customQuestions.length === 0) {
+        listEl.innerHTML = `
+          <div class="p-6 bg-slate-50 border border-dashed border-slate-300 rounded-xl text-center space-y-2">
+            <p class="text-xs text-slate-600 font-medium">No custom questions configured yet.</p>
+            <p class="text-[11px] text-slate-400">Use the form on the left or select a preset to begin tracking personal symptoms.</p>
+            <button type="button" onclick="restoreDefaultCustomQuestions()" class="mt-2 inline-flex items-center px-3 py-1.5 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-lg text-xs font-medium transition-colors">
+              Load Suggested Defaults
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      listEl.innerHTML = customQuestions.map(q => `
+        <div class="p-3.5 bg-white border border-slate-200 rounded-xl shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-slate-300 transition-colors">
+          <div class="space-y-0.5">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-purple-500"></span>
+              <span class="text-xs font-bold text-slate-900">${escapeHTML(q.name)}</span>
+            </div>
+            ${q.question ? `<p class="text-xs text-slate-500 pl-4">${escapeHTML(q.question)}</p>` : ''}
+          </div>
+          <div class="flex items-center gap-2 self-end sm:self-center flex-shrink-0">
+            <button type="button" onclick="editCustomQuestion('${q.id}')" class="px-2.5 py-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 rounded-md transition-colors">
+              Edit
+            </button>
+            <button type="button" onclick="promptDeleteCustomQuestion('${q.id}')" class="px-2.5 py-1 text-xs font-semibold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 rounded-md transition-colors">
+              Remove
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    let pendingDeleteCustomQId = null;
+
+    window.applyCustomQPreset = function(name, prompt) {
+      document.getElementById('customQName').value = name;
+      document.getElementById('customQPrompt').value = prompt;
+      document.getElementById('customQName').focus();
+    };
+
+    window.handleSaveCustomQuestion = function(e) {
+      e.preventDefault();
+      const name = document.getElementById('customQName').value.trim();
+      const prompt = document.getElementById('customQPrompt').value.trim();
+      const editId = document.getElementById('customQEditId').value.trim();
+      const statusEl = document.getElementById('customQFormStatus');
+
+      if (!name) return;
+
+      if (editId) {
+        const qIndex = customQuestions.findIndex(q => q.id === editId);
+        if (qIndex >= 0) {
+          customQuestions[qIndex].name = name;
+          customQuestions[qIndex].question = prompt;
+        }
+        statusEl.textContent = 'Question updated successfully!';
+      } else {
+        const newId = 'custom_' + Date.now();
+        customQuestions.push({
+          id: newId,
+          name: name,
+          question: prompt
+        });
+        statusEl.textContent = 'Question added!';
+      }
+
+      saveCustomQuestions();
+      renderCustomCheckboxes();
+      renderCustomQuestionsList();
+      renderEntries();
+      generateReport();
+      resetCustomQForm();
+
+      statusEl.classList.remove('hidden');
+      setTimeout(() => statusEl.classList.add('hidden'), 2500);
+    };
+
+    window.editCustomQuestion = function(id) {
+      const q = customQuestions.find(item => item.id === id);
+      if (!q) return;
+
+      document.getElementById('customQEditId').value = q.id;
+      document.getElementById('customQName').value = q.name;
+      document.getElementById('customQPrompt').value = q.question || '';
+      document.getElementById('customQFormHeading').textContent = 'Edit Tracking Question';
+      document.getElementById('saveCustomQBtn').textContent = 'Update Question';
+      document.getElementById('cancelCustomQEditBtn').classList.remove('hidden');
+      document.getElementById('customQName').focus();
+    };
+
+    window.resetCustomQForm = function() {
+      document.getElementById('customQEditId').value = '';
+      document.getElementById('customQName').value = '';
+      document.getElementById('customQPrompt').value = '';
+      document.getElementById('customQFormHeading').textContent = 'Add Tracking Question';
+      document.getElementById('saveCustomQBtn').textContent = 'Add Question';
+      document.getElementById('cancelCustomQEditBtn').classList.add('hidden');
+    };
+
+    window.promptDeleteCustomQuestion = function(id) {
+      const q = customQuestions.find(item => item.id === id);
+      if (!q) return;
+      pendingDeleteCustomQId = id;
+      document.getElementById('confirmDeleteCustomQText').textContent = `Are you sure you want to remove "${q.name}"?`;
+      document.getElementById('confirmDeleteCustomQModal').classList.remove('hidden');
+    };
+
+    window.closeDeleteCustomQModal = function() {
+      pendingDeleteCustomQId = null;
+      document.getElementById('confirmDeleteCustomQModal').classList.add('hidden');
+    };
+
+    window.executeDeleteCustomQuestion = function() {
+      if (!pendingDeleteCustomQId) return;
+      customQuestions = customQuestions.filter(q => q.id !== pendingDeleteCustomQId);
+      saveCustomQuestions();
+      closeDeleteCustomQModal();
+      renderCustomCheckboxes();
+      renderCustomQuestionsList();
+      renderEntries();
+      generateReport();
+    };
+
+    window.restoreDefaultCustomQuestions = function() {
+      customQuestions = [...defaultCustomQuestions];
+      saveCustomQuestions();
+      renderCustomCheckboxes();
+      renderCustomQuestionsList();
+      renderEntries();
+      generateReport();
+      resetCustomQForm();
     };
 
     // 3. Rendering Functions: Daily Entries
@@ -865,8 +1216,11 @@
           ? entry.symptoms.map(s => {
               const label = symptomLabels[s] || s;
               const isDass = s.startsWith('dass_');
-              const color = isDass ? 'bg-emerald-50 text-emerald-800 border-emerald-100' : 'bg-indigo-50 text-indigo-700 border-indigo-100';
-              return `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${color}">${label}</span>`;
+              const isAsrs = asrsConfig.some(a => a.id === s);
+              let color = 'bg-purple-50 text-purple-700 border-purple-200';
+              if (isDass) color = 'bg-emerald-50 text-emerald-800 border-emerald-100';
+              else if (isAsrs) color = 'bg-indigo-50 text-indigo-700 border-indigo-100';
+              return `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${color}">${escapeHTML(label)}</span>`;
             }).join(' ')
           : '<span class="text-xs text-slate-400 italic">None noted</span>';
 
@@ -1071,17 +1425,24 @@
 
         let asrsCount = 0;
         let dassCount = 0;
+        let customCount = 0;
         if (dayEntry && dayEntry.symptoms) {
           dayEntry.symptoms.forEach(s => {
-            if (s.startsWith('dass_')) dassCount++;
-            else asrsCount++;
+            if (s.startsWith('dass_')) {
+              dassCount++;
+            } else if (asrsConfig.some(a => a.id === s)) {
+              asrsCount++;
+            } else {
+              customCount++;
+            }
           });
         }
 
-        const totalSymptoms = asrsCount + dassCount;
-        const barHeightPercent = Math.min(100, Math.max(8, totalSymptoms * 12));
+        const totalSymptoms = asrsCount + dassCount + customCount;
+        const barHeightPercent = Math.min(100, Math.max(8, totalSymptoms * 10));
         const asrsPct = totalSymptoms > 0 ? (asrsCount / totalSymptoms) * 100 : 0;
         const dassPct = totalSymptoms > 0 ? (dassCount / totalSymptoms) * 100 : 0;
+        const customPct = totalSymptoms > 0 ? (customCount / totalSymptoms) * 100 : 0;
         const dateNum = curDate.getDate();
 
         dayBars.push(`
@@ -1090,11 +1451,12 @@
               ${totalSymptoms > 0 ? `
                 <div class="bg-indigo-500 w-full" style="height:${asrsPct}%"></div>
                 <div class="bg-emerald-500 w-full" style="height:${dassPct}%"></div>
+                <div class="bg-purple-500 w-full" style="height:${customPct}%"></div>
               ` : ''}
             </div>
             <span class="text-[9px] text-slate-400 mt-1">${dateNum}</span>
             <div class="absolute bottom-full mb-1 hidden group-hover:block bg-slate-900 text-white text-[10px] px-2 py-1 rounded shadow-lg whitespace-nowrap z-20 pointer-events-none">
-              ${curDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}: ${totalSymptoms} items (${asrsCount} ASRS, ${dassCount} DASS)
+              ${curDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}: ${totalSymptoms} items (${asrsCount} ASRS, ${dassCount} DASS${customCount > 0 ? `, ${customCount} Custom` : ''})
             </div>
           </div>
         `);
@@ -1286,6 +1648,55 @@
           </tr>
         `;
       }).join('');
+
+      // Render Custom Questions Table
+      const customReportSection = document.getElementById('customReportSection');
+      const customTableBody = document.getElementById('customReportTableBody');
+      if (customReportSection && customTableBody) {
+        if (customQuestions.length === 0) {
+          customTableBody.innerHTML = `
+            <tr>
+              <td colspan="4" class="py-4 text-center text-xs text-slate-400 italic">
+                No custom tracking questions currently configured.
+              </td>
+            </tr>
+          `;
+        } else {
+          customTableBody.innerHTML = customQuestions.map(q => {
+            const count = counts[q.id] || 0;
+            const percent = Math.round((count / 14) * 100);
+            const rating = getRating(count);
+
+            return `
+              <tr class="hover:bg-slate-50/75 transition-colors">
+                <td class="py-2.5 px-3">
+                  <div class="flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-purple-500 flex-shrink-0"></span>
+                    <span class="font-medium text-slate-900">${escapeHTML(q.name)}</span>
+                  </div>
+                  ${q.question ? `<div class="text-xs text-slate-500 mt-0.5 pl-4">${escapeHTML(q.question)}</div>` : ''}
+                </td>
+                <td class="py-2.5 px-3 text-center">
+                  <span class="inline-flex items-center justify-center font-semibold text-slate-900 bg-slate-100 rounded px-2.5 py-1 text-xs">
+                    ${count} / 14 d
+                  </span>
+                </td>
+                <td class="py-2.5 px-3 w-32">
+                  <div class="w-full bg-slate-200 rounded-full h-1.5">
+                    <div class="bg-purple-600 h-1.5 rounded-full" style="width: ${percent}%"></div>
+                  </div>
+                  <div class="text-[11px] text-slate-500 mt-0.5">${percent}%</div>
+                </td>
+                <td class="py-2.5 px-3 text-right">
+                  <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${rating.badgeClass}">
+                    ${rating.label}
+                  </span>
+                </td>
+              </tr>
+            `;
+          }).join('');
+        }
+      }
     };
 
     function getRating(days) {
@@ -1355,6 +1766,15 @@
         summary += `[${i.scale}] ${i.label}: ${c}/14d -> Rating ${val}\n`;
       });
 
+      if (customQuestions.length > 0) {
+        summary += `\n--- Custom Tracking Questions ---\n`;
+        customQuestions.forEach(q => {
+          const c = counts[q.id] || 0;
+          const r = getRating(c).label;
+          summary += `${q.name}: ${c}/14d -> ${r}\n`;
+        });
+      }
+
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(summary).then(() => showNotice()).catch(() => fallbackCopy(summary));
       } else {
@@ -1384,7 +1804,13 @@
 
     // 6. Data Management: Export & Import JSON
     window.exportDataJSON = function() {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(entries, null, 2));
+      const exportPayload = {
+        version: 1,
+        exportedAt: new Date().toISOString(),
+        customQuestions: customQuestions,
+        entries: entries
+      };
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportPayload, null, 2));
       const downloadAnchor = document.createElement('a');
       downloadAnchor.setAttribute("href", dataStr);
       downloadAnchor.setAttribute("download", `mental_health_tracker_backup_${new Date().toISOString().split('T')[0]}.json`);
@@ -1392,7 +1818,7 @@
       downloadAnchor.click();
       downloadAnchor.remove();
 
-      showBackupStatus("Successfully exported JSON backup file!", "bg-emerald-50 text-emerald-800 border border-emerald-200");
+      showBackupStatus("Successfully exported JSON backup file with custom questions and daily logs!", "bg-emerald-50 text-emerald-800 border border-emerald-200");
     };
 
     window.importDataJSON = function() {
@@ -1407,11 +1833,23 @@
       reader.onload = function(e) {
         try {
           const imported = JSON.parse(e.target.result);
-          if (!Array.isArray(imported)) {
-            throw new Error("Invalid format: expected array of daily entries.");
+          let importedEntries = [];
+          let importedCustomQuestions = null;
+
+          if (Array.isArray(imported)) {
+            importedEntries = imported;
+          } else if (imported && typeof imported === 'object') {
+            if (Array.isArray(imported.entries)) {
+              importedEntries = imported.entries;
+            }
+            if (Array.isArray(imported.customQuestions)) {
+              importedCustomQuestions = imported.customQuestions;
+            }
+          } else {
+            throw new Error("Invalid format: expected tracking backup object or array.");
           }
 
-          imported.forEach(item => {
+          importedEntries.forEach(item => {
             if (item.date && item.id) {
               const idx = entries.findIndex(existing => existing.date === item.date);
               if (idx >= 0) {
@@ -1422,10 +1860,26 @@
             }
           });
 
+          if (importedCustomQuestions) {
+            importedCustomQuestions.forEach(cq => {
+              if (cq.id && cq.name) {
+                const existingIdx = customQuestions.findIndex(q => q.id === cq.id);
+                if (existingIdx >= 0) {
+                  customQuestions[existingIdx] = cq;
+                } else {
+                  customQuestions.push(cq);
+                }
+              }
+            });
+            saveCustomQuestions();
+            renderCustomCheckboxes();
+            renderCustomQuestionsList();
+          }
+
           saveToStorage();
           renderEntries();
           generateReport();
-          showBackupStatus(`Successfully imported! Loaded ${imported.length} records.`, "bg-emerald-50 text-emerald-800 border border-emerald-200");
+          showBackupStatus(`Successfully imported! Loaded ${importedEntries.length} records${importedCustomQuestions ? ` and ${importedCustomQuestions.length} custom questions` : ''}.`, "bg-emerald-50 text-emerald-800 border border-emerald-200");
           fileInput.value = '';
         } catch (err) {
           showBackupStatus("Import error: File is not a valid JSON tracking backup.", "bg-rose-50 text-rose-800 border border-rose-200");
@@ -1570,11 +2024,11 @@
 
       updateBadge('#asrsSection', 'asrsSelectedBadge');
       updateBadge('#asrsCoreSubSection', 'asrsCoreSelectedBadge');
-      updateBadge('#asrsGeneralSubSection', 'asrsGeneralSelectedBadge');
       updateBadge('#dassSection', 'dassTotalSelectedBadge');
       updateBadge('#dassDepSubSection', 'dassDepSelectedBadge');
       updateBadge('#dassAnxSubSection', 'dassAnxSelectedBadge');
       updateBadge('#dassStrSubSection', 'dassStrSelectedBadge');
+      updateBadge('#customSection', 'customSelectedBadge');
     };
 
     // 8. Initialization
@@ -1588,7 +2042,10 @@
       dateInput.value = today;
       reportDateInput.value = today;
 
+      loadCustomQuestions();
       loadEntries();
+      renderCustomCheckboxes();
+      renderCustomQuestionsList();
       renderEntries();
       registerServiceWorker();
 
