@@ -668,7 +668,7 @@
                 <p class="text-xs text-slate-500">These questions appear in Section 3 of your Daily Entry Form and in the 14-day analysis.</p>
               </div>
               <button type="button" onclick="restoreDefaultCustomQuestions()" class="text-[11px] font-medium text-slate-500 hover:text-indigo-600 underline">
-                Restore Defaults
+                Restore Sample Questions
               </button>
             </div>
 
@@ -924,22 +924,21 @@
 
     function loadCustomQuestions() {
       try {
-        const stored = localStorage.getItem('mental_health_tracker_custom_questions_v1');
+        const stored = localStorage.getItem('mental_health_tracker_custom_questions_v2');
         if (stored) {
           customQuestions = JSON.parse(stored);
         } else {
-          customQuestions = [...defaultCustomQuestions];
-          saveCustomQuestions();
+          customQuestions = [];
         }
       } catch (e) {
-        customQuestions = [...defaultCustomQuestions];
+        customQuestions = [];
       }
       refreshSymptomRegistry();
     }
 
     function saveCustomQuestions() {
       try {
-        localStorage.setItem('mental_health_tracker_custom_questions_v1', JSON.stringify(customQuestions));
+        localStorage.setItem('mental_health_tracker_custom_questions_v2', JSON.stringify(customQuestions));
       } catch (e) {
         console.warn('Unable to persist custom questions to localStorage', e);
       }
@@ -1027,11 +1026,16 @@
 
       if (customQuestions.length === 0) {
         container.innerHTML = `
-          <div class="py-4 text-center">
-            <p class="text-xs text-slate-500 mb-2">No custom questions configured.</p>
-            <button type="button" onclick="switchTab('settings')" class="inline-flex items-center gap-1 px-3 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-700 text-xs font-semibold rounded-lg transition-colors">
-              <span>Go to Entry Settings to add questions</span> &rarr;
-            </button>
+          <div class="py-4 text-center space-y-2.5">
+            <p class="text-xs text-slate-500">No custom questions configured yet.</p>
+            <div class="flex items-center justify-center gap-2 flex-wrap">
+              <button type="button" onclick="switchTab('settings')" class="inline-flex items-center gap-1 px-3 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-700 text-xs font-semibold rounded-lg transition-colors">
+                <span>Add in Entry Settings</span> &rarr;
+              </button>
+              <button type="button" onclick="restoreDefaultCustomQuestions()" class="inline-flex items-center gap-1 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-medium rounded-lg transition-colors">
+                <span>Restore Sample Questions</span>
+              </button>
+            </div>
           </div>
         `;
         return;
@@ -1064,7 +1068,7 @@
             <p class="text-xs text-slate-600 font-medium">No custom questions configured yet.</p>
             <p class="text-[11px] text-slate-400">Use the form on the left or select a preset to begin tracking personal symptoms.</p>
             <button type="button" onclick="restoreDefaultCustomQuestions()" class="mt-2 inline-flex items-center px-3 py-1.5 bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 rounded-lg text-xs font-medium transition-colors">
-              Load Suggested Defaults
+              Restore Sample Questions
             </button>
           </div>
         `;
@@ -1191,6 +1195,12 @@
       renderEntries();
       generateReport();
       resetCustomQForm();
+      const statusEl = document.getElementById('customQFormStatus');
+      if (statusEl) {
+        statusEl.textContent = 'Sample tracking questions restored!';
+        statusEl.classList.remove('hidden');
+        setTimeout(() => statusEl.classList.add('hidden'), 2500);
+      }
     };
 
     // 3. Rendering Functions: Daily Entries
