@@ -1321,7 +1321,7 @@
     // Register Offline Service Worker
     function registerServiceWorker() {
       if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
+        const register = () => {
           navigator.serviceWorker.register('./sw.js')
             .then((registration) => {
               console.log('ServiceWorker registered with scope:', registration.scope);
@@ -1329,7 +1329,13 @@
             .catch((err) => {
               console.warn('ServiceWorker registration failed:', err);
             });
-        });
+        };
+
+        if (document.readyState === 'complete') {
+          register();
+        } else {
+          window.addEventListener('load', register);
+        }
       }
     }
 
