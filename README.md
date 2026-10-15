@@ -17,3 +17,6 @@ Upload these files (`index.html`, `manifest.json`, `sw.js`, `icon.svg`) to any s
 - Netlify / Vercel
 - Cloudflare Pages
 - Any local or private HTTP/HTTPS web server
+
+## License
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
