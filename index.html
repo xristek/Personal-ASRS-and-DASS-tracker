@@ -1,0 +1,1415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Daily Mental Health Tracker: ASRS & DASS-21</title>
+  
+  <!-- PWA Meta Tags -->
+  <meta name="theme-color" content="#4f46e5">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="HealthTracker">
+  <meta name="description" content="Offline-capable Daily Mental Health Assessment & Questionnaire Helper for ASRS v1.1 and DASS-21.">
+
+  <!-- PWA Icon & Inline Manifest (Data URI for self-contained execution) -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%234f46e5'/%3E%3Cpath d='M50 25c-13.8 0-25 11.2-25 25 0 10.4 6.3 19.3 15.3 23.2v6.8h19.4v-6.8C68.7 69.3 75 60.4 75 50c0-13.8-11.2-25-25-25zm0 8c9.4 0 17 7.6 17 17 0 7.2-4.5 13.4-11 15.8V68h-12v-2.2c-6.5-2.4-11-8.6-11-15.8 0-9.4 7.6-17 17-17z' fill='%23ffffff'/%3E%3C/svg%3E">
+  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%234f46e5'/%3E%3Cpath d='M50 25c-13.8 0-25 11.2-25 25 0 10.4 6.3 19.3 15.3 23.2v6.8h19.4v-6.8C68.7 69.3 75 60.4 75 50c0-13.8-11.2-25-25-25zm0 8c9.4 0 17 7.6 17 17 0 7.2-4.5 13.4-11 15.8V68h-12v-2.2c-6.5-2.4-11-8.6-11-15.8 0-9.4 7.6-17 17-17z' fill='%23ffffff'/%3E%3C/svg%3E">
+  
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+    @media print {
+      body { background-color: white !important; color: black !important; }
+      nav, header button, #tabDaily, #tabReport, #tabData, #copySummaryBtn, #printBtn, #entryForm, .no-print {
+        display: none !important;
+      }
+      #viewDaily, #viewData { display: none !important; }
+      #viewReport { display: block !important; }
+      .print-shadow-none { box-shadow: none !important; border: 1px solid #e2e8f0 !important; }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen pb-12">
+  <div class="max-w-4xl mx-auto px-4 py-8">
+    <!-- Header -->
+    <header class="mb-8">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div>
+          <div class="flex items-center gap-2.5">
+            <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Daily Mental Health Tracker</h1>
+            <span id="offlineStatusBadge" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200" title="All operations run offline directly in your browser">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Offline Ready
+            </span>
+          </div>
+          <p class="text-sm text-slate-600 mt-1">Daily logging and 14-day questionnaire helper for <strong>ASRS v1.1</strong> &amp; <strong>DASS-21</strong>.</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <button id="pwaInstallBtn" onclick="triggerPWAInstall()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm transition-colors">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            <span>Install App</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Navigation Tabs -->
+      <nav class="flex border-b border-slate-200 mt-6 gap-6" aria-label="Views">
+        <button id="tabDaily" onclick="switchTab('daily')" class="pb-3 text-sm font-semibold text-indigo-600 border-b-2 border-indigo-600 flex items-center gap-2">
+          <span>Daily Entry Form</span>
+        </button>
+        <button id="tabReport" onclick="switchTab('report')" class="pb-3 text-sm font-semibold text-slate-500 hover:text-slate-800 border-b-2 border-transparent flex items-center gap-2">
+          <span>14-Day Assessment Report</span>
+          <span id="tabReportBadge" class="bg-indigo-100 text-indigo-700 text-xs px-2 py-0.5 rounded-full font-medium">New</span>
+        </button>
+        <button id="tabData" onclick="switchTab('data')" class="pb-3 text-sm font-semibold text-slate-500 hover:text-slate-800 border-b-2 border-transparent flex items-center gap-2">
+          <span>Backup &amp; Export</span>
+        </button>
+      </nav>
+    </header>
+
+    <!-- TAB 1: DAILY ENTRY & RECENT LOGS -->
+    <div id="viewDaily" class="space-y-8">
+      <!-- Main Entry Form -->
+      <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 pb-2 border-b border-slate-100 gap-2">
+          <h2 class="text-lg font-semibold text-slate-900">Add Daily Entry</h2>
+          <span class="text-xs text-slate-500">Record daily symptoms to automatically answer clinical assessments</span>
+        </div>
+        <form id="entryForm" class="space-y-6">
+          <div>
+            <label for="entryDate" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">Date</label>
+            <input type="date" id="entryDate" required class="w-full sm:w-64 px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+          </div>
+
+          <!-- Section 1: ASRS v1.1 Part A Screener -->
+          <div class="space-y-3">
+            <div class="flex items-center justify-between pb-1 border-b border-slate-100">
+              <span class="text-xs font-bold uppercase tracking-wider text-indigo-900 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-indigo-600"></span>
+                ASRS v1.1 Screener (Adult ADHD Indicators)
+              </span>
+              <span class="text-[11px] text-slate-500">6 core questions</span>
+            </div>
+            <div class="grid grid-cols-1 gap-2.5" id="symptomsList">
+              <label class="flex items-start gap-3 p-3 rounded-lg border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
+                <input type="checkbox" name="symptom" value="details" class="mt-0.5 h-4 w-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">Q1</span>
+                    <span class="text-sm font-medium text-slate-800">Trouble Finishing Final Details</span>
+                  </div>
+                  <p class="text-xs text-slate-500 mt-0.5">Difficulty wrapping up project details once challenging parts are done.</p>
+                </div>
+              </label>
+
+              <label class="flex items-start gap-3 p-3 rounded-lg border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
+                <input type="checkbox" name="symptom" value="disorganized" class="mt-0.5 h-4 w-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">Q2</span>
+                    <span class="text-sm font-medium text-slate-800">Difficulty Getting Organized</span>
+                  </div>
+                  <p class="text-xs text-slate-500 mt-0.5">Trouble putting things in order when a task requires organization.</p>
+                </div>
+              </label>
+
+              <label class="flex items-start gap-3 p-3 rounded-lg border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
+                <input type="checkbox" name="symptom" value="remembering" class="mt-0.5 h-4 w-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">Q3</span>
+                    <span class="text-sm font-medium text-slate-800">Remembering Appointments or Tasks</span>
+                  </div>
+                  <p class="text-xs text-slate-500 mt-0.5">Problems remembering scheduled commitments or daily obligations.</p>
+                </div>
+              </label>
+
+              <label class="flex items-start gap-3 p-3 rounded-lg border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
+                <input type="checkbox" name="symptom" value="procrastination" class="mt-0.5 h-4 w-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">Q4</span>
+                    <span class="text-sm font-medium text-slate-800">Avoiding Demanding Tasks</span>
+                  </div>
+                  <p class="text-xs text-slate-500 mt-0.5">Delaying or putting off tasks requiring sustained mental effort.</p>
+                </div>
+              </label>
+
+              <label class="flex items-start gap-3 p-3 rounded-lg border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
+                <input type="checkbox" name="symptom" value="restless" class="mt-0.5 h-4 w-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">Q5</span>
+                    <span class="text-sm font-medium text-slate-800">Fidgety, Restless, or Squirming</span>
+                  </div>
+                  <p class="text-xs text-slate-500 mt-0.5">Fidgeting with hands/feet or squirming when seated for a while.</p>
+                </div>
+              </label>
+
+              <label class="flex items-start gap-3 p-3 rounded-lg border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
+                <input type="checkbox" name="symptom" value="motor" class="mt-0.5 h-4 w-4 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">Q6</span>
+                    <span class="text-sm font-medium text-slate-800">Overly Active / Driven by a Motor</span>
+                  </div>
+                  <p class="text-xs text-slate-500 mt-0.5">Feeling compelled to keep moving or doing things like driven by a motor.</p>
+                </div>
+              </label>
+
+              <!-- General Focus & Rest Context -->
+              <div class="pt-2">
+                <span class="text-xs font-semibold text-slate-600 uppercase tracking-wider mb-2 block">General Focus & Rest Indicators</span>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                  <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-slate-200 hover:bg-slate-50 cursor-pointer">
+                    <input type="checkbox" name="symptom" value="concentrating" class="mt-0.5 h-3.5 w-3.5 text-indigo-600 rounded border-slate-300">
+                    <div>
+                      <span class="font-medium text-slate-800">Difficulty Concentrating</span>
+                      <p class="text-[11px] text-slate-500">Trouble focusing during reading or discussions.</p>
+                    </div>
+                  </label>
+                  <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-slate-200 hover:bg-slate-50 cursor-pointer">
+                    <input type="checkbox" name="symptom" value="unwinding" class="mt-0.5 h-3.5 w-3.5 text-indigo-600 rounded border-slate-300">
+                    <div>
+                      <span class="font-medium text-slate-800">Trouble Unwinding</span>
+                      <p class="text-[11px] text-slate-500">Hard to quiet thoughts down during rest hours.</p>
+                    </div>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 2: DASS-21 Questionnaire Items -->
+          <div class="space-y-4 pt-2">
+            <div class="flex items-center justify-between pb-1 border-b border-slate-100">
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-800 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-600"></span>
+                DASS-21 Assessment Indicators (Depression, Anxiety, Stress)
+              </span>
+              <span class="text-[11px] text-slate-500">21 standardized clinical items</span>
+            </div>
+
+            <!-- DASS-21 Depression Subscale (7 items) -->
+            <div class="bg-blue-50/40 p-4 rounded-xl border border-blue-100 space-y-2.5">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-blue-900 uppercase tracking-wide">Depression Scale (DASS-D)</span>
+                <span class="text-[11px] text-blue-700 font-medium">Dysphoria, Hopelessness, Inertia</span>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-blue-100 hover:bg-blue-50/50 cursor-pointer">
+                  <input type="checkbox" name="symptom" value="dass_d1" class="mt-0.5 h-3.5 w-3.5 text-blue-600 rounded border-slate-300">
+                  <span>Couldn't experience positive feelings</span>
+                </label>
+                <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-blue-100 hover:bg-blue-50/50 cursor-pointer">
+                  <input type="checkbox" name="symptom" value="dass_d2" class="mt-0.5 h-3.5 w-3.5 text-blue-600 rounded border-slate-300">
+                  <span>Hard to work up initiative to do things</span>
+                </label>
+                <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-blue-100 hover:bg-blue-50/50 cursor-pointer">
+                  <input type="checkbox" name="symptom" value="dass_d3" class="mt-0.5 h-3.5 w-3.5 text-blue-600 rounded border-slate-300">
+                  <span>Felt nothing to look forward to</span>
+                </label>
+                <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-blue-100 hover:bg-blue-50/50 cursor-pointer">
+                  <input type="checkbox" name="symptom" value="dass_d4" class="mt-0.5 h-3.5 w-3.5 text-blue-600 rounded border-slate-300">
+                  <span>Felt down-hearted and blue</span>
+                </label>
+                <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-blue-100 hover:bg-blue-50/50 cursor-pointer">
+                  <input type="checkbox" name="symptom" value="dass_d5" class="mt-0.5 h-3.5 w-3.5 text-blue-600 rounded border-slate-300">
+                  <span>Unable to become enthusiastic</span>
+                </label>
+                <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-blue-100 hover:bg-blue-50/50 cursor-pointer">
+                  <input type="checkbox" name="symptom" value="dass_d6" class="mt-0.5 h-3.5 w-3.5 text-blue-600 rounded border-slate-300">
+                  <span>Felt not worth much as a person</span>
+                </label>
+                <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-blue-100 hover:bg-blue-50/50 cursor-pointer sm:col-span-2">
+                  <input type="checkbox" name="symptom" value="dass_d7" class="mt-0.5 h-3.5 w-3.5 text-blue-600 rounded border-slate-300">
+                  <span>Felt life was meaningless</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- DASS-21 Anxiety Subscale (7 items) -->
+            <div class="bg-amber-50/40 p-4 rounded-xl border border-amber-100 space-y-2.5">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-amber-900 uppercase tracking-wide">Anxiety Scale (DASS-A)</span>
+                <span class="text-[11px] text-amber-800 font-medium">Autonomic Arousal, Panic, Tremor</span>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-amber-100 hover:bg-amber-50/50 cursor-pointer">
+                  <input type="checkbox" name="symptom" value="dass_a1" class="mt-0.5 h-3.5 w-3.5 text-amber-600 rounded border-slate-300">
+                  <span>Aware of dry mouth</span>
+                </label>
+                <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-amber-100 hover:bg-amber-50/50 cursor-pointer">
+                  <input type="checkbox" name="symptom" value="dass_a2" class="mt-0.5 h-3.5 w-3.5 text-amber-600 rounded border-slate-300">
+                  <span>Difficulty breathing / shortness of breath</span>
+                </label>
+                <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-amber-100 hover:bg-amber-50/50 cursor-pointer">
+                  <input type="checkbox" name="symptom" value="dass_a3" class="mt-0.5 h-3.5 w-3.5 text-amber-600 rounded border-slate-300">
+                  <span>Shakiness or trembling (e.g. hands)</span>
+                </label>
+                <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-amber-100 hover:bg-amber-50/50 cursor-pointer">
+                  <input type="checkbox" name="symptom" value="dass_a4" class="mt-0.5 h-3.5 w-3.5 text-amber-600 rounded border-slate-300">
+                  <span>Worried about panic situations</span>
+                </label>
+                <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-amber-100 hover:bg-amber-50/50 cursor-pointer">
+                  <input type="checkbox" name="symptom" value="dass_a5" class="mt-0.5 h-3.5 w-3.5 text-amber-600 rounded border-slate-300">
+                  <span>Felt close to panic</span>
+                </label>
+                <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-amber-100 hover:bg-amber-50/50 cursor-pointer">
+                  <input type="checkbox" name="symptom" value="dass_a6" class="mt-0.5 h-3.5 w-3.5 text-amber-600 rounded border-slate-300">
+                  <span>Aware of rapid heart action / palpitations</span>
+                </label>
+                <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-amber-100 hover:bg-amber-50/50 cursor-pointer sm:col-span-2">
+                  <input type="checkbox" name="symptom" value="dass_a7" class="mt-0.5 h-3.5 w-3.5 text-amber-600 rounded border-slate-300">
+                  <span>Felt scared without any good reason</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- DASS-21 Stress Subscale (7 items) -->
+            <div class="bg-rose-50/40 p-4 rounded-xl border border-rose-100 space-y-2.5">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-rose-900 uppercase tracking-wide">Stress Scale (DASS-S)</span>
+                <span class="text-[11px] text-rose-800 font-medium">Tension, Irritability, Difficulty Relaxing</span>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-rose-100 hover:bg-rose-50/50 cursor-pointer">
+                  <input type="checkbox" name="symptom" value="dass_s1" class="mt-0.5 h-3.5 w-3.5 text-rose-600 rounded border-slate-300">
+                  <span>Hard to wind down / unwind</span>
+                </label>
+                <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-rose-100 hover:bg-rose-50/50 cursor-pointer">
+                  <input type="checkbox" name="symptom" value="dass_s2" class="mt-0.5 h-3.5 w-3.5 text-rose-600 rounded border-slate-300">
+                  <span>Tended to over-react to situations</span>
+                </label>
+                <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-rose-100 hover:bg-rose-50/50 cursor-pointer">
+                  <input type="checkbox" name="symptom" value="dass_s3" class="mt-0.5 h-3.5 w-3.5 text-rose-600 rounded border-slate-300">
+                  <span>Felt using lots of nervous energy</span>
+                </label>
+                <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-rose-100 hover:bg-rose-50/50 cursor-pointer">
+                  <input type="checkbox" name="symptom" value="dass_s4" class="mt-0.5 h-3.5 w-3.5 text-rose-600 rounded border-slate-300">
+                  <span>Getting agitated or irritable</span>
+                </label>
+                <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-rose-100 hover:bg-rose-50/50 cursor-pointer">
+                  <input type="checkbox" name="symptom" value="dass_s5" class="mt-0.5 h-3.5 w-3.5 text-rose-600 rounded border-slate-300">
+                  <span>Found it difficult to relax</span>
+                </label>
+                <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-rose-100 hover:bg-rose-50/50 cursor-pointer">
+                  <input type="checkbox" name="symptom" value="dass_s6" class="mt-0.5 h-3.5 w-3.5 text-rose-600 rounded border-slate-300">
+                  <span>Intolerant of interruptions / delays</span>
+                </label>
+                <label class="flex items-start gap-2.5 p-2 bg-white rounded border border-rose-100 hover:bg-rose-50/50 cursor-pointer sm:col-span-2">
+                  <input type="checkbox" name="symptom" value="dass_s7" class="mt-0.5 h-3.5 w-3.5 text-rose-600 rounded border-slate-300">
+                  <span>Felt rather touchy or sensitive</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label for="entryNotes" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+              Personal Notes & Triggers
+            </label>
+            <textarea id="entryNotes" rows="3" placeholder="Context notes: What were your energy levels, workday demands, stress triggers, or helpful coping strategies today?" class="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+          </div>
+
+          <div class="flex items-center justify-between pt-2">
+            <button type="submit" id="saveBtn" class="inline-flex items-center justify-center px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-medium rounded-lg shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+              Save Daily Entry
+            </button>
+            <span id="saveStatus" class="text-xs text-emerald-600 font-medium hidden">Entry saved!</span>
+          </div>
+        </form>
+      </section>
+
+      <!-- Past Entries Feed -->
+      <section>
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-semibold text-slate-900">Recent Logs</h2>
+          <span id="logCount" class="text-xs text-slate-500">0 entries</span>
+        </div>
+
+        <div id="entriesContainer" class="space-y-3">
+          <!-- Rendered via JavaScript -->
+        </div>
+      </section>
+    </div>
+
+    <!-- TAB 2: 14-DAY ASSESSMENT REPORT -->
+    <div id="viewReport" class="hidden space-y-6">
+      <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 print-shadow-none">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 mb-4 border-b border-slate-100 gap-4">
+          <div>
+            <h2 class="text-lg font-semibold text-slate-900">14-Day Clinical Assessment Report</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Automated scoring and questionnaire response mapping for <strong>ASRS v1.1</strong> &amp; <strong>DASS-21</strong>.</p>
+          </div>
+          <div class="flex items-center gap-2 no-print">
+            <label for="reportEndDate" class="text-xs font-semibold text-slate-600 uppercase">End Date:</label>
+            <input type="date" id="reportEndDate" onchange="generateReport()" class="px-2.5 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+        </div>
+
+        <!-- Metric Badges -->
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-3 mb-6">
+          <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+            <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Evaluation Window</div>
+            <div id="metricDateRange" class="text-sm font-bold text-slate-800 mt-1">Past 14 Days</div>
+          </div>
+          <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+            <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Days Logged</div>
+            <div id="metricDaysLogged" class="text-xl font-bold text-indigo-600 mt-1">0 / 14</div>
+          </div>
+          <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+            <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Completion Rate</div>
+            <div id="metricLoggingRate" class="text-xl font-bold text-slate-800 mt-1">0%</div>
+          </div>
+          <div class="bg-slate-50 p-3.5 rounded-xl border border-slate-200">
+            <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider">ASRS Criteria Met</div>
+            <div id="metricClinicalCriteria" class="text-xl font-bold text-slate-800 mt-1">0 / 6</div>
+          </div>
+        </div>
+
+        <!-- Visual 14-Day Daily Trend Graph -->
+        <div class="mb-6 p-4 rounded-xl border border-slate-200 bg-slate-50/70">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-slate-700">14-Day Daily Symptom Volume Trend</h3>
+            <div class="flex items-center gap-3 text-[11px]">
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-indigo-500"></span> ASRS Items</span>
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-emerald-500"></span> DASS Items</span>
+            </div>
+          </div>
+          <div id="trendChartContainer" class="h-28 flex items-end gap-1.5 pt-3 pb-1">
+            <!-- Rendered via JS -->
+          </div>
+          <div class="flex justify-between text-[10px] text-slate-400 mt-1">
+            <span>Day 1 (14 days ago)</span>
+            <span>Today / Selected End Date</span>
+          </div>
+        </div>
+
+        <!-- ASRS Part A Analysis Banner -->
+        <div id="screenerScoreBanner" class="p-4 rounded-xl border mb-6 bg-slate-50 border-slate-200">
+          <div class="flex items-start justify-between">
+            <div>
+              <span class="text-xs font-bold uppercase tracking-wider text-slate-600">ASRS v1.1 Screener Analysis:</span>
+              <p id="screenerScoreText" class="text-sm font-medium text-slate-800 mt-0.5">Calculating evaluation...</p>
+            </div>
+            <span id="screenerScoreBadge" class="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-200 text-slate-700">Pending</span>
+          </div>
+          <p class="text-xs text-slate-500 mt-2">
+            Per WHO ASRS guidelines: Q1–Q3 meet threshold at <em>Sometimes</em> (≥4d); Q4–Q6 meet threshold at <em>Often</em> (≥8d). Four or more criteria met is highly indicative of adult ADHD.
+          </p>
+        </div>
+
+        <!-- DASS-21 Score Breakdown Cards -->
+        <div class="mb-6">
+          <div class="flex items-center justify-between mb-3">
+            <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider">DASS-21 Subscale Results (Multiplied ×2 per clinical standard)</h3>
+            <span class="text-xs text-slate-500">Normal / Mild / Moderate / Severe / Extremely Severe</span>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5" id="dassScoreCards">
+            <!-- Rendered via JS -->
+          </div>
+        </div>
+
+        <!-- ASRS Results Table -->
+        <div class="mb-8">
+          <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-2">ASRS v1.1 Part A Item Breakdown</h3>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-sm">
+              <thead>
+                <tr class="border-b border-slate-200 text-xs font-semibold text-slate-600 uppercase tracking-wider bg-slate-50">
+                  <th class="py-2.5 px-3">Item & Assessment Question</th>
+                  <th class="py-2.5 px-3 text-center">Days Logged</th>
+                  <th class="py-2.5 px-3">Frequency</th>
+                  <th class="py-2.5 px-3 text-center">Clinical Threshold</th>
+                  <th class="py-2.5 px-3 text-right">Suggested Answer</th>
+                </tr>
+              </thead>
+              <tbody id="reportTableBody" class="divide-y divide-slate-100 text-slate-800">
+                <!-- Rendered via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- DASS-21 Results Table -->
+        <div class="mb-6">
+          <h3 class="text-sm font-bold text-slate-900 uppercase tracking-wider mb-2">DASS-21 Item-By-Item Questionnaire Mapping</h3>
+          <p class="text-xs text-slate-500 mb-3">Maps 14-day occurrence to standard DASS ratings (0: Did not apply, 1: Applied to some degree, 2: Applied to considerable degree, 3: Applied very much).</p>
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse text-sm">
+              <thead>
+                <tr class="border-b border-slate-200 text-xs font-semibold text-slate-600 uppercase tracking-wider bg-slate-50">
+                  <th class="py-2.5 px-3">Scale & Item</th>
+                  <th class="py-2.5 px-3 text-center">Days Reported</th>
+                  <th class="py-2.5 px-3">Frequency</th>
+                  <th class="py-2.5 px-3 text-right">DASS Rating (0-3)</th>
+                </tr>
+              </thead>
+              <tbody id="dassTableBody" class="divide-y divide-slate-100 text-slate-800">
+                <!-- Rendered via JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Action / Copy Summary -->
+        <div class="mt-6 pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 no-print">
+          <p class="text-xs text-slate-500">Take this combined summary to your clinical appointment to complete your assessment accurately.</p>
+          <div class="flex items-center gap-2">
+            <button id="printBtn" onclick="window.print()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition-colors inline-flex items-center gap-1.5">
+              <span>Print / Save PDF</span>
+            </button>
+            <button id="copySummaryBtn" onclick="copyReportSummary()" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-semibold rounded-lg transition-colors inline-flex items-center gap-1.5 shadow-sm">
+              <span>Copy Text Summary</span>
+            </button>
+          </div>
+        </div>
+        <div id="copyNotice" class="text-xs text-emerald-600 font-medium text-right mt-1 hidden no-print">Copied summary to clipboard!</div>
+      </section>
+    </div>
+
+    <!-- TAB 3: BACKUP & DATA MANAGEMENT -->
+    <div id="viewData" class="hidden space-y-6">
+      <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+        <h2 class="text-lg font-semibold text-slate-900 mb-1">Data Backup &amp; PWA Configuration</h2>
+        <p class="text-xs text-slate-500 mb-6">Manage data backups or configure offline Progressive Web App installation for your mobile device.</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Export Card -->
+          <div class="p-5 rounded-xl border border-slate-200 bg-slate-50/70 space-y-3">
+            <div class="flex items-center gap-2">
+              <span class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-sm">↓</span>
+              <div>
+                <h3 class="text-sm font-semibold text-slate-900">Export Backup (JSON)</h3>
+                <p class="text-xs text-slate-500">Download your entire history as a standard JSON data file.</p>
+              </div>
+            </div>
+            <p class="text-xs text-slate-600">Save a copy to your local drive before clearing browser cookies or changing laptops.</p>
+            <button id="exportJsonBtn" onclick="exportDataJSON()" class="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-colors shadow-sm">
+              Download JSON Backup
+            </button>
+          </div>
+
+          <!-- Import Card -->
+          <div class="p-5 rounded-xl border border-slate-200 bg-slate-50/70 space-y-3">
+            <div class="flex items-center gap-2">
+              <span class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-sm">↑</span>
+              <div>
+                <h3 class="text-sm font-semibold text-slate-900">Import Backup (JSON)</h3>
+                <p class="text-xs text-slate-500">Restore or merge logs from a previous backup file.</p>
+              </div>
+            </div>
+            <input type="file" id="importJsonInput" accept=".json" class="w-full text-xs text-slate-600 file:mr-2 file:py-1.5 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-slate-200 file:text-slate-700 hover:file:bg-slate-300">
+            <button id="importJsonBtn" onclick="importDataJSON()" class="w-full py-2.5 px-4 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-xs font-semibold transition-colors">
+              Load &amp; Merge Backup
+            </button>
+          </div>
+        </div>
+
+        <div id="backupStatus" class="mt-4 p-3 rounded-lg text-xs font-medium hidden"></div>
+
+        <!-- PWA Installation Instructions Card -->
+        <div class="mt-8 pt-6 border-t border-slate-100">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700">Progressive Web App (PWA) Mobile Setup</h4>
+              <p class="text-xs text-slate-500 mt-0.5">How to install this app to your smartphone or desktop home screen.</p>
+            </div>
+            <span class="text-[11px] font-semibold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">Standalone Mode Enabled</span>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs text-slate-600">
+            <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-2">
+              <div class="font-bold text-slate-900 flex items-center gap-1.5">
+                <span class="w-5 h-5 rounded-full bg-indigo-100 text-indigo-700 flex items-center justify-center text-[10px]">A</span>
+                iPhone / iPad (Safari)
+              </div>
+              <ol class="list-decimal pl-4 space-y-1 text-slate-600">
+                <li>Open this app in <strong>Safari</strong>.</li>
+                <li>Tap the <strong>Share</strong> button (box with upward arrow at the bottom).</li>
+                <li>Scroll down and tap <strong>Add to Home Screen</strong>.</li>
+                <li>Tap <strong>Add</strong> in the top-right corner. It will appear with its own icon on your home screen.</li>
+              </ol>
+            </div>
+
+            <div class="p-4 rounded-xl border border-slate-200 bg-slate-50 space-y-2">
+              <div class="font-bold text-slate-900 flex items-center gap-1.5">
+                <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-[10px]">B</span>
+                Android / Chrome / Desktop
+              </div>
+              <ol class="list-decimal pl-4 space-y-1 text-slate-600">
+                <li>Click the <strong>Install App</strong> button at the top of the screen.</li>
+                <li>Alternatively, tap the browser menu (<strong>⋮</strong> or install icon in URL bar).</li>
+                <li>Select <strong>Install App</strong> or <strong>Add to Home screen</strong>.</li>
+                <li>The app launches in full-screen standalone window with complete offline storage.</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reset / Sample Controls -->
+        <div class="mt-8 pt-6 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div>
+            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-700">Reset or Seed Data</h4>
+            <p class="text-xs text-slate-500 mt-0.5">Restore the initial 14-day sample records or wipe local storage.</p>
+          </div>
+          <div class="flex items-center gap-2.5">
+            <button id="resetSampleBtn" onclick="seedSampleData()" class="px-3.5 py-2 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg transition-colors">
+              Load 14-Day Sample
+            </button>
+            <button id="resetDataBtn" onclick="openResetModal()" class="px-3.5 py-2 text-xs font-medium text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg transition-colors">
+              Clear All Logs
+            </button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- PWA Install Guide Modal -->
+    <div id="pwaInstallModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+      <div class="bg-white rounded-xl shadow-xl border border-slate-200 max-w-md w-full p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div class="flex items-center gap-2">
+            <span class="w-7 h-7 rounded-lg bg-indigo-600 text-white flex items-center justify-center font-bold text-xs">PWA</span>
+            <h3 class="text-base font-bold text-slate-900">Install to Home Screen</h3>
+          </div>
+          <button onclick="closePWAInstallModal()" class="text-slate-400 hover:text-slate-600 text-sm">✕</button>
+        </div>
+        <p class="text-xs text-slate-600">Installing adds an app icon to your phone or desktop, removes the browser address bar, and works completely offline.</p>
+        
+        <div class="space-y-3 text-xs bg-slate-50 p-4 rounded-xl border border-slate-200">
+          <div class="font-semibold text-slate-900">Installation Steps:</div>
+          <div class="space-y-1.5 text-slate-600">
+            <p><strong>iOS / Safari:</strong> Tap <span class="bg-slate-200 px-1 py-0.5 rounded font-mono">Share [↑]</span> then tap <span class="font-medium text-slate-900">Add to Home Screen [+]</span>.</p>
+            <p><strong>Android / Chrome:</strong> Tap <span class="bg-slate-200 px-1 py-0.5 rounded font-mono">Menu [⋮]</span> then select <span class="font-medium text-slate-900">Install app</span>.</p>
+            <p><strong>Desktop (Chrome/Edge):</strong> Click the install icon <span class="font-mono">[⊕]</span> on the right side of the address bar.</p>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-2.5 pt-2">
+          <button onclick="closePWAInstallModal()" class="px-4 py-2 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg">
+            Got it
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- In-Page Confirmation Modal for Reset (No native confirm/alert) -->
+    <div id="confirmResetModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+      <div class="bg-white rounded-xl shadow-xl border border-slate-200 max-w-sm w-full p-6 space-y-4">
+        <h3 class="text-base font-bold text-slate-900">Clear all tracking history?</h3>
+        <p class="text-xs text-slate-600">This will delete all saved daily logs from this browser. This action cannot be undone unless you have a JSON backup file.</p>
+        <div class="flex items-center justify-end gap-2.5 pt-2">
+          <button onclick="closeResetModal()" class="px-4 py-2 text-xs font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 rounded-lg">
+            Cancel
+          </button>
+          <button onclick="confirmClearLogs()" class="px-4 py-2 text-xs font-medium text-white bg-rose-600 hover:bg-rose-700 rounded-lg">
+            Yes, Clear Everything
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 1. Data Store & Configuration: ASRS v1.1 Part A
+    const asrsConfig = [
+      { id: "details", qNum: "Q1", name: "Finishing Details", question: "How often do you have trouble wrapping up final details of a project, once challenging parts are done?", thresholdDays: 4, thresholdLabel: "≥ Sometimes" },
+      { id: "disorganized", qNum: "Q2", name: "Getting Organized", question: "How often do you have difficulty getting things in order when a task requires organization?", thresholdDays: 4, thresholdLabel: "≥ Sometimes" },
+      { id: "remembering", qNum: "Q3", name: "Remembering Commitments", question: "How often do you have problems remembering appointments or obligations?", thresholdDays: 4, thresholdLabel: "≥ Sometimes" },
+      { id: "procrastination", qNum: "Q4", name: "Avoiding Difficult Tasks", question: "When you have a task that requires a lot of thought, how often do you avoid or delay getting started?", thresholdDays: 8, thresholdLabel: "≥ Often" },
+      { id: "restless", qNum: "Q5", name: "Fidgeting & Restlessness", question: "How often do you fidget or squirm with your hands or feet when you have to sit down for a long time?", thresholdDays: 8, thresholdLabel: "≥ Often" },
+      { id: "motor", qNum: "Q6", name: "Overly Active / Driven", question: "How often do you feel overly active and compelled to do things, like you were driven by a motor?", thresholdDays: 8, thresholdLabel: "≥ Often" }
+    ];
+
+    // DASS-21 Configuration (7 Depression, 7 Anxiety, 7 Stress)
+    const dassConfig = [
+      // Depression Subscale
+      { id: "dass_d1", scale: "Depression", label: "No positive feelings", desc: "Couldn't seem to experience any positive feeling at all" },
+      { id: "dass_d2", scale: "Depression", label: "Difficulty initiating", desc: "Found it difficult to work up the initiative to do things" },
+      { id: "dass_d3", scale: "Depression", label: "Nothing to look forward to", desc: "Felt that I had nothing to look forward to" },
+      { id: "dass_d4", scale: "Depression", label: "Down-hearted and blue", desc: "Felt down-hearted and blue" },
+      { id: "dass_d5", scale: "Depression", label: "Unable to be enthusiastic", desc: "Unable to become enthusiastic about anything" },
+      { id: "dass_d6", scale: "Depression", label: "Low self-worth", desc: "Felt I wasn't worth much as a person" },
+      { id: "dass_d7", scale: "Depression", label: "Life was meaningless", desc: "Felt that life was meaningless" },
+
+      // Anxiety Subscale
+      { id: "dass_a1", scale: "Anxiety", label: "Dryness of mouth", desc: "Aware of dryness of my mouth" },
+      { id: "dass_a2", scale: "Anxiety", label: "Breathing difficulty", desc: "Experienced breathing difficulty (e.g. rapid breathing, breathlessness)" },
+      { id: "dass_a3", scale: "Anxiety", label: "Trembling / Shakiness", desc: "Experienced trembling (e.g. in the hands)" },
+      { id: "dass_a4", scale: "Anxiety", label: "Worried about panic", desc: "Worried about situations in which I might panic and make a fool of myself" },
+      { id: "dass_a5", scale: "Anxiety", label: "Felt close to panic", desc: "Felt I was close to panic" },
+      { id: "dass_a6", scale: "Anxiety", label: "Rapid heart rate", desc: "Aware of the action of my heart in the absence of physical exertion" },
+      { id: "dass_a7", scale: "Anxiety", label: "Scared without reason", desc: "Felt scared without any good reason" },
+
+      // Stress Subscale
+      { id: "dass_s1", scale: "Stress", label: "Hard to wind down", desc: "Found it hard to wind down" },
+      { id: "dass_s2", scale: "Stress", label: "Tended to over-react", desc: "Tended to over-react to situations" },
+      { id: "dass_s3", scale: "Stress", label: "Excess nervous energy", desc: "Felt that I was using a lot of nervous energy" },
+      { id: "dass_s4", scale: "Stress", label: "Agitated / Irritable", desc: "Found myself getting agitated" },
+      { id: "dass_s5", scale: "Stress", label: "Difficult to relax", desc: "Found it difficult to relax" },
+      { id: "dass_s6", scale: "Stress", label: "Intolerant of delays", desc: "Intolerant of anything that kept me from getting on with what I was doing" },
+      { id: "dass_s7", scale: "Stress", label: "Rather touchy", desc: "Felt that I was rather touchy" }
+    ];
+
+    const extraConfig = [
+      { id: "concentrating", qNum: "Extra", name: "Difficulty Concentrating", question: "Trouble focusing or concentrating on reading, discussions, or work tasks.", thresholdDays: 4, thresholdLabel: "Optional" },
+      { id: "unwinding", qNum: "Extra", name: "Difficulty Unwinding", question: "Trouble relaxing or quieting racing thoughts during personal rest hours.", thresholdDays: 4, thresholdLabel: "Optional" }
+    ];
+
+    const allSymptoms = [...asrsConfig, ...dassConfig, ...extraConfig];
+    const symptomLabels = allSymptoms.reduce((acc, curr) => {
+      acc[curr.id] = curr.name || curr.label;
+      return acc;
+    }, {});
+
+    // Starter sample history
+    const defaultEntries = [
+      { id: "entry-1", date: "2026-10-14", symptoms: ["restless", "procrastination", "details", "dass_s1", "dass_s3", "dass_d2"], notes: "Back-to-back engineering reviews. Restless, high nervous energy, and hard to wind down tonight." },
+      { id: "entry-2", date: "2026-10-13", symptoms: ["procrastination", "disorganized", "dass_s4", "dass_s5"], notes: "Avoided starting complex tickets. Felt irritable and found it difficult to relax." },
+      { id: "e-3", date: "2026-10-12", symptoms: ["remembering", "dass_d4", "dass_d2"], notes: "Missed calendar invite. Felt down-hearted and low initiative in the afternoon." },
+      { id: "e-4", date: "2026-10-11", symptoms: ["motor", "dass_s1", "dass_a6"], notes: "Racing thoughts at night; palpitations when thinking of Monday deadlines." },
+      { id: "e-5", date: "2026-10-10", symptoms: ["restless", "procrastination", "dass_s2", "dass_s6"], notes: "Fidgety and snapped at small interruptions." },
+      { id: "e-6", date: "2026-10-09", symptoms: ["details", "procrastination", "dass_d5"], notes: "Hard to get excited or finish closing items on project." },
+      { id: "e-7", date: "2026-10-08", symptoms: ["restless", "disorganized", "dass_s3", "dass_s1"], notes: "Pacing during meetings; tough to organize priorities." },
+      { id: "e-8", date: "2026-10-06", symptoms: ["remembering", "procrastination", "dass_a4"], notes: "Worried about team presentation." },
+      { id: "e-9", date: "2026-10-04", symptoms: ["restless", "motor", "dass_s5"], notes: "Worked on weekend tasks; couldn't settle down." },
+      { id: "e-10", date: "2026-10-02", symptoms: ["details", "dass_d1"], notes: "Completed code reviews, but felt flat emotionally." }
+    ];
+
+    let entries = [];
+
+    function loadEntries() {
+      try {
+        const stored = localStorage.getItem('mental_health_tracker_entries_v5');
+        if (stored) {
+          entries = JSON.parse(stored);
+        } else {
+          entries = defaultEntries;
+          saveToStorage();
+        }
+      } catch (e) {
+        entries = defaultEntries;
+      }
+    }
+
+    function saveToStorage() {
+      try {
+        localStorage.setItem('mental_health_tracker_entries_v5', JSON.stringify(entries));
+      } catch (e) {
+        console.warn('Unable to persist to localStorage', e);
+      }
+    }
+
+    // 2. Tab Navigation
+    window.switchTab = function(tab) {
+      const viewDaily = document.getElementById('viewDaily');
+      const viewReport = document.getElementById('viewReport');
+      const viewData = document.getElementById('viewData');
+      const tabDaily = document.getElementById('tabDaily');
+      const tabReport = document.getElementById('tabReport');
+      const tabData = document.getElementById('tabData');
+
+      [tabDaily, tabReport, tabData].forEach(t => {
+        t.className = "pb-3 text-sm font-semibold text-slate-500 hover:text-slate-800 border-b-2 border-transparent flex items-center gap-2";
+      });
+      [viewDaily, viewReport, viewData].forEach(v => v.classList.add('hidden'));
+
+      if (tab === 'daily') {
+        viewDaily.classList.remove('hidden');
+        tabDaily.className = "pb-3 text-sm font-semibold text-indigo-600 border-b-2 border-indigo-600 flex items-center gap-2";
+      } else if (tab === 'report') {
+        viewReport.classList.remove('hidden');
+        tabReport.className = "pb-3 text-sm font-semibold text-indigo-600 border-b-2 border-indigo-600 flex items-center gap-2";
+        generateReport();
+      } else if (tab === 'data') {
+        viewData.classList.remove('hidden');
+        tabData.className = "pb-3 text-sm font-semibold text-indigo-600 border-b-2 border-indigo-600 flex items-center gap-2";
+      }
+    };
+
+    // 3. Rendering Functions: Daily Entries
+    function renderEntries() {
+      const container = document.getElementById('entriesContainer');
+      const countLabel = document.getElementById('logCount');
+      
+      countLabel.textContent = `${entries.length} ${entries.length === 1 ? 'entry' : 'entries'}`;
+
+      if (entries.length === 0) {
+        container.innerHTML = `
+          <div class="bg-white border border-slate-200 border-dashed rounded-xl p-8 text-center">
+            <p class="text-sm text-slate-500">No logs yet. Fill out the form above to record your first day!</p>
+          </div>
+        `;
+        return;
+      }
+
+      const sorted = [...entries].sort((a, b) => new Date(b.date) - new Date(a.date));
+
+      container.innerHTML = sorted.map(entry => {
+        const badges = entry.symptoms && entry.symptoms.length > 0
+          ? entry.symptoms.map(s => {
+              const label = symptomLabels[s] || s;
+              const isDass = s.startsWith('dass_');
+              const color = isDass ? 'bg-emerald-50 text-emerald-800 border-emerald-100' : 'bg-indigo-50 text-indigo-700 border-indigo-100';
+              return `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${color}">${label}</span>`;
+            }).join(' ')
+          : '<span class="text-xs text-slate-400 italic">None noted</span>';
+
+        const formattedDate = new Date(entry.date + 'T00:00:00').toLocaleDateString(undefined, {
+          weekday: 'short',
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric'
+        });
+
+        return `
+          <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-sm font-semibold text-slate-900">${formattedDate}</span>
+              <button onclick="deleteEntry('${entry.id}')" class="text-xs text-slate-400 hover:text-rose-600 transition-colors">
+                Remove
+              </button>
+            </div>
+            
+            <div>
+              <div class="text-xs font-medium text-slate-500 mb-1.5">Experiences Reported:</div>
+              <div class="flex flex-wrap gap-1.5">${badges}</div>
+            </div>
+
+            ${entry.notes ? `
+              <div class="pt-2 border-t border-slate-100 text-sm text-slate-700">
+                <span class="text-xs font-medium text-slate-500 block mb-0.5">Notes:</span>
+                ${escapeHTML(entry.notes)}
+              </div>
+            ` : ''}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function escapeHTML(str) {
+      return str.replace(/[&<>'"]/g, 
+        tag => ({
+          '&': '&amp;',
+          '<': '&lt;',
+          '>': '&gt;',
+          "'": '&#39;',
+          '"': '&quot;'
+        }[tag] || tag)
+      );
+    }
+
+    window.deleteEntry = function(id) {
+      entries = entries.filter(item => item.id !== id);
+      saveToStorage();
+      renderEntries();
+      generateReport();
+    };
+
+    // 4. Report Generation Logic: ASRS, DASS-21 & 14-Day Timeline Trend
+    window.generateReport = function() {
+      const endInput = document.getElementById('reportEndDate');
+      const endDateVal = endInput.value || new Date().toISOString().split('T')[0];
+      
+      const endDate = new Date(endDateVal + 'T23:59:59');
+      const startDate = new Date(endDate);
+      startDate.setDate(startDate.getDate() - 13);
+      startDate.setHours(0, 0, 0, 0);
+
+      const startISO = startDate.toISOString().split('T')[0];
+      const endISO = endDateVal;
+
+      const windowEntries = entries.filter(e => e.date >= startISO && e.date <= endISO);
+      const daysLogged = windowEntries.length;
+      const rate = Math.round((daysLogged / 14) * 100);
+
+      const counts = {};
+      allSymptoms.forEach(s => counts[s.id] = 0);
+
+      windowEntries.forEach(entry => {
+        if (entry.symptoms && Array.isArray(entry.symptoms)) {
+          entry.symptoms.forEach(s => {
+            if (counts[s] !== undefined) counts[s]++;
+          });
+        }
+      });
+
+      // 4A. ASRS Calculation
+      let asrsCriteriaCount = 0;
+      asrsConfig.forEach(s => {
+        if (counts[s.id] >= s.thresholdDays) asrsCriteriaCount++;
+      });
+
+      const formatDateLabel = (d) => d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+      document.getElementById('metricDateRange').textContent = `${formatDateLabel(startDate)} – ${formatDateLabel(endDate)}`;
+      document.getElementById('metricDaysLogged').textContent = `${daysLogged} / 14`;
+      document.getElementById('metricLoggingRate').textContent = `${rate}%`;
+      
+      const criteriaEl = document.getElementById('metricClinicalCriteria');
+      criteriaEl.textContent = `${asrsCriteriaCount} / 6`;
+      criteriaEl.className = asrsCriteriaCount >= 4 ? "text-xl font-bold text-rose-600 mt-1" : "text-xl font-bold text-slate-800 mt-1";
+
+      // 4B. Visual 14-Day Day-by-Day Volume Trend Chart
+      const chartContainer = document.getElementById('trendChartContainer');
+      const dayBars = [];
+      for (let i = 13; i >= 0; i--) {
+        const curDate = new Date(endDate);
+        curDate.setDate(curDate.getDate() - i);
+        const iso = curDate.toISOString().split('T')[0];
+        const dayEntry = windowEntries.find(e => e.date === iso);
+
+        let asrsCount = 0;
+        let dassCount = 0;
+        if (dayEntry && dayEntry.symptoms) {
+          dayEntry.symptoms.forEach(s => {
+            if (s.startsWith('dass_')) dassCount++;
+            else asrsCount++;
+          });
+        }
+
+        const totalSymptoms = asrsCount + dassCount;
+        const barHeightPercent = Math.min(100, Math.max(8, totalSymptoms * 12));
+        const asrsPct = totalSymptoms > 0 ? (asrsCount / totalSymptoms) * 100 : 0;
+        const dassPct = totalSymptoms > 0 ? (dassCount / totalSymptoms) * 100 : 0;
+        const dateNum = curDate.getDate();
+
+        dayBars.push(`
+          <div class="flex-1 flex flex-col items-center justify-end h-full group relative">
+            <div class="w-full max-w-[20px] rounded overflow-hidden flex flex-col justify-end transition-all ${totalSymptoms === 0 ? 'bg-slate-200 h-2' : ''}" style="${totalSymptoms > 0 ? 'height:' + barHeightPercent + '%;' : ''}">
+              ${totalSymptoms > 0 ? `
+                <div class="bg-indigo-500 w-full" style="height:${asrsPct}%"></div>
+                <div class="bg-emerald-500 w-full" style="height:${dassPct}%"></div>
+              ` : ''}
+            </div>
+            <span class="text-[9px] text-slate-400 mt-1">${dateNum}</span>
+            <div class="absolute bottom-full mb-1 hidden group-hover:block bg-slate-900 text-white text-[10px] px-2 py-1 rounded shadow-lg whitespace-nowrap z-20 pointer-events-none">
+              ${curDate.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}: ${totalSymptoms} items (${asrsCount} ASRS, ${dassCount} DASS)
+            </div>
+          </div>
+        `);
+      }
+      chartContainer.innerHTML = dayBars.join('');
+
+      // ASRS Banner
+      const banner = document.getElementById('screenerScoreBanner');
+      const scoreText = document.getElementById('screenerScoreText');
+      const scoreBadge = document.getElementById('screenerScoreBadge');
+
+      if (asrsCriteriaCount >= 4) {
+        banner.className = "p-4 rounded-xl border mb-6 bg-rose-50/70 border-rose-200";
+        scoreText.textContent = `${asrsCriteriaCount} of 6 Part A questions met clinical threshold. Highly consistent with adult ADHD symptoms in clinical settings.`;
+        scoreBadge.className = "text-xs font-semibold px-2.5 py-1 rounded-full bg-rose-200 text-rose-900";
+        scoreBadge.textContent = "Positive ASRS Screener";
+      } else {
+        banner.className = "p-4 rounded-xl border mb-6 bg-slate-50 border-slate-200";
+        scoreText.textContent = `${asrsCriteriaCount} of 6 Part A questions met threshold (<4 threshold questions). Review specific areas with your provider.`;
+        scoreBadge.className = "text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-200 text-slate-700";
+        scoreBadge.textContent = "Sub-threshold ASRS";
+      }
+
+      // 4C. DASS-21 Subscale Scoring
+      function getDassRating(days) {
+        if (days <= 1) return { val: 0, label: "0 (Never/Rarely)" };
+        if (days <= 4) return { val: 1, label: "1 (Sometimes)" };
+        if (days <= 8) return { val: 2, label: "2 (Often)" };
+        return { val: 3, label: "3 (Almost Always)" };
+      }
+
+      const dassScores = { Depression: 0, Anxiety: 0, Stress: 0 };
+      dassConfig.forEach(item => {
+        const count = counts[item.id];
+        const rating = getDassRating(count);
+        dassScores[item.scale] += rating.val;
+      });
+
+      const dTotal = dassScores.Depression * 2;
+      const aTotal = dassScores.Anxiety * 2;
+      const sTotal = dassScores.Stress * 2;
+
+      function getDassSeverity(scale, score) {
+        if (scale === 'Depression') {
+          if (score <= 9) return { label: "Normal", color: "text-emerald-700 bg-emerald-50 border-emerald-200" };
+          if (score <= 13) return { label: "Mild", color: "text-blue-700 bg-blue-50 border-blue-200" };
+          if (score <= 20) return { label: "Moderate", color: "text-amber-700 bg-amber-50 border-amber-200" };
+          if (score <= 27) return { label: "Severe", color: "text-orange-700 bg-orange-50 border-orange-200" };
+          return { label: "Extremely Severe", color: "text-rose-700 bg-rose-50 border-rose-200" };
+        }
+        if (scale === 'Anxiety') {
+          if (score <= 7) return { label: "Normal", color: "text-emerald-700 bg-emerald-50 border-emerald-200" };
+          if (score <= 9) return { label: "Mild", color: "text-blue-700 bg-blue-50 border-blue-200" };
+          if (score <= 14) return { label: "Moderate", color: "text-amber-700 bg-amber-50 border-amber-200" };
+          if (score <= 19) return { label: "Severe", color: "text-orange-700 bg-orange-50 border-orange-200" };
+          return { label: "Extremely Severe", color: "text-rose-700 bg-rose-50 border-rose-200" };
+        }
+        if (scale === 'Stress') {
+          if (score <= 14) return { label: "Normal", color: "text-emerald-700 bg-emerald-50 border-emerald-200" };
+          if (score <= 18) return { label: "Mild", color: "text-blue-700 bg-blue-50 border-blue-200" };
+          if (score <= 25) return { label: "Moderate", color: "text-amber-700 bg-amber-50 border-amber-200" };
+          if (score <= 33) return { label: "Severe", color: "text-orange-700 bg-orange-50 border-orange-200" };
+          return { label: "Extremely Severe", color: "text-rose-700 bg-rose-50 border-rose-200" };
+        }
+      }
+
+      const dSev = getDassSeverity('Depression', dTotal);
+      const aSev = getDassSeverity('Anxiety', aTotal);
+      const sSev = getDassSeverity('Stress', sTotal);
+
+      // Render DASS Score Cards
+      const dassCardContainer = document.getElementById('dassScoreCards');
+      dassCardContainer.innerHTML = `
+        <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/75">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-700">Depression (DASS-D)</span>
+            <span class="text-xs font-semibold px-2 py-0.5 rounded border ${dSev.color}">${dSev.label}</span>
+          </div>
+          <div class="flex items-baseline gap-2 mt-2">
+            <span class="text-2xl font-bold text-slate-900">${dTotal}</span>
+            <span class="text-xs text-slate-500">/ 42 points</span>
+          </div>
+          <p class="text-[11px] text-slate-500 mt-1">Normal: 0-9 | Mild: 10-13 | Mod: 14-20 | Sev: 21-27 | Ex: 28+</p>
+        </div>
+
+        <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/75">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-700">Anxiety (DASS-A)</span>
+            <span class="text-xs font-semibold px-2 py-0.5 rounded border ${aSev.color}">${aSev.label}</span>
+          </div>
+          <div class="flex items-baseline gap-2 mt-2">
+            <span class="text-2xl font-bold text-slate-900">${aTotal}</span>
+            <span class="text-xs text-slate-500">/ 42 points</span>
+          </div>
+          <p class="text-[11px] text-slate-500 mt-1">Normal: 0-7 | Mild: 8-9 | Mod: 10-14 | Sev: 15-19 | Ex: 20+</p>
+        </div>
+
+        <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/75">
+          <div class="flex items-center justify-between mb-1">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-700">Stress (DASS-S)</span>
+            <span class="text-xs font-semibold px-2 py-0.5 rounded border ${sSev.color}">${sSev.label}</span>
+          </div>
+          <div class="flex items-baseline gap-2 mt-2">
+            <span class="text-2xl font-bold text-slate-900">${sTotal}</span>
+            <span class="text-xs text-slate-500">/ 42 points</span>
+          </div>
+          <p class="text-[11px] text-slate-500 mt-1">Normal: 0-14 | Mild: 15-18 | Mod: 19-25 | Sev: 26-33 | Ex: 34+</p>
+        </div>
+      `;
+
+      // Render ASRS Table
+      const asrsTableBody = document.getElementById('reportTableBody');
+      asrsTableBody.innerHTML = asrsConfig.map(s => {
+        const count = counts[s.id];
+        const percent = Math.round((count / 14) * 100);
+        const rating = getRating(count);
+        const meetsThreshold = count >= s.thresholdDays;
+
+        return `
+          <tr class="hover:bg-slate-50/75 transition-colors ${meetsThreshold ? 'bg-amber-50/20' : ''}">
+            <td class="py-2.5 px-3">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-bold px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-800">${s.qNum}</span>
+                <span class="font-medium text-slate-900">${s.name}</span>
+              </div>
+              <div class="text-xs text-slate-500 mt-0.5 pl-7">${s.question}</div>
+            </td>
+            <td class="py-2.5 px-3 text-center">
+              <span class="inline-flex items-center justify-center font-semibold text-slate-900 bg-slate-100 rounded px-2.5 py-1 text-xs">
+                ${count} / 14 d
+              </span>
+            </td>
+            <td class="py-2.5 px-3 w-32">
+              <div class="w-full bg-slate-200 rounded-full h-1.5">
+                <div class="bg-indigo-600 h-1.5 rounded-full" style="width: ${percent}%"></div>
+              </div>
+              <div class="text-[11px] text-slate-500 mt-0.5">${percent}%</div>
+            </td>
+            <td class="py-2.5 px-3 text-center">
+              <span class="text-xs font-medium ${meetsThreshold ? 'text-rose-700 font-semibold' : 'text-slate-500'}">
+                ${s.thresholdLabel} ${meetsThreshold ? '✓' : ''}
+              </span>
+            </td>
+            <td class="py-2.5 px-3 text-right">
+              <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${rating.badgeClass}">
+                ${rating.label}
+              </span>
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      // Render DASS-21 Item Table
+      const dassTableBody = document.getElementById('dassTableBody');
+      dassTableBody.innerHTML = dassConfig.map(item => {
+        const count = counts[item.id];
+        const percent = Math.round((count / 14) * 100);
+        const rating = getDassRating(count);
+
+        let scaleBadge = 'bg-blue-100 text-blue-800';
+        if (item.scale === 'Anxiety') scaleBadge = 'bg-amber-100 text-amber-800';
+        if (item.scale === 'Stress') scaleBadge = 'bg-rose-100 text-rose-800';
+
+        return `
+          <tr class="hover:bg-slate-50/75 transition-colors">
+            <td class="py-2.5 px-3">
+              <div class="flex items-center gap-2">
+                <span class="text-[11px] font-semibold px-1.5 py-0.5 rounded ${scaleBadge}">${item.scale}</span>
+                <span class="font-medium text-slate-900">${item.label}</span>
+              </div>
+              <div class="text-xs text-slate-500 mt-0.5 pl-7">${item.desc}</div>
+            </td>
+            <td class="py-2.5 px-3 text-center">
+              <span class="inline-flex items-center justify-center font-semibold text-slate-900 bg-slate-100 rounded px-2.5 py-1 text-xs">
+                ${count} / 14 d
+              </span>
+            </td>
+            <td class="py-2.5 px-3 w-32">
+              <div class="w-full bg-slate-200 rounded-full h-1.5">
+                <div class="bg-emerald-600 h-1.5 rounded-full" style="width: ${percent}%"></div>
+              </div>
+              <div class="text-[11px] text-slate-500 mt-0.5">${percent}%</div>
+            </td>
+            <td class="py-2.5 px-3 text-right">
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-semibold bg-slate-100 text-slate-800">
+                ${rating.label}
+              </span>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    };
+
+    function getRating(days) {
+      if (days === 0) return { label: "Never", badgeClass: "bg-slate-100 text-slate-600" };
+      if (days >= 1 && days <= 3) return { label: "Rarely", badgeClass: "bg-blue-50 text-blue-700 border border-blue-200" };
+      if (days >= 4 && days <= 7) return { label: "Sometimes", badgeClass: "bg-amber-50 text-amber-700 border border-amber-200" };
+      if (days >= 8 && days <= 11) return { label: "Often", badgeClass: "bg-orange-50 text-orange-700 border border-orange-200" };
+      return { label: "Very Often", badgeClass: "bg-rose-50 text-rose-700 border border-rose-200" };
+    }
+
+    // 5. Copy Combined Summary Text
+    window.copyReportSummary = function() {
+      const endVal = document.getElementById('reportEndDate').value || new Date().toISOString().split('T')[0];
+      const endDate = new Date(endVal + 'T23:59:59');
+      const startDate = new Date(endDate);
+      startDate.setDate(startDate.getDate() - 13);
+      const startISO = startDate.toISOString().split('T')[0];
+
+      const windowEntries = entries.filter(e => e.date >= startISO && e.date <= endVal);
+      const counts = {};
+      allSymptoms.forEach(s => counts[s.id] = 0);
+      windowEntries.forEach(e => {
+        (e.symptoms || []).forEach(s => {
+          if (counts[s] !== undefined) counts[s]++;
+        });
+      });
+
+      let asrsCount = 0;
+      asrsConfig.forEach(s => {
+        if (counts[s.id] >= s.thresholdDays) asrsCount++;
+      });
+
+      function getDassVal(days) {
+        if (days <= 1) return 0;
+        if (days <= 4) return 1;
+        if (days <= 8) return 2;
+        return 3;
+      }
+
+      const dassScores = { Depression: 0, Anxiety: 0, Stress: 0 };
+      dassConfig.forEach(i => {
+        dassScores[i.scale] += getDassVal(counts[i.id]);
+      });
+
+      let summary = `14-Day Mental Health Assessment Summary\n`;
+      summary += `Window: ${startDate.toLocaleDateString()} to ${endDate.toLocaleDateString()}\n`;
+      summary += `Days Logged: ${windowEntries.length} / 14\n\n`;
+
+      summary += `--- ASRS v1.1 Part A (ADHD Screener) ---\n`;
+      summary += `Criteria Met: ${asrsCount} of 6 (Threshold: >=4 indicates positive screener)\n`;
+      asrsConfig.forEach(s => {
+        const c = counts[s.id];
+        const r = getRating(c).label;
+        const met = c >= s.thresholdDays ? " [Meets Threshold]" : "";
+        summary += `${s.qNum} (${s.name}): ${c}/14d -> ${r}${met}\n`;
+      });
+
+      summary += `\n--- DASS-21 Subscale Scores (x2 scaled) ---\n`;
+      summary += `Depression: ${dassScores.Depression * 2}/42\n`;
+      summary += `Anxiety: ${dassScores.Anxiety * 2}/42\n`;
+      summary += `Stress: ${dassScores.Stress * 2}/42\n\n`;
+
+      summary += `DASS-21 Item Ratings (0=Did not apply, 1=Sometimes, 2=Often, 3=Almost Always):\n`;
+      dassConfig.forEach(i => {
+        const c = counts[i.id];
+        const val = getDassVal(c);
+        summary += `[${i.scale}] ${i.label}: ${c}/14d -> Rating ${val}\n`;
+      });
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(summary).then(() => showNotice()).catch(() => fallbackCopy(summary));
+      } else {
+        fallbackCopy(summary);
+      }
+    };
+
+    function fallbackCopy(text) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      try {
+        document.execCommand('copy');
+        showNotice();
+      } catch (err) {
+        console.error('Copy failed', err);
+      }
+      document.body.removeChild(ta);
+    }
+
+    function showNotice() {
+      const notice = document.getElementById('copyNotice');
+      notice.classList.remove('hidden');
+      setTimeout(() => notice.classList.add('hidden'), 2500);
+    }
+
+    // 6. Data Management: Export & Import JSON
+    window.exportDataJSON = function() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(entries, null, 2));
+      const downloadAnchor = document.createElement('a');
+      downloadAnchor.setAttribute("href", dataStr);
+      downloadAnchor.setAttribute("download", `mental_health_tracker_backup_${new Date().toISOString().split('T')[0]}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+
+      showBackupStatus("Successfully exported JSON backup file!", "bg-emerald-50 text-emerald-800 border border-emerald-200");
+    };
+
+    window.importDataJSON = function() {
+      const fileInput = document.getElementById('importJsonInput');
+      if (!fileInput.files || fileInput.files.length === 0) {
+        showBackupStatus("Please choose a JSON backup file to import.", "bg-amber-50 text-amber-800 border border-amber-200");
+        return;
+      }
+
+      const file = fileInput.files[0];
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (!Array.isArray(imported)) {
+            throw new Error("Invalid format: expected array of daily entries.");
+          }
+
+          imported.forEach(item => {
+            if (item.date && item.id) {
+              const idx = entries.findIndex(existing => existing.date === item.date);
+              if (idx >= 0) {
+                entries[idx] = item;
+              } else {
+                entries.push(item);
+              }
+            }
+          });
+
+          saveToStorage();
+          renderEntries();
+          generateReport();
+          showBackupStatus(`Successfully imported! Loaded ${imported.length} records.`, "bg-emerald-50 text-emerald-800 border border-emerald-200");
+          fileInput.value = '';
+        } catch (err) {
+          showBackupStatus("Import error: File is not a valid JSON tracking backup.", "bg-rose-50 text-rose-800 border border-rose-200");
+        }
+      };
+      reader.readAsText(file);
+    };
+
+    function showBackupStatus(msg, classes) {
+      const el = document.getElementById('backupStatus');
+      el.className = `mt-4 p-3 rounded-lg text-xs font-medium ${classes}`;
+      el.textContent = msg;
+      el.classList.remove('hidden');
+      setTimeout(() => el.classList.add('hidden'), 4000);
+    }
+
+    window.openResetModal = function() {
+      document.getElementById('confirmResetModal').classList.remove('hidden');
+    };
+
+    window.closeResetModal = function() {
+      document.getElementById('confirmResetModal').classList.add('hidden');
+    };
+
+    window.confirmClearLogs = function() {
+      entries = [];
+      saveToStorage();
+      renderEntries();
+      generateReport();
+      closeResetModal();
+      showBackupStatus("All logs have been cleared.", "bg-slate-100 text-slate-700 border border-slate-300");
+    };
+
+    window.seedSampleData = function() {
+      entries = [...defaultEntries];
+      saveToStorage();
+      renderEntries();
+      generateReport();
+      showBackupStatus("14-day sample entries reloaded.", "bg-indigo-50 text-indigo-700 border border-indigo-200");
+    };
+
+    // 7. PWA Installation & Service Worker Integration
+    let deferredInstallPrompt = null;
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredInstallPrompt = e;
+    });
+
+    window.triggerPWAInstall = function() {
+      if (deferredInstallPrompt) {
+        deferredInstallPrompt.prompt();
+        deferredInstallPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            console.log('User accepted PWA install');
+          }
+          deferredInstallPrompt = null;
+        });
+      } else {
+        document.getElementById('pwaInstallModal').classList.remove('hidden');
+      }
+    };
+
+    window.closePWAInstallModal = function() {
+      document.getElementById('pwaInstallModal').classList.add('hidden');
+    };
+
+    // Offline & Network Detection
+    function updateOnlineStatus() {
+      const badge = document.getElementById('offlineStatusBadge');
+      if (navigator.onLine) {
+        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Offline Ready`;
+        badge.className = "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200";
+      } else {
+        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Offline Mode`;
+        badge.className = "inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-100 text-amber-800 border border-amber-200";
+      }
+    }
+    window.addEventListener('online', updateOnlineStatus);
+    window.addEventListener('offline', updateOnlineStatus);
+
+    // Dynamic Manifest Generation via Data URI
+    function injectPWAManifest() {
+      try {
+        const manifestObj = {
+          name: "Daily Mental Health Tracker",
+          short_name: "HealthTracker",
+          start_url: "./",
+          display: "standalone",
+          background_color: "#ffffff",
+          theme_color: "#4f46e5",
+          icons: [
+            {
+              src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%234f46e5'/%3E%3Cpath d='M50 25c-13.8 0-25 11.2-25 25 0 10.4 6.3 19.3 15.3 23.2v6.8h19.4v-6.8C68.7 69.3 75 60.4 75 50c0-13.8-11.2-25-25-25zm0 8c9.4 0 17 7.6 17 17 0 7.2-4.5 13.4-11 15.8V68h-12v-2.2c-6.5-2.4-11-8.6-11-15.8 0-9.4 7.6-17 17-17z' fill='%23ffffff'/%3E%3C/svg%3E",
+              sizes: "192x192 512x512",
+              type: "image/svg+xml"
+            }
+          ]
+        };
+        const stringManifest = JSON.stringify(manifestObj);
+        const blob = new Blob([stringManifest], {type: 'application/json'});
+        const manifestURL = URL.createObjectURL(blob);
+        let linkTag = document.querySelector('link[rel="manifest"]');
+        if (!linkTag) {
+          linkTag = document.createElement('link');
+          linkTag.rel = 'manifest';
+          document.head.appendChild(linkTag);
+        }
+        linkTag.href = manifestURL;
+      } catch (e) {
+        console.warn('Manifest injection warning', e);
+      }
+    }
+
+    // Register Safe Offline Service Worker
+    function registerServiceWorker() {
+      if ('serviceWorker' in navigator) {
+        try {
+          const swCode = `
+            const CACHE_NAME = 'mental-health-pwa-v1';
+            self.addEventListener('install', (e) => {
+              self.skipWaiting();
+            });
+            self.addEventListener('activate', (e) => {
+              e.waitUntil(clients.claim());
+            });
+            self.addEventListener('fetch', (e) => {
+              e.respondWith(
+                fetch(e.request).catch(() => caches.match(e.request))
+              );
+            });
+          `;
+          const blob = new Blob([swCode], { type: 'application/javascript' });
+          const swUrl = URL.createObjectURL(blob);
+          navigator.serviceWorker.register(swUrl).catch(() => {});
+        } catch (e) {
+          // Handled gracefully in sandboxed iframes
+        }
+      }
+    }
+
+    // 8. Initialization
+    document.addEventListener('DOMContentLoaded', () => {
+      const dateInput = document.getElementById('entryDate');
+      const reportDateInput = document.getElementById('reportEndDate');
+      const form = document.getElementById('entryForm');
+      const statusEl = document.getElementById('saveStatus');
+
+      const today = new Date().toISOString().split('T')[0];
+      dateInput.value = today;
+      reportDateInput.value = today;
+
+      loadEntries();
+      renderEntries();
+      injectPWAManifest();
+      registerServiceWorker();
+
+      form.addEventListener('submit', (e) => {
+        e.preventDefault();
+
+        const selectedDate = dateInput.value;
+        const selectedSymptoms = Array.from(
+          document.querySelectorAll('input[name="symptom"]:checked')
+        ).map(cb => cb.value);
+        const notes = document.getElementById('entryNotes').value.trim();
+
+        const newEntry = {
+          id: 'entry-' + Date.now(),
+          date: selectedDate,
+          symptoms: selectedSymptoms,
+          notes: notes
+        };
+
+        const existingIndex = entries.findIndex(item => item.date === selectedDate);
+        if (existingIndex >= 0) {
+          entries[existingIndex] = newEntry;
+        } else {
+          entries.unshift(newEntry);
+        }
+
+        saveToStorage();
+        renderEntries();
+
+        document.querySelectorAll('input[name="symptom"]').forEach(cb => cb.checked = false);
+        document.getElementById('entryNotes').value = '';
+        
+        statusEl.classList.remove('hidden');
+        setTimeout(() => {
+          statusEl.classList.add('hidden');
+        }, 2000);
+      });
+    });
+  </script>
+</body>
+</html>

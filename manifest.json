@@ -1,0 +1,16 @@
+{
+  "name": "Daily Mental Health Tracker",
+  "short_name": "HealthTracker",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4f46e5",
+  "description": "Daily logging and 14-day questionnaire helper for ASRS v1.1 and DASS-21.",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}
