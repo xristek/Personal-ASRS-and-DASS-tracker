@@ -12,9 +12,11 @@
   <meta name="apple-mobile-web-app-title" content="HealthTracker">
   <meta name="description" content="Offline-capable Daily Mental Health Assessment & Questionnaire Helper for ASRS v1.1 and DASS-21.">
 
-  <!-- PWA Icon & Inline Manifest (Data URI for self-contained execution) -->
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%234f46e5'/%3E%3Cpath d='M50 25c-13.8 0-25 11.2-25 25 0 10.4 6.3 19.3 15.3 23.2v6.8h19.4v-6.8C68.7 69.3 75 60.4 75 50c0-13.8-11.2-25-25-25zm0 8c9.4 0 17 7.6 17 17 0 7.2-4.5 13.4-11 15.8V68h-12v-2.2c-6.5-2.4-11-8.6-11-15.8 0-9.4 7.6-17 17-17z' fill='%23ffffff'/%3E%3C/svg%3E">
-  <link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%234f46e5'/%3E%3Cpath d='M50 25c-13.8 0-25 11.2-25 25 0 10.4 6.3 19.3 15.3 23.2v6.8h19.4v-6.8C68.7 69.3 75 60.4 75 50c0-13.8-11.2-25-25-25zm0 8c9.4 0 17 7.6 17 17 0 7.2-4.5 13.4-11 15.8V68h-12v-2.2c-6.5-2.4-11-8.6-11-15.8 0-9.4 7.6-17 17-17z' fill='%23ffffff'/%3E%3C/svg%3E">
+  <!-- PWA Manifest & Icons -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  <link rel="apple-touch-icon" href="icon-192.png">
   
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
   <style>
@@ -1265,7 +1267,24 @@
     window.addEventListener('beforeinstallprompt', (e) => {
       e.preventDefault();
       deferredInstallPrompt = e;
+      const btn = document.getElementById('pwaInstallBtn');
+      if (btn) btn.classList.remove('hidden');
     });
+
+    window.addEventListener('appinstalled', () => {
+      deferredInstallPrompt = null;
+      const btn = document.getElementById('pwaInstallBtn');
+      if (btn) btn.classList.add('hidden');
+      console.log('PWA installed successfully');
+    });
+
+    // Check if launched as installed standalone PWA
+    if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true) {
+      window.addEventListener('DOMContentLoaded', () => {
+        const btn = document.getElementById('pwaInstallBtn');
+        if (btn) btn.classList.add('hidden');
+      });
+    }
 
     window.triggerPWAInstall = function() {
       if (deferredInstallPrompt) {
@@ -1299,63 +1318,18 @@
     window.addEventListener('online', updateOnlineStatus);
     window.addEventListener('offline', updateOnlineStatus);
 
-    // Dynamic Manifest Generation via Data URI
-    function injectPWAManifest() {
-      try {
-        const manifestObj = {
-          name: "Daily Mental Health Tracker",
-          short_name: "HealthTracker",
-          start_url: "./",
-          display: "standalone",
-          background_color: "#ffffff",
-          theme_color: "#4f46e5",
-          icons: [
-            {
-              src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%234f46e5'/%3E%3Cpath d='M50 25c-13.8 0-25 11.2-25 25 0 10.4 6.3 19.3 15.3 23.2v6.8h19.4v-6.8C68.7 69.3 75 60.4 75 50c0-13.8-11.2-25-25-25zm0 8c9.4 0 17 7.6 17 17 0 7.2-4.5 13.4-11 15.8V68h-12v-2.2c-6.5-2.4-11-8.6-11-15.8 0-9.4 7.6-17 17-17z' fill='%23ffffff'/%3E%3C/svg%3E",
-              sizes: "192x192 512x512",
-              type: "image/svg+xml"
-            }
-          ]
-        };
-        const stringManifest = JSON.stringify(manifestObj);
-        const blob = new Blob([stringManifest], {type: 'application/json'});
-        const manifestURL = URL.createObjectURL(blob);
-        let linkTag = document.querySelector('link[rel="manifest"]');
-        if (!linkTag) {
-          linkTag = document.createElement('link');
-          linkTag.rel = 'manifest';
-          document.head.appendChild(linkTag);
-        }
-        linkTag.href = manifestURL;
-      } catch (e) {
-        console.warn('Manifest injection warning', e);
-      }
-    }
-
-    // Register Safe Offline Service Worker
+    // Register Offline Service Worker
     function registerServiceWorker() {
       if ('serviceWorker' in navigator) {
-        try {
-          const swCode = `
-            const CACHE_NAME = 'mental-health-pwa-v1';
-            self.addEventListener('install', (e) => {
-              self.skipWaiting();
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('./sw.js')
+            .then((registration) => {
+              console.log('ServiceWorker registered with scope:', registration.scope);
+            })
+            .catch((err) => {
+              console.warn('ServiceWorker registration failed:', err);
             });
-            self.addEventListener('activate', (e) => {
-              e.waitUntil(clients.claim());
-            });
-            self.addEventListener('fetch', (e) => {
-              e.respondWith(
-                fetch(e.request).catch(() => caches.match(e.request))
-              );
-            });
-          `;
-          const blob = new Blob([swCode], { type: 'application/javascript' });
-          const swUrl = URL.createObjectURL(blob);
-          navigator.serviceWorker.register(swUrl).catch(() => {});
-        } catch (e) {
-          // Handled gracefully in sandboxed iframes
-        }
+        });
       }
     }
 
@@ -1372,7 +1346,6 @@
 
       loadEntries();
       renderEntries();
-      injectPWAManifest();
       registerServiceWorker();
 
       form.addEventListener('submit', (e) => {
