@@ -18,12 +18,194 @@
   <link rel="icon" type="image/svg+xml" href="icon.svg">
   <link rel="apple-touch-icon" href="icon-192.png">
   
+  <!-- Theme Initialization (prevents flash of unstyled theme) -->
+  <script>
+    (function() {
+      try {
+        const theme = localStorage.getItem('mental_health_tracker_theme');
+        if (theme === 'dark' || (!theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      } catch (e) {}
+    })();
+  </script>
+
   <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class'
+    };
+  </script>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+
+    /* Dark Mode Theme Rules */
+    html.dark {
+      color-scheme: dark;
+    }
+    html.dark body {
+      background-color: #0b1120 !important;
+      color: #f1f5f9 !important;
+    }
+    html.dark .bg-white {
+      background-color: #1e293b !important;
+    }
+    html.dark .bg-slate-50,
+    html.dark .bg-slate-50\/70,
+    html.dark .bg-slate-50\/75,
+    html.dark .bg-slate-50\/80,
+    html.dark .bg-slate-50\/90 {
+      background-color: #0f172a !important;
+    }
+    html.dark .bg-slate-100 {
+      background-color: #334155 !important;
+    }
+    html.dark .bg-slate-200 {
+      background-color: #475569 !important;
+    }
+    html.dark .border-slate-100,
+    html.dark .border-slate-200,
+    html.dark .border-slate-300,
+    html.dark .divide-slate-100 > :not([hidden]) ~ :not([hidden]) {
+      border-color: #334155 !important;
+    }
+    html.dark .text-slate-900,
+    html.dark .text-slate-800 {
+      color: #f8fafc !important;
+    }
+    html.dark .text-slate-700 {
+      color: #e2e8f0 !important;
+    }
+    html.dark .text-slate-600 {
+      color: #cbd5e1 !important;
+    }
+    html.dark .text-slate-500 {
+      color: #94a3b8 !important;
+    }
+    html.dark .text-slate-400 {
+      color: #64748b !important;
+    }
+    html.dark .hover\:bg-slate-50:hover,
+    html.dark .hover\:bg-slate-50\/75:hover,
+    html.dark .hover\:bg-slate-100:hover,
+    html.dark .hover\:bg-slate-100\/70:hover,
+    html.dark .hover\:bg-slate-100\/80:hover {
+      background-color: #334155 !important;
+    }
+    html.dark .hover\:bg-slate-200:hover,
+    html.dark .hover\:bg-slate-200\/80:hover {
+      background-color: #475569 !important;
+    }
+    html.dark .hover\:text-slate-800:hover {
+      color: #f8fafc !important;
+    }
+
+    /* Form Elements in Dark Mode */
+    html.dark input[type="text"],
+    html.dark input[type="date"],
+    html.dark textarea,
+    html.dark select {
+      background-color: #0f172a !important;
+      color: #f8fafc !important;
+      border-color: #334155 !important;
+    }
+    html.dark input[type="checkbox"] {
+      background-color: #0f172a;
+      border-color: #475569;
+    }
+
+    /* Modals in Dark Mode */
+    html.dark #confirmResetModal > div,
+    html.dark #confirmDeleteCustomQModal > div,
+    html.dark #pwaInstallModal > div {
+      background-color: #1e293b !important;
+      border-color: #334155 !important;
+    }
+
+    /* Colored Badges & Containers in Dark Mode */
+    html.dark .bg-indigo-50 {
+      background-color: rgba(99, 102, 241, 0.15) !important;
+      color: #a5b4fc !important;
+    }
+    html.dark .bg-indigo-100 {
+      background-color: rgba(99, 102, 241, 0.25) !important;
+      color: #c7d2fe !important;
+    }
+    html.dark .bg-emerald-50 {
+      background-color: rgba(16, 185, 129, 0.15) !important;
+      color: #6ee7b7 !important;
+    }
+    html.dark .bg-emerald-100 {
+      background-color: rgba(16, 185, 129, 0.25) !important;
+      color: #a7f3d0 !important;
+    }
+    html.dark .bg-amber-50,
+    html.dark .bg-amber-50\/20 {
+      background-color: rgba(245, 158, 11, 0.15) !important;
+      color: #fde68a !important;
+    }
+    html.dark .bg-amber-100 {
+      background-color: rgba(245, 158, 11, 0.25) !important;
+      color: #fef3c7 !important;
+    }
+    html.dark .bg-rose-50,
+    html.dark .bg-rose-50\/70 {
+      background-color: rgba(244, 63, 94, 0.15) !important;
+      color: #fecdd3 !important;
+    }
+    html.dark .bg-rose-100 {
+      background-color: rgba(244, 63, 94, 0.25) !important;
+      color: #ffe4e6 !important;
+    }
+    html.dark .bg-purple-50 {
+      background-color: rgba(168, 85, 247, 0.15) !important;
+      color: #d8b4fe !important;
+    }
+    html.dark .bg-purple-100 {
+      background-color: rgba(168, 85, 247, 0.25) !important;
+      color: #e9d5ff !important;
+    }
+    html.dark .bg-blue-50 {
+      background-color: rgba(59, 130, 246, 0.15) !important;
+      color: #93c5fd !important;
+    }
+    html.dark .bg-blue-100 {
+      background-color: rgba(59, 130, 246, 0.25) !important;
+      color: #bfdbfe !important;
+    }
+
+    /* Navigation active/inactive tabs in dark mode */
+    html.dark nav button.border-transparent {
+      color: #94a3b8 !important;
+    }
+    html.dark nav button.border-transparent:hover {
+      color: #f8fafc !important;
+    }
+    html.dark nav button.border-indigo-600 {
+      color: #818cf8 !important;
+      border-color: #818cf8 !important;
+    }
+
+    /* Dark mode buttons */
+    html.dark button.bg-slate-800 {
+      background-color: #334155 !important;
+      color: #f8fafc !important;
+    }
+    html.dark button.bg-slate-800:hover {
+      background-color: #475569 !important;
+    }
+
     @media print {
-      body { background-color: white !important; color: black !important; }
+      body, html.dark body { background-color: white !important; color: black !important; }
+      html.dark .bg-white { background-color: white !important; }
+      html.dark .bg-slate-50, html.dark .bg-slate-100 { background-color: #f8fafc !important; }
+      html.dark .text-slate-900, html.dark .text-slate-800, html.dark .text-slate-700 { color: black !important; }
+      html.dark .text-slate-600, html.dark .text-slate-500 { color: #475569 !important; }
+      html.dark .border-slate-100, html.dark .border-slate-200, html.dark .border-slate-300 { border-color: #cbd5e1 !important; }
+      #themeToggleBtn { display: none !important; }
       nav, header button, #tabDaily, #tabReport, #tabData, #copySummaryBtn, #printBtn, #entryForm, .no-print {
         display: none !important;
       }
@@ -48,6 +230,10 @@
           <p class="text-sm text-slate-600 mt-1">Daily logging and 14-day questionnaire helper for <strong>ASRS v1.1</strong> &amp; <strong>DASS-21</strong>.</p>
         </div>
         <div class="flex items-center gap-2">
+          <button id="themeToggleBtn" onclick="toggleTheme()" class="p-1.5 rounded-lg text-slate-500 hover:text-slate-700 hover:bg-slate-100 border border-slate-200 transition-colors" title="Toggle theme (Light / Dark)" aria-label="Toggle theme">
+            <svg id="themeIconSun" class="w-4 h-4 hidden text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+            <svg id="themeIconMoon" class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+          </button>
           <button id="pwaInstallBtn" onclick="triggerPWAInstall()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm transition-colors">
             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
             <span>Install App</span>
@@ -106,6 +292,20 @@
                 Collapse All
               </button>
             </div>
+          </div>
+
+          <!-- Quick Fill Helper Actions -->
+          <div class="flex items-center gap-2 flex-wrap pt-0.5 pb-1">
+            <span class="text-xs text-slate-500 font-medium mr-1">Quick Actions:</span>
+            <button type="button" id="quickClearBtn" onclick="quickFillClearAll()" class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-emerald-700 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-lg transition-colors">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              <span>All Clear (Zero Symptoms)</span>
+            </button>
+            <button type="button" id="quickCopyYesterdayBtn" onclick="quickFillYesterday()" class="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 rounded-lg transition-colors">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/></svg>
+              <span>Copy from Yesterday</span>
+            </button>
+            <span id="quickFillNotice" class="text-xs font-medium hidden"></span>
           </div>
 
           <!-- Section 1: ASRS v1.1 Part A Screener (Collapsible) -->
@@ -691,14 +891,21 @@
             <div class="flex items-center gap-2">
               <span class="w-8 h-8 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-sm">↓</span>
               <div>
-                <h3 class="text-sm font-semibold text-slate-900">Export Backup (JSON)</h3>
-                <p class="text-xs text-slate-500">Download your entire history as a standard JSON data file.</p>
+                <h3 class="text-sm font-semibold text-slate-900">Export Backup &amp; Logs</h3>
+                <p class="text-xs text-slate-500">Download your history as JSON or spreadsheet CSV.</p>
               </div>
             </div>
-            <p class="text-xs text-slate-600">Save a copy to your local drive before clearing browser cookies or changing laptops.</p>
-            <button id="exportJsonBtn" onclick="exportDataJSON()" class="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-colors shadow-sm">
-              Download JSON Backup
-            </button>
+            <p class="text-xs text-slate-600">Save a complete JSON backup for restoration, or export a CSV spreadsheet for Excel, Google Sheets, or your healthcare provider.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+              <button id="exportJsonBtn" onclick="exportDataJSON()" class="w-full py-2.5 px-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-colors shadow-sm flex items-center justify-center gap-1.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                <span>JSON Backup</span>
+              </button>
+              <button id="exportCsvBtn" onclick="exportDataCSV()" class="w-full py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold transition-colors shadow-sm flex items-center justify-center gap-1.5">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                <span>CSV Spreadsheet</span>
+              </button>
+            </div>
           </div>
 
           <!-- Import Card -->
@@ -1830,6 +2037,102 @@
       showBackupStatus("Successfully exported JSON backup file with custom questions and daily logs!", "bg-emerald-50 text-emerald-800 border border-emerald-200");
     };
 
+    window.exportDataCSV = function() {
+      if (!entries || entries.length === 0) {
+        showBackupStatus("No logs available to export.", "bg-amber-50 text-amber-800 border border-amber-200");
+        return;
+      }
+
+      const sorted = [...entries].sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+
+      function escapeCSV(val) {
+        if (val === null || val === undefined) return '""';
+        const str = String(val);
+        return '"' + str.replace(/"/g, '""') + '"';
+      }
+
+      const headers = [
+        'Date',
+        'Total_Symptoms_Count',
+        'ASRS_PartA_Count',
+        'DASS_Depression_Count',
+        'DASS_Anxiety_Count',
+        'DASS_Stress_Count',
+        'Custom_Symptoms_Count',
+        'Symptoms_Logged',
+        'Notes'
+      ];
+
+      allSymptoms.forEach(s => {
+        headers.push(escapeCSV(`${s.name || s.id} (${s.id})`));
+      });
+
+      const rows = [];
+      rows.push(headers.map(h => (h.startsWith('"') ? h : escapeCSV(h))).join(','));
+
+      sorted.forEach(entry => {
+        const symptoms = Array.isArray(entry.symptoms) ? entry.symptoms : [];
+        const symptomsSet = new Set(symptoms);
+
+        let asrsCount = 0;
+        let dassDepCount = 0;
+        let dassAnxCount = 0;
+        let dassStrCount = 0;
+        let customCount = 0;
+
+        symptoms.forEach(sId => {
+          if (asrsConfig.some(a => a.id === sId)) {
+            asrsCount++;
+          } else if (sId.startsWith('dass_')) {
+            const item = dassConfig.find(d => d.id === sId);
+            if (item) {
+              if (item.scale === 'Depression') dassDepCount++;
+              else if (item.scale === 'Anxiety') dassAnxCount++;
+              else if (item.scale === 'Stress') dassStrCount++;
+            }
+          } else {
+            customCount++;
+          }
+        });
+
+        const symptomNames = symptoms
+          .map(sId => symptomLabels[sId] || sId)
+          .join('; ');
+
+        const rowValues = [
+          escapeCSV(entry.date || ''),
+          escapeCSV(symptoms.length),
+          escapeCSV(asrsCount),
+          escapeCSV(dassDepCount),
+          escapeCSV(dassAnxCount),
+          escapeCSV(dassStrCount),
+          escapeCSV(customCount),
+          escapeCSV(symptomNames),
+          escapeCSV(entry.notes || '')
+        ];
+
+        allSymptoms.forEach(s => {
+          rowValues.push(symptomsSet.has(s.id) ? '1' : '0');
+        });
+
+        rows.push(rowValues.join(','));
+      });
+
+      const csvContent = "\uFEFF" + rows.join('\r\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const downloadAnchor = document.createElement('a');
+      const todayStr = new Date().toISOString().split('T')[0];
+      downloadAnchor.setAttribute("href", url);
+      downloadAnchor.setAttribute("download", `mental_health_tracker_logs_${todayStr}.csv`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+      URL.revokeObjectURL(url);
+
+      showBackupStatus(`Successfully exported ${sorted.length} records as CSV spreadsheet!`, "bg-emerald-50 text-emerald-800 border border-emerald-200");
+    };
+
     window.importDataJSON = function() {
       const fileInput = document.getElementById('importJsonInput');
       if (!fileInput.files || fileInput.files.length === 0) {
@@ -2040,8 +2343,92 @@
       updateBadge('#customSection', 'customSelectedBadge');
     };
 
+    // Quick Logging Actions
+    window.quickFillClearAll = function() {
+      const checkboxes = document.querySelectorAll('#entryForm input[name="symptom"]');
+      checkboxes.forEach(cb => { cb.checked = false; });
+      updateSectionSelectedCounts();
+      showQuickFillNotice("All symptoms cleared (Zero Symptoms).");
+    };
+
+    window.quickFillYesterday = function() {
+      const dateInput = document.getElementById('entryDate');
+      const currentDate = dateInput.value;
+      if (!currentDate) {
+        showQuickFillNotice("Please select a date first.", true);
+        return;
+      }
+
+      // Find the most recent entry strictly prior to the currently selected date
+      const priorEntries = entries
+        .filter(e => e.date < currentDate)
+        .sort((a, b) => b.date.localeCompare(a.date));
+
+      if (priorEntries.length === 0) {
+        showQuickFillNotice("No earlier entry found before " + currentDate + ".", true);
+        return;
+      }
+
+      const target = priorEntries[0];
+      const targetSymptoms = new Set(target.symptoms || []);
+
+      const checkboxes = document.querySelectorAll('#entryForm input[name="symptom"]');
+      checkboxes.forEach(cb => {
+        cb.checked = targetSymptoms.has(cb.value);
+      });
+
+      const notesEl = document.getElementById('entryNotes');
+      if (notesEl && !notesEl.value.trim() && target.notes) {
+        notesEl.value = target.notes;
+      }
+
+      updateSectionSelectedCounts();
+      showQuickFillNotice(`Copied ${targetSymptoms.size} symptoms from ${target.date}.`);
+    };
+
+    function showQuickFillNotice(msg, isError = false) {
+      const notice = document.getElementById('quickFillNotice');
+      if (!notice) return;
+      notice.textContent = msg;
+      notice.className = isError 
+        ? "text-xs font-medium text-amber-600 dark:text-amber-400"
+        : "text-xs font-medium text-emerald-600 dark:text-emerald-400";
+      notice.classList.remove('hidden');
+      setTimeout(() => {
+        notice.classList.add('hidden');
+      }, 3000);
+    }
+
+    // Theme Toggle Handlers
+    window.toggleTheme = function() {
+      const isDark = document.documentElement.classList.toggle('dark');
+      try {
+        localStorage.setItem('mental_health_tracker_theme', isDark ? 'dark' : 'light');
+      } catch (e) {}
+      updateThemeToggleUI();
+    };
+
+    function updateThemeToggleUI() {
+      const isDark = document.documentElement.classList.contains('dark');
+      const sun = document.getElementById('themeIconSun');
+      const moon = document.getElementById('themeIconMoon');
+      const btn = document.getElementById('themeToggleBtn');
+      if (sun && moon) {
+        if (isDark) {
+          sun.classList.remove('hidden');
+          moon.classList.add('hidden');
+          if (btn) btn.setAttribute('title', 'Switch to light mode');
+        } else {
+          sun.classList.add('hidden');
+          moon.classList.remove('hidden');
+          if (btn) btn.setAttribute('title', 'Switch to dark mode');
+        }
+      }
+    }
+
     // 8. Initialization
     document.addEventListener('DOMContentLoaded', () => {
+      updateThemeToggleUI();
       const dateInput = document.getElementById('entryDate');
       const reportDateInput = document.getElementById('reportEndDate');
       const form = document.getElementById('entryForm');
