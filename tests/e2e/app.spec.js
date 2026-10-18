@@ -199,4 +199,96 @@ test.describe('Mental Health Tracker App E2E', () => {
     await expect(page.locator('button:has-text("CSV Spreadsheet")')).toBeVisible();
     await expect(page.locator('button:has-text("JSON Backup")')).toBeVisible();
   });
+
+  test('Phase 3: Multi-type custom questions (scale & numeric), daily logging, and 14-day rolling averages', async ({ page }) => {
+    await page.goto('/');
+
+    // 1. Go to Settings tab
+    await page.locator('#tabSettings').click();
+    await expect(page.locator('#viewSettings')).toBeVisible();
+
+    // 2. Add 1-10 Rating Scale Question
+    await page.locator('#customQName').fill('Overall Mood');
+    await page.locator('#customQPrompt').fill('Rate your mood from 1 to 10 today.');
+    await page.locator('#customQType').selectOption('scale');
+    await page.locator('#saveCustomQBtn').click();
+
+    // Verify in settings list
+    const questionsList = page.locator('#customQuestionsList');
+    await expect(questionsList).toContainText('Overall Mood');
+    await expect(questionsList).toContainText('1–10 Scale');
+
+    // 3. Add Numeric Question with Unit
+    await page.locator('#customQName').fill('Hours of Sleep');
+    await page.locator('#customQPrompt').fill('Total hours slept last night.');
+    await page.locator('#customQType').selectOption('number');
+    await page.locator('#customQUnit').fill('hrs');
+    await page.locator('#saveCustomQBtn').click();
+
+    // Verify in settings list
+    await expect(questionsList).toContainText('Hours of Sleep');
+    await expect(questionsList).toContainText('Number (hrs)');
+
+    // 4. Go back to Daily Entry tab
+    await page.locator('#tabDaily').click();
+    await expect(page.locator('#viewDaily')).toBeVisible();
+
+    // Verify custom section rendered scale buttons and numeric input
+    const customSection = page.locator('#customSection');
+    await expect(customSection).toContainText('Overall Mood');
+    await expect(customSection).toContainText('Hours of Sleep');
+    await expect(customSection.locator('input[placeholder="0"]')).toBeVisible();
+    await expect(customSection.locator('span:has-text("hrs")')).toBeVisible();
+
+    // 5. Fill entry with Scale and Numeric values
+    const testDate = '2026-10-18';
+    await page.locator('#entryDate').fill(testDate);
+
+    // Click scale button 8 for Overall Mood
+    const moodBtn8 = page.locator('button[data-val="8"]').first();
+    await moodBtn8.click();
+    await expect(moodBtn8).toHaveClass(/bg-indigo-600/);
+
+    // Fill numeric input with 7.5 hrs
+    const sleepInput = customSection.locator('input[type="number"]').first();
+    await sleepInput.fill('7.5');
+
+    await page.locator('#entryNotes').fill('Logged mood 8 and 7.5 hours of sleep.');
+    await page.locator('#entryForm button[type="submit"]').click();
+
+    // 6. Verify entry in recent feed
+    const entryCard = page.locator('#entriesContainer > div').first();
+    await expect(entryCard).toContainText('Overall Mood: 8/10');
+    await expect(entryCard).toContainText('Hours of Sleep: 7.5 hrs');
+
+    // 7. Verify 14-Day Report tab displays rolling averages and ranges
+    await page.locator('#tabReport').click();
+    await expect(page.locator('#viewReport')).toBeVisible();
+
+    const reportTable = page.locator('#customReportTableBody');
+    await expect(reportTable).toContainText('Overall Mood');
+    await expect(reportTable).toContainText('8.0 / 10 avg');
+    await expect(reportTable).toContainText('Score: 8');
+
+    await expect(reportTable).toContainText('Hours of Sleep');
+    await expect(reportTable).toContainText('7.5 hrs avg');
+    await expect(reportTable).toContainText('Min: 7.5 hrs');
+
+    // 8. Edit the entry to verify editing updates both feed and report
+    await page.locator('#tabDaily').click();
+    await entryCard.locator('button:has-text("Edit")').click();
+
+    // Change Mood to 9
+    const moodBtn9 = page.locator('button[data-val="9"]').first();
+    await moodBtn9.click();
+    await page.locator('#entryForm button[type="submit"]').click();
+
+    // Verify updated badge
+    await expect(page.locator('#entriesContainer > div').first()).toContainText('Overall Mood: 9/10');
+
+    // Verify updated report average
+    await page.locator('#tabReport').click();
+    await expect(reportTable).toContainText('9.0 / 10 avg');
+  });
 });
+

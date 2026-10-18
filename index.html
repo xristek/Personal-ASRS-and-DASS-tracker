@@ -903,8 +903,8 @@
                 <tr class="border-b border-slate-200 text-xs font-semibold text-slate-600 uppercase tracking-wider bg-slate-50">
                   <th class="py-2.5 px-3">Custom Item &amp; Daily Prompt</th>
                   <th class="py-2.5 px-3 text-center">Days Reported</th>
-                  <th class="py-2.5 px-3">Frequency</th>
-                  <th class="py-2.5 px-3 text-right">Occurrence Rating</th>
+                  <th class="py-2.5 px-3">Frequency / Range</th>
+                  <th class="py-2.5 px-3 text-right">Occurrence / Average</th>
                 </tr>
               </thead>
               <tbody id="customReportTableBody" class="divide-y divide-slate-100 text-slate-800">
@@ -968,23 +968,54 @@
                 <textarea id="customQPrompt" rows="2" placeholder="e.g. Sluggish thinking, forgetfulness, or trouble finding words during work" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"></textarea>
               </div>
 
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label for="customQType" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+                    Question Type
+                  </label>
+                  <select id="customQType" onchange="handleCustomQTypeChange()" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                    <option value="boolean">Yes / No Checkbox (Default)</option>
+                    <option value="scale">1–10 Rating Scale</option>
+                    <option value="number">Numeric Value</option>
+                  </select>
+                </div>
+                <div id="customQUnitContainer" class="hidden">
+                  <label for="customQUnit" class="block text-xs font-semibold text-slate-700 uppercase tracking-wider mb-1">
+                    Unit of Measure
+                  </label>
+                  <input type="text" id="customQUnit" placeholder="e.g. hrs, cups, mins, mg" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500">
+                </div>
+              </div>
+
               <!-- Quick Presets -->
               <div>
                 <span class="block text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-1.5">Quick Presets</span>
                 <div class="flex flex-wrap gap-1.5">
-                  <button type="button" onclick="applyCustomQPreset('Brain Fog', 'Sluggish thinking, forgetfulness, or trouble finding words.')" class="px-2 py-1 bg-white hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 text-slate-700 hover:text-indigo-700 rounded text-xs transition-colors">
+                  <button type="button" onclick="applyCustomQPreset('Overall Mood', 'Rate your general mood and emotional well-being today (1=Very Low, 10=Excellent).', 'scale')" class="px-2 py-1 bg-white hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 text-slate-700 hover:text-indigo-700 rounded text-xs transition-colors">
+                    + Mood (1-10)
+                  </button>
+                  <button type="button" onclick="applyCustomQPreset('Energy Level', 'Rate your mental and physical energy level throughout the day (1=Exhausted, 10=High Energy).', 'scale')" class="px-2 py-1 bg-white hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 text-slate-700 hover:text-indigo-700 rounded text-xs transition-colors">
+                    + Energy (1-10)
+                  </button>
+                  <button type="button" onclick="applyCustomQPreset('Hours of Sleep', 'Total number of hours slept last night.', 'number', 'hrs')" class="px-2 py-1 bg-white hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 text-slate-700 hover:text-indigo-700 rounded text-xs transition-colors">
+                    + Sleep (hrs)
+                  </button>
+                  <button type="button" onclick="applyCustomQPreset('Caffeine Intake', 'Estimated cups of coffee, tea, or caffeinated drinks consumed today.', 'number', 'cups')" class="px-2 py-1 bg-white hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 text-slate-700 hover:text-indigo-700 rounded text-xs transition-colors">
+                    + Caffeine (cups)
+                  </button>
+                  <button type="button" onclick="applyCustomQPreset('Brain Fog', 'Sluggish thinking, forgetfulness, or trouble finding words.', 'boolean')" class="px-2 py-1 bg-white hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 text-slate-700 hover:text-indigo-700 rounded text-xs transition-colors">
                     + Brain Fog
                   </button>
-                  <button type="button" onclick="applyCustomQPreset('Sleep Disruption', 'Difficulty falling asleep, frequent waking, or unrefreshing rest.')" class="px-2 py-1 bg-white hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 text-slate-700 hover:text-indigo-700 rounded text-xs transition-colors">
+                  <button type="button" onclick="applyCustomQPreset('Sleep Disruption', 'Difficulty falling asleep, frequent waking, or unrefreshing rest.', 'boolean')" class="px-2 py-1 bg-white hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 text-slate-700 hover:text-indigo-700 rounded text-xs transition-colors">
                     + Sleep Disruption
                   </button>
-                  <button type="button" onclick="applyCustomQPreset('Sensory Overload', 'Feeling overwhelmed by bright lights, loud noises, or crowded environments.')" class="px-2 py-1 bg-white hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 text-slate-700 hover:text-indigo-700 rounded text-xs transition-colors">
+                  <button type="button" onclick="applyCustomQPreset('Sensory Overload', 'Feeling overwhelmed by bright lights, loud noises, or crowded environments.', 'boolean')" class="px-2 py-1 bg-white hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 text-slate-700 hover:text-indigo-700 rounded text-xs transition-colors">
                     + Sensory Overload
                   </button>
-                  <button type="button" onclick="applyCustomQPreset('Medication Effects', 'Experienced nausea, jitters, appetite loss, or headaches after medication.')" class="px-2 py-1 bg-white hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 text-slate-700 hover:text-indigo-700 rounded text-xs transition-colors">
+                  <button type="button" onclick="applyCustomQPreset('Medication Effects', 'Experienced nausea, jitters, appetite loss, or headaches after medication.', 'boolean')" class="px-2 py-1 bg-white hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 text-slate-700 hover:text-indigo-700 rounded text-xs transition-colors">
                     + Medication Effects
                   </button>
-                  <button type="button" onclick="applyCustomQPreset('Social Exhaustion', 'Felt completely drained from social interactions or meetings.')" class="px-2 py-1 bg-white hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 text-slate-700 hover:text-indigo-700 rounded text-xs transition-colors">
+                  <button type="button" onclick="applyCustomQPreset('Social Exhaustion', 'Felt completely drained from social interactions or meetings.', 'boolean')" class="px-2 py-1 bg-white hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 text-slate-700 hover:text-indigo-700 rounded text-xs transition-colors">
                     + Social Exhaustion
                   </button>
                 </div>
@@ -1255,8 +1286,8 @@
     ];
 
     const defaultCustomQuestions = [
-      { id: "concentrating", name: "Difficulty Concentrating", question: "Trouble focusing or concentrating on reading, discussions, or work tasks." },
-      { id: "unwinding", name: "Difficulty Unwinding", question: "Trouble relaxing or quieting racing thoughts during personal rest hours." }
+      { id: "concentrating", name: "Difficulty Concentrating", question: "Trouble focusing or concentrating on reading, discussions, or work tasks.", type: "boolean" },
+      { id: "unwinding", name: "Difficulty Unwinding", question: "Trouble relaxing or quieting racing thoughts during personal rest hours.", type: "boolean" }
     ];
 
     let customQuestions = [];
@@ -1275,7 +1306,12 @@
       try {
         const stored = localStorage.getItem('mental_health_tracker_custom_questions_v2');
         if (stored) {
-          customQuestions = JSON.parse(stored);
+          const parsed = JSON.parse(stored);
+          customQuestions = Array.isArray(parsed) ? parsed.map(q => ({
+            ...q,
+            type: q.type || 'boolean',
+            unit: q.unit || ''
+          })) : [];
         } else {
           customQuestions = [];
         }
@@ -1298,21 +1334,21 @@
 
     // Starter sample history
     const defaultEntries = [
-      { id: "entry-1", date: "2026-10-14", symptoms: ["restless", "procrastination", "details", "dass_s1", "dass_s3", "dass_d2"], notes: "Back-to-back engineering reviews. Restless, high nervous energy, and hard to wind down tonight." },
-      { id: "entry-2", date: "2026-10-13", symptoms: ["procrastination", "disorganized", "dass_s4", "dass_s5"], notes: "Avoided starting complex tickets. Felt irritable and found it difficult to relax." },
-      { id: "e-3", date: "2026-10-12", symptoms: ["remembering", "dass_d4", "dass_d2"], notes: "Missed calendar invite. Felt down-hearted and low initiative in the afternoon." },
-      { id: "e-4", date: "2026-10-11", symptoms: ["motor", "dass_s1", "dass_a6"], notes: "Racing thoughts at night; palpitations when thinking of Monday deadlines." },
-      { id: "e-5", date: "2026-10-10", symptoms: ["restless", "procrastination", "dass_s2", "dass_s6"], notes: "Fidgety and snapped at small interruptions." },
-      { id: "e-6", date: "2026-10-09", symptoms: ["details", "procrastination", "dass_d5"], notes: "Hard to get excited or finish closing items on project." },
-      { id: "e-7", date: "2026-10-08", symptoms: ["restless", "disorganized", "dass_s3", "dass_s1"], notes: "Pacing during meetings; tough to organize priorities." },
-      { id: "e-8", date: "2026-10-06", symptoms: ["remembering", "procrastination", "dass_a4"], notes: "Worried about team presentation." },
-      { id: "e-9", date: "2026-10-04", symptoms: ["restless", "motor", "dass_s5"], notes: "Worked on weekend tasks; couldn't settle down." },
-      { id: "e-10", date: "2026-10-02", symptoms: ["details", "dass_d1"], notes: "Completed code reviews, but felt flat emotionally." },
-      { id: "e-11", date: "2026-09-30", symptoms: ["details", "disorganized", "procrastination", "dass_s1", "dass_s3", "dass_d4"], notes: "End of month sprint crunch; high stress and difficulty concentrating." },
-      { id: "e-12", date: "2026-09-28", symptoms: ["remembering", "dass_a4", "dass_a6"], notes: "Severe worry about upcoming releases with palpitations." },
-      { id: "e-13", date: "2026-09-26", symptoms: ["restless", "dass_s2", "dass_s4"], notes: "Easily irritable with slow build times." },
-      { id: "e-14", date: "2026-09-24", symptoms: ["details", "procrastination", "dass_d2"], notes: "Low energy and feeling overwhelmed." },
-      { id: "e-15", date: "2026-09-22", symptoms: ["motor", "dass_s5"], notes: "Couldn't relax during the evening." }
+      { id: "entry-1", date: "2026-10-14", symptoms: ["restless", "procrastination", "details", "dass_s1", "dass_s3", "dass_d2"], metrics: {}, notes: "Back-to-back engineering reviews. Restless, high nervous energy, and hard to wind down tonight." },
+      { id: "entry-2", date: "2026-10-13", symptoms: ["procrastination", "disorganized", "dass_s4", "dass_s5"], metrics: {}, notes: "Avoided starting complex tickets. Felt irritable and found it difficult to relax." },
+      { id: "e-3", date: "2026-10-12", symptoms: ["remembering", "dass_d4", "dass_d2"], metrics: {}, notes: "Missed calendar invite. Felt down-hearted and low initiative in the afternoon." },
+      { id: "e-4", date: "2026-10-11", symptoms: ["motor", "dass_s1", "dass_a6"], metrics: {}, notes: "Racing thoughts at night; palpitations when thinking of Monday deadlines." },
+      { id: "e-5", date: "2026-10-10", symptoms: ["restless", "procrastination", "dass_s2", "dass_s6"], metrics: {}, notes: "Fidgety and snapped at small interruptions." },
+      { id: "e-6", date: "2026-10-09", symptoms: ["details", "procrastination", "dass_d5"], metrics: {}, notes: "Hard to get excited or finish closing items on project." },
+      { id: "e-7", date: "2026-10-08", symptoms: ["restless", "disorganized", "dass_s3", "dass_s1"], metrics: {}, notes: "Pacing during meetings; tough to organize priorities." },
+      { id: "e-8", date: "2026-10-06", symptoms: ["remembering", "procrastination", "dass_a4"], metrics: {}, notes: "Worried about team presentation." },
+      { id: "e-9", date: "2026-10-04", symptoms: ["restless", "motor", "dass_s5"], metrics: {}, notes: "Worked on weekend tasks; couldn't settle down." },
+      { id: "e-10", date: "2026-10-02", symptoms: ["details", "dass_d1"], metrics: {}, notes: "Completed code reviews, but felt flat emotionally." },
+      { id: "e-11", date: "2026-09-30", symptoms: ["details", "disorganized", "procrastination", "dass_s1", "dass_s3", "dass_d4"], metrics: {}, notes: "End of month sprint crunch; high stress and difficulty concentrating." },
+      { id: "e-12", date: "2026-09-28", symptoms: ["remembering", "dass_a4", "dass_a6"], metrics: {}, notes: "Severe worry about upcoming releases with palpitations." },
+      { id: "e-13", date: "2026-09-26", symptoms: ["restless", "dass_s2", "dass_s4"], metrics: {}, notes: "Easily irritable with slow build times." },
+      { id: "e-14", date: "2026-09-24", symptoms: ["details", "procrastination", "dass_d2"], metrics: {}, notes: "Low energy and feeling overwhelmed." },
+      { id: "e-15", date: "2026-09-22", symptoms: ["motor", "dass_s5"], metrics: {}, notes: "Couldn't relax during the evening." }
     ];
 
     let entries = [];
@@ -1321,7 +1357,12 @@
       try {
         const stored = localStorage.getItem('mental_health_tracker_entries_v6');
         if (stored) {
-          entries = JSON.parse(stored);
+          const parsed = JSON.parse(stored);
+          entries = Array.isArray(parsed) ? parsed.map(e => ({
+            ...e,
+            symptoms: Array.isArray(e.symptoms) ? e.symptoms : [],
+            metrics: (e.metrics && typeof e.metrics === 'object') ? e.metrics : {}
+          })) : [];
         } else {
           entries = [];
         }
@@ -1395,19 +1436,144 @@
         return;
       }
 
-      container.innerHTML = `
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-          ${customQuestions.map(q => `
-            <label class="flex items-start gap-2.5 p-2.5 bg-white rounded-lg border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
-              <input type="checkbox" name="symptom" value="${q.id}" class="mt-0.5 h-3.5 w-3.5 text-purple-600 rounded border-slate-300 focus:ring-purple-500">
-              <div>
-                <span class="font-medium text-slate-800">${escapeHTML(q.name)}</span>
-                ${q.question ? `<p class="text-[11px] text-slate-500 mt-0.5">${escapeHTML(q.question)}</p>` : ''}
+      const booleanQs = customQuestions.filter(q => (q.type || 'boolean') === 'boolean');
+      const scaleQs = customQuestions.filter(q => q.type === 'scale');
+      const numberQs = customQuestions.filter(q => q.type === 'number');
+
+      let html = '<div class="space-y-4">';
+
+      // 1. Scale Questions (1-10)
+      if (scaleQs.length > 0) {
+        html += `
+          <div class="space-y-2.5">
+            <div class="text-[11px] font-bold uppercase tracking-wider text-indigo-700 dark:text-indigo-400 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+              <span>Rating Scales (1–10)</span>
+            </div>
+            <div class="space-y-2.5">
+              ${scaleQs.map(q => `
+                <div class="p-3 bg-slate-50/80 border border-slate-200 rounded-xl space-y-2">
+                  <div class="flex items-center justify-between gap-2">
+                    <div>
+                      <span class="text-xs font-bold text-slate-900">${escapeHTML(q.name)}</span>
+                      ${q.question ? `<p class="text-[11px] text-slate-500 mt-0.5">${escapeHTML(q.question)}</p>` : ''}
+                    </div>
+                    <button type="button" id="clear_scale_${q.id}" onclick="clearCustomScale('${q.id}')" class="hidden text-[11px] font-semibold text-slate-400 hover:text-rose-600 transition-colors">
+                      Clear
+                    </button>
+                  </div>
+                  <input type="hidden" name="custom_metric" id="metric_${q.id}" data-qid="${q.id}" value="">
+                  <div class="flex items-center gap-1 sm:gap-1.5 pt-1">
+                    ${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(val => `
+                      <button type="button" data-scale-qid="${q.id}" data-val="${val}" onclick="setCustomScaleValue('${q.id}', ${val})" class="flex-1 py-1.5 px-1 sm:px-2 rounded-lg text-xs font-medium transition-all bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200">
+                        ${val}
+                      </button>
+                    `).join('')}
+                  </div>
+                  <div class="flex justify-between text-[10px] text-slate-400 px-1">
+                    <span>1 (Low / Mild)</span>
+                    <span>10 (High / Severe)</span>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      // 2. Quantitative Numeric Questions
+      if (numberQs.length > 0) {
+        html += `
+          <div class="space-y-2.5">
+            <div class="text-[11px] font-bold uppercase tracking-wider text-emerald-700 dark:text-emerald-400 flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+              <span>Quantitative Metrics</span>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              ${numberQs.map(q => `
+                <div class="p-3 bg-slate-50/80 border border-slate-200 rounded-xl flex items-center justify-between gap-3">
+                  <div class="space-y-0.5 flex-1 min-w-0">
+                    <span class="text-xs font-bold text-slate-900 block truncate">${escapeHTML(q.name)}</span>
+                    ${q.question ? `<p class="text-[11px] text-slate-500 truncate">${escapeHTML(q.question)}</p>` : ''}
+                  </div>
+                  <div class="flex items-center gap-1.5 flex-shrink-0">
+                    <input type="number" step="any" min="0" name="custom_metric" id="metric_${q.id}" data-qid="${q.id}" placeholder="0" class="w-20 sm:w-24 px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    ${q.unit ? `<span class="text-xs font-semibold text-slate-600 bg-slate-100 border border-slate-200 px-2 py-1 rounded-md">${escapeHTML(q.unit)}</span>` : ''}
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      // 3. Checklist Boolean Questions
+      if (booleanQs.length > 0) {
+        html += `
+          <div class="space-y-2">
+            ${(scaleQs.length > 0 || numberQs.length > 0) ? `
+              <div class="text-[11px] font-bold uppercase tracking-wider text-purple-700 dark:text-purple-400 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-purple-500"></span>
+                <span>Checklist Indicators</span>
               </div>
-            </label>
-          `).join('')}
-        </div>
-      `;
+            ` : ''}
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+              ${booleanQs.map(q => `
+                <label class="flex items-start gap-2.5 p-2.5 bg-white rounded-lg border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
+                  <input type="checkbox" name="symptom" value="${q.id}" class="mt-0.5 h-3.5 w-3.5 text-purple-600 rounded border-slate-300 focus:ring-purple-500">
+                  <div>
+                    <span class="font-medium text-slate-800">${escapeHTML(q.name)}</span>
+                    ${q.question ? `<p class="text-[11px] text-slate-500 mt-0.5">${escapeHTML(q.question)}</p>` : ''}
+                  </div>
+                </label>
+              `).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      html += '</div>';
+      container.innerHTML = html;
+    }
+
+    window.setCustomScaleValue = function(qid, val) {
+      const input = document.getElementById(`metric_${qid}`);
+      if (!input) return;
+      const currentVal = input.value;
+      const newVal = (currentVal === String(val)) ? '' : String(val);
+      input.value = newVal;
+      updateScaleButtonsUI(qid, newVal);
+      if (window.updateSectionSelectedCounts) {
+        window.updateSectionSelectedCounts();
+      }
+    };
+
+    window.clearCustomScale = function(qid) {
+      const input = document.getElementById(`metric_${qid}`);
+      if (!input) return;
+      input.value = '';
+      updateScaleButtonsUI(qid, '');
+      if (window.updateSectionSelectedCounts) {
+        window.updateSectionSelectedCounts();
+      }
+    };
+
+    function updateScaleButtonsUI(qid, val) {
+      const valStr = (val !== undefined && val !== null && val !== '') ? String(val) : '';
+      const buttons = document.querySelectorAll(`button[data-scale-qid="${qid}"]`);
+      buttons.forEach(btn => {
+        const btnVal = btn.getAttribute('data-val');
+        if (valStr && btnVal === valStr) {
+          btn.className = "flex-1 py-1.5 px-1 sm:px-2 rounded-lg text-xs font-bold transition-all bg-indigo-600 text-white shadow-sm ring-2 ring-indigo-300";
+        } else {
+          btn.className = "flex-1 py-1.5 px-1 sm:px-2 rounded-lg text-xs font-medium transition-all bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200";
+        }
+      });
+      const clearBtn = document.getElementById(`clear_scale_${qid}`);
+      if (clearBtn) {
+        if (valStr) clearBtn.classList.remove('hidden');
+        else clearBtn.classList.add('hidden');
+      }
     }
 
     function renderCustomQuestionsList() {
@@ -1429,32 +1595,65 @@
         return;
       }
 
-      listEl.innerHTML = customQuestions.map(q => `
-        <div class="p-3.5 bg-white border border-slate-200 rounded-xl shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-slate-300 transition-colors">
-          <div class="space-y-0.5">
-            <div class="flex items-center gap-2">
-              <span class="w-2 h-2 rounded-full bg-purple-500"></span>
-              <span class="text-xs font-bold text-slate-900">${escapeHTML(q.name)}</span>
+      listEl.innerHTML = customQuestions.map(q => {
+        const qType = q.type || 'boolean';
+        let typeBadge = '';
+        if (qType === 'scale') {
+          typeBadge = '<span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700">1–10 Scale</span>';
+        } else if (qType === 'number') {
+          typeBadge = `<span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">Number${q.unit ? ` (${escapeHTML(q.unit)})` : ''}</span>`;
+        } else {
+          typeBadge = '<span class="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-purple-100 text-purple-700">Checkbox</span>';
+        }
+
+        return `
+          <div class="p-3.5 bg-white border border-slate-200 rounded-xl shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:border-slate-300 transition-colors">
+            <div class="space-y-1">
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="w-2 h-2 rounded-full ${qType === 'scale' ? 'bg-indigo-500' : qType === 'number' ? 'bg-emerald-500' : 'bg-purple-500'}"></span>
+                <span class="text-xs font-bold text-slate-900">${escapeHTML(q.name)}</span>
+                ${typeBadge}
+              </div>
+              ${q.question ? `<p class="text-xs text-slate-500 pl-4">${escapeHTML(q.question)}</p>` : ''}
             </div>
-            ${q.question ? `<p class="text-xs text-slate-500 pl-4">${escapeHTML(q.question)}</p>` : ''}
+            <div class="flex items-center gap-2 self-end sm:self-center flex-shrink-0">
+              <button type="button" onclick="editCustomQuestion('${q.id}')" class="px-2.5 py-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 rounded-md transition-colors">
+                Edit
+              </button>
+              <button type="button" onclick="promptDeleteCustomQuestion('${q.id}')" class="px-2.5 py-1 text-xs font-semibold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 rounded-md transition-colors">
+                Remove
+              </button>
+            </div>
           </div>
-          <div class="flex items-center gap-2 self-end sm:self-center flex-shrink-0">
-            <button type="button" onclick="editCustomQuestion('${q.id}')" class="px-2.5 py-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 rounded-md transition-colors">
-              Edit
-            </button>
-            <button type="button" onclick="promptDeleteCustomQuestion('${q.id}')" class="px-2.5 py-1 text-xs font-semibold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 rounded-md transition-colors">
-              Remove
-            </button>
-          </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
     let pendingDeleteCustomQId = null;
 
-    window.applyCustomQPreset = function(name, prompt) {
+    window.handleCustomQTypeChange = function() {
+      const typeSelect = document.getElementById('customQType');
+      const unitContainer = document.getElementById('customQUnitContainer');
+      if (!typeSelect || !unitContainer) return;
+      if (typeSelect.value === 'number') {
+        unitContainer.classList.remove('hidden');
+      } else {
+        unitContainer.classList.add('hidden');
+      }
+    };
+
+    window.applyCustomQPreset = function(name, prompt, type = 'boolean', unit = '') {
       document.getElementById('customQName').value = name;
       document.getElementById('customQPrompt').value = prompt;
+      const typeSelect = document.getElementById('customQType');
+      if (typeSelect) {
+        typeSelect.value = type;
+        handleCustomQTypeChange();
+      }
+      const unitInput = document.getElementById('customQUnit');
+      if (unitInput) {
+        unitInput.value = unit;
+      }
       document.getElementById('customQName').focus();
     };
 
@@ -1462,6 +1661,8 @@
       e.preventDefault();
       const name = document.getElementById('customQName').value.trim();
       const prompt = document.getElementById('customQPrompt').value.trim();
+      const type = (document.getElementById('customQType')?.value || 'boolean');
+      const unit = (document.getElementById('customQUnit')?.value.trim() || '');
       const editId = document.getElementById('customQEditId').value.trim();
       const statusEl = document.getElementById('customQFormStatus');
 
@@ -1472,6 +1673,8 @@
         if (qIndex >= 0) {
           customQuestions[qIndex].name = name;
           customQuestions[qIndex].question = prompt;
+          customQuestions[qIndex].type = type;
+          customQuestions[qIndex].unit = unit;
         }
         statusEl.textContent = 'Question updated successfully!';
       } else {
@@ -1479,7 +1682,9 @@
         customQuestions.push({
           id: newId,
           name: name,
-          question: prompt
+          question: prompt,
+          type: type,
+          unit: unit
         });
         statusEl.textContent = 'Question added!';
       }
@@ -1502,6 +1707,15 @@
       document.getElementById('customQEditId').value = q.id;
       document.getElementById('customQName').value = q.name;
       document.getElementById('customQPrompt').value = q.question || '';
+      const typeSelect = document.getElementById('customQType');
+      if (typeSelect) {
+        typeSelect.value = q.type || 'boolean';
+        handleCustomQTypeChange();
+      }
+      const unitInput = document.getElementById('customQUnit');
+      if (unitInput) {
+        unitInput.value = q.unit || '';
+      }
       document.getElementById('customQFormHeading').textContent = 'Edit Tracking Question';
       document.getElementById('saveCustomQBtn').textContent = 'Update Question';
       document.getElementById('cancelCustomQEditBtn').classList.remove('hidden');
@@ -1512,6 +1726,15 @@
       document.getElementById('customQEditId').value = '';
       document.getElementById('customQName').value = '';
       document.getElementById('customQPrompt').value = '';
+      const typeSelect = document.getElementById('customQType');
+      if (typeSelect) {
+        typeSelect.value = 'boolean';
+        handleCustomQTypeChange();
+      }
+      const unitInput = document.getElementById('customQUnit');
+      if (unitInput) {
+        unitInput.value = '';
+      }
       document.getElementById('customQFormHeading').textContent = 'Add Tracking Question';
       document.getElementById('saveCustomQBtn').textContent = 'Add Question';
       document.getElementById('cancelCustomQEditBtn').classList.add('hidden');
@@ -1773,6 +1996,26 @@
             }).join(' ')
           : '<span class="text-xs text-slate-400 italic">None noted</span>';
 
+        let metricBadges = '';
+        if (entry.metrics && Object.keys(entry.metrics).length > 0) {
+          const items = Object.entries(entry.metrics).map(([qId, val]) => {
+            const qObj = customQuestions.find(q => q.id === qId);
+            const qName = qObj ? qObj.name : qId;
+            const isScale = qObj && qObj.type === 'scale';
+            const unit = (qObj && qObj.unit) ? ` ${escapeHTML(qObj.unit)}` : '';
+            const displayVal = isScale ? `${val}/10` : `${val}${unit}`;
+            return `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border bg-amber-50 text-amber-800 border-amber-200">${escapeHTML(qName)}: <strong class="ml-1">${displayVal}</strong></span>`;
+          });
+          if (items.length > 0) {
+            metricBadges = `
+              <div class="mt-2 pt-2 border-t border-slate-100">
+                <div class="text-xs font-medium text-slate-500 mb-1">Metrics &amp; Scales:</div>
+                <div class="flex flex-wrap gap-1.5">${items.join(' ')}</div>
+              </div>
+            `;
+          }
+        }
+
         const formattedDate = new Date(entry.date + 'T00:00:00').toLocaleDateString(undefined, {
           weekday: 'short',
           month: 'short',
@@ -1798,6 +2041,8 @@
               <div class="text-xs font-medium text-slate-500 mb-1.5">Experiences Reported:</div>
               <div class="flex flex-wrap gap-1.5">${badges}</div>
             </div>
+
+            ${metricBadges}
 
             ${entry.notes ? `
               <div class="pt-2 border-t border-slate-100 text-sm text-slate-700">
@@ -1839,6 +2084,20 @@
         });
       }
 
+      // Populate custom metrics (scales and numeric inputs)
+      const entryMetrics = entry.metrics || {};
+      const metricInputs = document.querySelectorAll('#entryForm input[name="custom_metric"]');
+      metricInputs.forEach(input => {
+        const qid = input.getAttribute('data-qid');
+        if (qid && entryMetrics[qid] !== undefined && entryMetrics[qid] !== null) {
+          input.value = entryMetrics[qid];
+          updateScaleButtonsUI(qid, entryMetrics[qid]);
+        } else {
+          input.value = '';
+          if (qid) updateScaleButtonsUI(qid, '');
+        }
+      });
+
       const notesEl = document.getElementById('entryNotes');
       if (notesEl) notesEl.value = entry.notes || '';
 
@@ -1879,6 +2138,12 @@
       if (saveBtnText) saveBtnText.textContent = 'Save Daily Entry';
 
       document.querySelectorAll('input[name="symptom"]').forEach(cb => cb.checked = false);
+      const metricInputs = document.querySelectorAll('#entryForm input[name="custom_metric"]');
+      metricInputs.forEach(input => {
+        input.value = '';
+        const qid = input.getAttribute('data-qid');
+        if (qid) updateScaleButtonsUI(qid, '');
+      });
       const notesEl = document.getElementById('entryNotes');
       if (notesEl) notesEl.value = '';
 
@@ -2007,16 +2272,21 @@
         let asrsCount = 0;
         let dassCount = 0;
         let customCount = 0;
-        if (dayEntry && dayEntry.symptoms) {
-          dayEntry.symptoms.forEach(s => {
-            if (s.startsWith('dass_')) {
-              dassCount++;
-            } else if (asrsConfig.some(a => a.id === s)) {
-              asrsCount++;
-            } else {
-              customCount++;
-            }
-          });
+        if (dayEntry) {
+          if (dayEntry.symptoms) {
+            dayEntry.symptoms.forEach(s => {
+              if (s.startsWith('dass_')) {
+                dassCount++;
+              } else if (asrsConfig.some(a => a.id === s)) {
+                asrsCount++;
+              } else {
+                customCount++;
+              }
+            });
+          }
+          if (dayEntry.metrics) {
+            customCount += Object.keys(dayEntry.metrics).length;
+          }
         }
 
         const totalSymptoms = asrsCount + dassCount + customCount;
@@ -2425,37 +2695,173 @@
           `;
         } else {
           customTableBody.innerHTML = customQuestions.map(q => {
-            const count = counts[q.id] || 0;
-            const percent = Math.round((count / 14) * 100);
-            const rating = getRating(count);
+            const qType = q.type || 'boolean';
 
-            return `
-              <tr class="hover:bg-slate-50/75 transition-colors">
-                <td class="py-2.5 px-3">
-                  <div class="flex items-center gap-2">
-                    <span class="w-2 h-2 rounded-full bg-purple-500 flex-shrink-0"></span>
-                    <span class="font-medium text-slate-900">${escapeHTML(q.name)}</span>
-                  </div>
-                  ${q.question ? `<div class="text-xs text-slate-500 mt-0.5 pl-4">${escapeHTML(q.question)}</div>` : ''}
-                </td>
-                <td class="py-2.5 px-3 text-center">
-                  <span class="inline-flex items-center justify-center font-semibold text-slate-900 bg-slate-100 rounded px-2.5 py-1 text-xs">
-                    ${count} / 14 d
-                  </span>
-                </td>
-                <td class="py-2.5 px-3 w-32">
-                  <div class="w-full bg-slate-200 rounded-full h-1.5">
-                    <div class="bg-purple-600 h-1.5 rounded-full" style="width: ${percent}%"></div>
-                  </div>
-                  <div class="text-[11px] text-slate-500 mt-0.5">${percent}%</div>
-                </td>
-                <td class="py-2.5 px-3 text-right">
-                  <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${rating.badgeClass}">
-                    ${rating.label}
-                  </span>
-                </td>
-              </tr>
-            `;
+            if (qType === 'scale') {
+              const vals = windowEntries
+                .filter(e => e.metrics && e.metrics[q.id] !== undefined && e.metrics[q.id] !== null)
+                .map(e => e.metrics[q.id]);
+              const metricDays = vals.length;
+
+              if (metricDays > 0) {
+                const avg = vals.reduce((a, b) => a + b, 0) / metricDays;
+                const min = Math.min(...vals);
+                const max = Math.max(...vals);
+                const avgFormatted = avg.toFixed(1);
+                const percent = Math.min(100, Math.round((avg / 10) * 100));
+
+                return `
+                  <tr class="hover:bg-slate-50/75 transition-colors">
+                    <td class="py-2.5 px-3">
+                      <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-indigo-500 flex-shrink-0"></span>
+                        <span class="font-medium text-slate-900">${escapeHTML(q.name)}</span>
+                        <span class="text-[10px] font-semibold px-1.5 py-0.2 rounded bg-indigo-50 text-indigo-700 border border-indigo-200">Scale</span>
+                      </div>
+                      ${q.question ? `<div class="text-xs text-slate-500 mt-0.5 pl-4">${escapeHTML(q.question)}</div>` : ''}
+                    </td>
+                    <td class="py-2.5 px-3 text-center">
+                      <span class="inline-flex items-center justify-center font-semibold text-slate-900 bg-slate-100 rounded px-2.5 py-1 text-xs">
+                        ${metricDays} / 14 d
+                      </span>
+                    </td>
+                    <td class="py-2.5 px-3 w-36">
+                      <div class="w-full bg-slate-200 rounded-full h-1.5">
+                        <div class="bg-indigo-600 h-1.5 rounded-full" style="width: ${percent}%"></div>
+                      </div>
+                      <div class="text-[11px] text-slate-500 mt-0.5">${min === max ? `Score: ${min}` : `Range: ${min} – ${max}`}</div>
+                    </td>
+                    <td class="py-2.5 px-3 text-right">
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+                        ${avgFormatted} / 10 avg
+                      </span>
+                    </td>
+                  </tr>
+                `;
+              } else {
+                return `
+                  <tr class="hover:bg-slate-50/75 transition-colors">
+                    <td class="py-2.5 px-3">
+                      <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-indigo-500 flex-shrink-0"></span>
+                        <span class="font-medium text-slate-900">${escapeHTML(q.name)}</span>
+                        <span class="text-[10px] font-semibold px-1.5 py-0.2 rounded bg-indigo-50 text-indigo-700 border border-indigo-200">Scale</span>
+                      </div>
+                      ${q.question ? `<div class="text-xs text-slate-500 mt-0.5 pl-4">${escapeHTML(q.question)}</div>` : ''}
+                    </td>
+                    <td class="py-2.5 px-3 text-center">
+                      <span class="inline-flex items-center justify-center font-semibold text-slate-400 bg-slate-100 rounded px-2.5 py-1 text-xs">
+                        0 / 14 d
+                      </span>
+                    </td>
+                    <td class="py-2.5 px-3 w-36 text-xs text-slate-400">—</td>
+                    <td class="py-2.5 px-3 text-right">
+                      <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-500">
+                        No data
+                      </span>
+                    </td>
+                  </tr>
+                `;
+              }
+            } else if (qType === 'number') {
+              const vals = windowEntries
+                .filter(e => e.metrics && e.metrics[q.id] !== undefined && e.metrics[q.id] !== null)
+                .map(e => e.metrics[q.id]);
+              const metricDays = vals.length;
+              const unit = q.unit ? ` ${escapeHTML(q.unit)}` : '';
+
+              if (metricDays > 0) {
+                const avg = vals.reduce((a, b) => a + b, 0) / metricDays;
+                const min = Math.min(...vals);
+                const max = Math.max(...vals);
+                const avgFormatted = Number.isInteger(avg) ? avg : avg.toFixed(1);
+
+                return `
+                  <tr class="hover:bg-slate-50/75 transition-colors">
+                    <td class="py-2.5 px-3">
+                      <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0"></span>
+                        <span class="font-medium text-slate-900">${escapeHTML(q.name)}</span>
+                        <span class="text-[10px] font-semibold px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">Numeric</span>
+                      </div>
+                      ${q.question ? `<div class="text-xs text-slate-500 mt-0.5 pl-4">${escapeHTML(q.question)}</div>` : ''}
+                    </td>
+                    <td class="py-2.5 px-3 text-center">
+                      <span class="inline-flex items-center justify-center font-semibold text-slate-900 bg-slate-100 rounded px-2.5 py-1 text-xs">
+                        ${metricDays} / 14 d
+                      </span>
+                    </td>
+                    <td class="py-2.5 px-3 w-36">
+                      <div class="text-xs text-slate-700 font-medium">Min: ${min}${unit}</div>
+                      <div class="text-[11px] text-slate-500 mt-0.5">Max: ${max}${unit}</div>
+                    </td>
+                    <td class="py-2.5 px-3 text-right">
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        ${avgFormatted}${unit} avg
+                      </span>
+                    </td>
+                  </tr>
+                `;
+              } else {
+                return `
+                  <tr class="hover:bg-slate-50/75 transition-colors">
+                    <td class="py-2.5 px-3">
+                      <div class="flex items-center gap-2">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 flex-shrink-0"></span>
+                        <span class="font-medium text-slate-900">${escapeHTML(q.name)}</span>
+                        <span class="text-[10px] font-semibold px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">Numeric</span>
+                      </div>
+                      ${q.question ? `<div class="text-xs text-slate-500 mt-0.5 pl-4">${escapeHTML(q.question)}</div>` : ''}
+                    </td>
+                    <td class="py-2.5 px-3 text-center">
+                      <span class="inline-flex items-center justify-center font-semibold text-slate-400 bg-slate-100 rounded px-2.5 py-1 text-xs">
+                        0 / 14 d
+                      </span>
+                    </td>
+                    <td class="py-2.5 px-3 w-36 text-xs text-slate-400">—</td>
+                    <td class="py-2.5 px-3 text-right">
+                      <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-500">
+                        No data
+                      </span>
+                    </td>
+                  </tr>
+                `;
+              }
+            } else {
+              // Boolean
+              const count = counts[q.id] || 0;
+              const percent = Math.round((count / 14) * 100);
+              const rating = getRating(count);
+
+              return `
+                <tr class="hover:bg-slate-50/75 transition-colors">
+                  <td class="py-2.5 px-3">
+                    <div class="flex items-center gap-2">
+                      <span class="w-2 h-2 rounded-full bg-purple-500 flex-shrink-0"></span>
+                      <span class="font-medium text-slate-900">${escapeHTML(q.name)}</span>
+                      <span class="text-[10px] font-semibold px-1.5 py-0.2 rounded bg-purple-50 text-purple-700 border border-purple-200">Yes/No</span>
+                    </div>
+                    ${q.question ? `<div class="text-xs text-slate-500 mt-0.5 pl-4">${escapeHTML(q.question)}</div>` : ''}
+                  </td>
+                  <td class="py-2.5 px-3 text-center">
+                    <span class="inline-flex items-center justify-center font-semibold text-slate-900 bg-slate-100 rounded px-2.5 py-1 text-xs">
+                      ${count} / 14 d
+                    </span>
+                  </td>
+                  <td class="py-2.5 px-3 w-36">
+                    <div class="w-full bg-slate-200 rounded-full h-1.5">
+                      <div class="bg-purple-600 h-1.5 rounded-full" style="width: ${percent}%"></div>
+                    </div>
+                    <div class="text-[11px] text-slate-500 mt-0.5">${percent}%</div>
+                  </td>
+                  <td class="py-2.5 px-3 text-right">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${rating.badgeClass}">
+                      ${rating.label}
+                    </span>
+                  </td>
+                </tr>
+              `;
+            }
           }).join('');
         }
       }
@@ -2532,9 +2938,38 @@
       if (customQuestions.length > 0) {
         summary += `\n--- Custom Tracking Questions ---\n`;
         customQuestions.forEach(q => {
-          const c = counts[q.id] || 0;
-          const r = getRating(c).label;
-          summary += `${q.name}: ${c}/14d -> ${r}\n`;
+          const qType = q.type || 'boolean';
+          if (qType === 'scale') {
+            const vals = windowEntries
+              .filter(e => e.metrics && e.metrics[q.id] !== undefined && e.metrics[q.id] !== null)
+              .map(e => e.metrics[q.id]);
+            if (vals.length > 0) {
+              const avg = (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1);
+              const min = Math.min(...vals);
+              const max = Math.max(...vals);
+              summary += `${q.name} (Scale 1-10): ${vals.length}/14d -> ${avg}/10 avg (Range: ${min}-${max})\n`;
+            } else {
+              summary += `${q.name} (Scale 1-10): 0/14d -> No entries\n`;
+            }
+          } else if (qType === 'number') {
+            const vals = windowEntries
+              .filter(e => e.metrics && e.metrics[q.id] !== undefined && e.metrics[q.id] !== null)
+              .map(e => e.metrics[q.id]);
+            const unit = q.unit ? ` ${q.unit}` : '';
+            if (vals.length > 0) {
+              const avg = (vals.reduce((a, b) => a + b, 0) / vals.length);
+              const avgFormatted = Number.isInteger(avg) ? avg : avg.toFixed(1);
+              const min = Math.min(...vals);
+              const max = Math.max(...vals);
+              summary += `${q.name} (${q.unit || 'Numeric'}): ${vals.length}/14d -> ${avgFormatted}${unit} avg (Min: ${min}, Max: ${max})\n`;
+            } else {
+              summary += `${q.name} (${q.unit || 'Numeric'}): 0/14d -> No entries\n`;
+            }
+          } else {
+            const c = counts[q.id] || 0;
+            const r = getRating(c).label;
+            summary += `${q.name}: ${c}/14d -> ${r}\n`;
+          }
         });
       }
 
@@ -2607,7 +3042,7 @@
     // 6. Data Management: Export & Import JSON
     window.exportDataJSON = function() {
       const exportPayload = {
-        version: 1,
+        version: 2,
         exportedAt: new Date().toISOString(),
         customQuestions: customQuestions,
         entries: entries
@@ -2646,11 +3081,18 @@
         'DASS_Stress_Count',
         'Custom_Symptoms_Count',
         'Symptoms_Logged',
+        'Metrics_Logged',
         'Notes'
       ];
 
       allSymptoms.forEach(s => {
-        headers.push(escapeCSV(`${s.name || s.id} (${s.id})`));
+        if (s.type === 'scale') {
+          headers.push(escapeCSV(`${s.name || s.id} [Scale 1-10] (${s.id})`));
+        } else if (s.type === 'number') {
+          headers.push(escapeCSV(`${s.name || s.id} [${s.unit || 'Numeric'}] (${s.id})`));
+        } else {
+          headers.push(escapeCSV(`${s.name || s.label || s.id} (${s.id})`));
+        }
       });
 
       const rows = [];
@@ -2659,6 +3101,7 @@
       sorted.forEach(entry => {
         const symptoms = Array.isArray(entry.symptoms) ? entry.symptoms : [];
         const symptomsSet = new Set(symptoms);
+        const metrics = (entry.metrics && typeof entry.metrics === 'object') ? entry.metrics : {};
 
         let asrsCount = 0;
         let dassDepCount = 0;
@@ -2680,25 +3123,40 @@
             customCount++;
           }
         });
+        customCount += Object.keys(metrics).length;
 
         const symptomNames = symptoms
           .map(sId => symptomLabels[sId] || sId)
           .join('; ');
 
+        const metricStrings = Object.entries(metrics).map(([qId, val]) => {
+          const qObj = customQuestions.find(q => q.id === qId);
+          const qName = qObj ? qObj.name : qId;
+          const isScale = qObj && qObj.type === 'scale';
+          const unit = (qObj && qObj.unit) ? ` ${qObj.unit}` : '';
+          return isScale ? `${qName}: ${val}/10` : `${qName}: ${val}${unit}`;
+        }).join('; ');
+
         const rowValues = [
           escapeCSV(entry.date || ''),
-          escapeCSV(symptoms.length),
+          escapeCSV(symptoms.length + Object.keys(metrics).length),
           escapeCSV(asrsCount),
           escapeCSV(dassDepCount),
           escapeCSV(dassAnxCount),
           escapeCSV(dassStrCount),
           escapeCSV(customCount),
           escapeCSV(symptomNames),
+          escapeCSV(metricStrings),
           escapeCSV(entry.notes || '')
         ];
 
         allSymptoms.forEach(s => {
-          rowValues.push(symptomsSet.has(s.id) ? '1' : '0');
+          if (s.type === 'scale' || s.type === 'number') {
+            const val = metrics[s.id];
+            rowValues.push(val !== undefined && val !== null ? escapeCSV(val) : '""');
+          } else {
+            rowValues.push(symptomsSet.has(s.id) ? '1' : '0');
+          }
         });
 
         rows.push(rowValues.join(','));
@@ -2749,11 +3207,16 @@
 
           importedEntries.forEach(item => {
             if (item.date && item.id) {
+              const normalizedItem = {
+                ...item,
+                symptoms: Array.isArray(item.symptoms) ? item.symptoms : [],
+                metrics: (item.metrics && typeof item.metrics === 'object') ? item.metrics : {}
+              };
               const idx = entries.findIndex(existing => existing.date === item.date);
               if (idx >= 0) {
-                entries[idx] = item;
+                entries[idx] = normalizedItem;
               } else {
-                entries.push(item);
+                entries.push(normalizedItem);
               }
             }
           });
@@ -2761,11 +3224,16 @@
           if (importedCustomQuestions) {
             importedCustomQuestions.forEach(cq => {
               if (cq.id && cq.name) {
+                const normalizedCQ = {
+                  ...cq,
+                  type: cq.type || 'boolean',
+                  unit: cq.unit || ''
+                };
                 const existingIdx = customQuestions.findIndex(q => q.id === cq.id);
                 if (existingIdx >= 0) {
-                  customQuestions[existingIdx] = cq;
+                  customQuestions[existingIdx] = normalizedCQ;
                 } else {
-                  customQuestions.push(cq);
+                  customQuestions.push(normalizedCQ);
                 }
               }
             });
@@ -2926,15 +3394,36 @@
       updateBadge('#dassDepSubSection', 'dassDepSelectedBadge');
       updateBadge('#dassAnxSubSection', 'dassAnxSelectedBadge');
       updateBadge('#dassStrSubSection', 'dassStrSelectedBadge');
-      updateBadge('#customSection', 'customSelectedBadge');
+
+      // Custom section badge: counts checked checkboxes + filled metrics
+      const customContainer = document.querySelector('#customSection');
+      const customBadge = document.getElementById('customSelectedBadge');
+      if (customContainer && customBadge) {
+        const checkedCount = customContainer.querySelectorAll('input[name="symptom"]:checked').length;
+        const filledMetricCount = Array.from(customContainer.querySelectorAll('input[name="custom_metric"]'))
+          .filter(input => input.value.trim() !== '' && !isNaN(parseFloat(input.value.trim()))).length;
+        const totalCustom = checkedCount + filledMetricCount;
+        if (totalCustom > 0) {
+          customBadge.textContent = `${totalCustom} logged`;
+          customBadge.classList.remove('hidden');
+        } else {
+          customBadge.classList.add('hidden');
+        }
+      }
     };
 
     // Quick Logging Actions
     window.quickFillClearAll = function() {
       const checkboxes = document.querySelectorAll('#entryForm input[name="symptom"]');
       checkboxes.forEach(cb => { cb.checked = false; });
+      const metricInputs = document.querySelectorAll('#entryForm input[name="custom_metric"]');
+      metricInputs.forEach(input => {
+        input.value = '';
+        const qid = input.getAttribute('data-qid');
+        if (qid) updateScaleButtonsUI(qid, '');
+      });
       updateSectionSelectedCounts();
-      showQuickFillNotice("All symptoms cleared (Zero Symptoms).");
+      showQuickFillNotice("All symptoms and metrics cleared.");
     };
 
     window.quickFillYesterday = function() {
@@ -2963,13 +3452,28 @@
         cb.checked = targetSymptoms.has(cb.value);
       });
 
+      const targetMetrics = target.metrics || {};
+      const metricInputs = document.querySelectorAll('#entryForm input[name="custom_metric"]');
+      metricInputs.forEach(input => {
+        const qid = input.getAttribute('data-qid');
+        if (qid && targetMetrics[qid] !== undefined && targetMetrics[qid] !== null) {
+          input.value = targetMetrics[qid];
+          updateScaleButtonsUI(qid, targetMetrics[qid]);
+        } else {
+          input.value = '';
+          if (qid) updateScaleButtonsUI(qid, '');
+        }
+      });
+
       const notesEl = document.getElementById('entryNotes');
       if (notesEl && !notesEl.value.trim() && target.notes) {
         notesEl.value = target.notes;
       }
 
       updateSectionSelectedCounts();
-      showQuickFillNotice(`Copied ${targetSymptoms.size} symptoms from ${target.date}.`);
+      const metricCount = Object.keys(targetMetrics).length;
+      const metricNotice = metricCount > 0 ? ` and ${metricCount} metrics` : '';
+      showQuickFillNotice(`Copied ${targetSymptoms.size} symptoms${metricNotice} from ${target.date}.`);
     };
 
     function showQuickFillNotice(msg, isError = false) {
@@ -3033,6 +3537,7 @@
       registerServiceWorker();
 
       form.addEventListener('change', updateSectionSelectedCounts);
+      form.addEventListener('input', updateSectionSelectedCounts);
       updateSectionSelectedCounts();
 
       dateInput.addEventListener('change', () => {
@@ -3056,42 +3561,43 @@
         const selectedSymptoms = Array.from(
           document.querySelectorAll('input[name="symptom"]:checked')
         ).map(cb => cb.value);
+
+        const metrics = {};
+        document.querySelectorAll('#entryForm input[name="custom_metric"]').forEach(input => {
+          const qid = input.getAttribute('data-qid');
+          const valStr = input.value.trim();
+          if (qid && valStr !== '') {
+            const num = parseFloat(valStr);
+            if (!isNaN(num) && isFinite(num)) {
+              metrics[qid] = num;
+            }
+          }
+        });
+
         const notes = document.getElementById('entryNotes').value.trim();
 
         const existingIndex = entries.findIndex(item => item.date === selectedDate);
         const isUpdating = (existingIndex >= 0) || Boolean(editingEntryId);
 
+        const entryPayload = {
+          id: isUpdating ? (existingIndex >= 0 ? entries[existingIndex].id : editingEntryId) : ('entry-' + Date.now()),
+          date: selectedDate,
+          symptoms: selectedSymptoms,
+          metrics: metrics,
+          notes: notes
+        };
+
         if (existingIndex >= 0) {
-          entries[existingIndex] = {
-            id: entries[existingIndex].id,
-            date: selectedDate,
-            symptoms: selectedSymptoms,
-            notes: notes
-          };
+          entries[existingIndex] = entryPayload;
         } else if (editingEntryId) {
           const editIndex = entries.findIndex(item => item.id === editingEntryId);
           if (editIndex >= 0) {
-            entries[editIndex] = {
-              id: editingEntryId,
-              date: selectedDate,
-              symptoms: selectedSymptoms,
-              notes: notes
-            };
+            entries[editIndex] = entryPayload;
           } else {
-            entries.unshift({
-              id: editingEntryId,
-              date: selectedDate,
-              symptoms: selectedSymptoms,
-              notes: notes
-            });
+            entries.unshift(entryPayload);
           }
         } else {
-          entries.unshift({
-            id: 'entry-' + Date.now(),
-            date: selectedDate,
-            symptoms: selectedSymptoms,
-            notes: notes
-          });
+          entries.unshift(entryPayload);
         }
 
         saveToStorage();
