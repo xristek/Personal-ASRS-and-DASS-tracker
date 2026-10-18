@@ -18,5 +18,20 @@ Upload these files (`index.html`, `manifest.json`, `sw.js`, `icon.svg`) to any s
 - Cloudflare Pages
 - Any local or private HTTP/HTTPS web server
 
+## Testing & CI
+
+Automated tests run on every pull request and push to `main` via GitHub Actions.
+
+```bash
+# Install dependencies
+npm install
+
+# Run unit & clinical logic tests (Node.js test runner)
+npm test
+
+# Run Playwright end-to-end browser smoke tests
+npm run test:e2e
+```
+
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
