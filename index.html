@@ -54,6 +54,7 @@
       background-color: #1e293b !important;
     }
     html.dark .bg-slate-50,
+    html.dark .bg-slate-50\/50,
     html.dark .bg-slate-50\/70,
     html.dark .bg-slate-50\/75,
     html.dark .bg-slate-50\/80,
@@ -259,7 +260,57 @@
     </header>
 
     <!-- TAB 1: DAILY ENTRY & RECENT LOGS -->
-    <div id="viewDaily" class="space-y-8">
+    <div id="viewDaily" class="space-y-6">
+      <!-- Activity & Consistency Overview -->
+      <section id="activityOverviewCard" class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 space-y-4">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-slate-100">
+          <div>
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="text-base font-bold text-slate-900">Habit &amp; Activity Tracker</span>
+              <span id="streakBadge" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">
+                <span>🔥</span> <span id="streakCount">0</span>-Day Streak
+              </span>
+            </div>
+            <p class="text-xs text-slate-500 mt-0.5">Click any day on the calendar to view, edit, or backfill daily logs.</p>
+          </div>
+          <div class="flex items-center gap-3 text-xs text-slate-600">
+            <div>
+              <span class="font-semibold text-slate-800" id="statTotalLogged">0</span>
+              <span class="text-slate-400 ml-0.5">total logs</span>
+            </div>
+            <div class="h-3 w-px bg-slate-200"></div>
+            <div>
+              <span class="font-semibold text-slate-800" id="statBestStreak">0</span>
+              <span class="text-slate-400 ml-0.5">best streak</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 35-Day (5-Week) Trailing Heatmap -->
+        <div class="space-y-2">
+          <div class="flex items-center justify-between text-xs flex-wrap gap-2">
+            <span class="font-semibold text-slate-700">Past 5 Weeks Activity (Trailing 35 Days)</span>
+            <div class="flex items-center gap-2.5 text-[11px] text-slate-500 flex-wrap">
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-slate-100 border border-slate-200"></span> Unlogged</span>
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-emerald-100 border border-emerald-300"></span> All Clear</span>
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-indigo-100 border border-indigo-300"></span> 1–4</span>
+              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-indigo-500 text-white"></span> 5+</span>
+            </div>
+          </div>
+
+          <div class="border border-slate-100 rounded-lg p-2.5 bg-slate-50/50">
+            <!-- Day of Week Headers -->
+            <div class="grid grid-cols-7 gap-1 text-center text-[11px] font-semibold text-slate-400 mb-1">
+              <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+            </div>
+            <!-- Heatmap Grid Cells -->
+            <div id="heatmapGrid" class="grid grid-cols-7 gap-1 text-center text-xs">
+              <!-- Rendered via JavaScript -->
+            </div>
+          </div>
+        </div>
+      </section>
+
       <!-- Main Entry Form -->
       <section id="entryFormSection" class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
         <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 pb-2 border-b border-slate-100 gap-2">
@@ -759,6 +810,25 @@
           </p>
         </div>
 
+        <!-- 14-Day Longitudinal Multi-Period Comparison Card -->
+        <div id="periodComparisonCard" class="mb-6 p-4 rounded-xl border border-slate-200 bg-slate-50/70 space-y-3">
+          <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-slate-200/60 pb-2.5">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-indigo-600"></span>
+              <h3 class="text-xs font-bold uppercase tracking-wider text-slate-800">
+                14-Day Period-over-Period Trend (Current vs. Prior 14 Days)
+              </h3>
+            </div>
+            <span id="comparisonWindowLabel" class="text-xs text-slate-500 font-medium"></span>
+          </div>
+          <div id="comparisonMetricsGrid" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+            <!-- Rendered via JS -->
+          </div>
+          <div id="comparisonTakeaway" class="text-xs text-slate-600 pt-0.5">
+            <!-- Rendered via JS -->
+          </div>
+        </div>
+
         <!-- DASS-21 Score Breakdown Cards -->
         <div class="mb-6">
           <div class="flex items-center justify-between mb-3">
@@ -1233,7 +1303,12 @@
       { id: "e-7", date: "2026-10-08", symptoms: ["restless", "disorganized", "dass_s3", "dass_s1"], notes: "Pacing during meetings; tough to organize priorities." },
       { id: "e-8", date: "2026-10-06", symptoms: ["remembering", "procrastination", "dass_a4"], notes: "Worried about team presentation." },
       { id: "e-9", date: "2026-10-04", symptoms: ["restless", "motor", "dass_s5"], notes: "Worked on weekend tasks; couldn't settle down." },
-      { id: "e-10", date: "2026-10-02", symptoms: ["details", "dass_d1"], notes: "Completed code reviews, but felt flat emotionally." }
+      { id: "e-10", date: "2026-10-02", symptoms: ["details", "dass_d1"], notes: "Completed code reviews, but felt flat emotionally." },
+      { id: "e-11", date: "2026-09-30", symptoms: ["details", "disorganized", "procrastination", "dass_s1", "dass_s3", "dass_d4"], notes: "End of month sprint crunch; high stress and difficulty concentrating." },
+      { id: "e-12", date: "2026-09-28", symptoms: ["remembering", "dass_a4", "dass_a6"], notes: "Severe worry about upcoming releases with palpitations." },
+      { id: "e-13", date: "2026-09-26", symptoms: ["restless", "dass_s2", "dass_s4"], notes: "Easily irritable with slow build times." },
+      { id: "e-14", date: "2026-09-24", symptoms: ["details", "procrastination", "dass_d2"], notes: "Low energy and feeling overwhelmed." },
+      { id: "e-15", date: "2026-09-22", symptoms: ["motor", "dass_s5"], notes: "Couldn't relax during the evening." }
     ];
 
     let entries = [];
@@ -1478,8 +1553,193 @@
       }
     };
 
+    // 2C. Streak Tracking & Trailing Calendar Heatmap
+    function calculateStreakStats(entriesList = entries, referenceDateStr) {
+      const datesSet = new Set(entriesList.map(e => e.date).filter(Boolean));
+      const todayISO = referenceDateStr || new Date().toISOString().split('T')[0];
+      const refDate = new Date(todayISO + 'T00:00:00');
+
+      const yesterday = new Date(refDate);
+      yesterday.setDate(yesterday.getDate() - 1);
+      const yesterdayISO = yesterday.toISOString().split('T')[0];
+
+      let currentStreak = 0;
+      let checkDate = new Date(refDate);
+
+      if (datesSet.has(todayISO)) {
+        while (datesSet.has(checkDate.toISOString().split('T')[0])) {
+          currentStreak++;
+          checkDate.setDate(checkDate.getDate() - 1);
+        }
+      } else if (datesSet.has(yesterdayISO)) {
+        checkDate = new Date(yesterday);
+        while (datesSet.has(checkDate.toISOString().split('T')[0])) {
+          currentStreak++;
+          checkDate.setDate(checkDate.getDate() - 1);
+        }
+      } else {
+        currentStreak = 0;
+      }
+
+      // Best streak calculation
+      const sortedDates = Array.from(datesSet).sort();
+      let bestStreak = 0;
+      let tempStreak = 0;
+      let lastDate = null;
+
+      for (const dStr of sortedDates) {
+        const cur = new Date(dStr + 'T00:00:00');
+        if (!lastDate) {
+          tempStreak = 1;
+        } else {
+          const diffDays = Math.round((cur - lastDate) / (1000 * 60 * 60 * 24));
+          if (diffDays === 1) {
+            tempStreak++;
+          } else if (diffDays > 1) {
+            tempStreak = 1;
+          }
+        }
+        if (tempStreak > bestStreak) bestStreak = tempStreak;
+        lastDate = cur;
+      }
+
+      return {
+        currentStreak,
+        bestStreak,
+        totalLogged: datesSet.size
+      };
+    }
+
+    function renderHeatmap() {
+      const grid = document.getElementById('heatmapGrid');
+      const streakCountEl = document.getElementById('streakCount');
+      const streakBadgeEl = document.getElementById('streakBadge');
+      const totalLoggedEl = document.getElementById('statTotalLogged');
+      const bestStreakEl = document.getElementById('statBestStreak');
+
+      if (!grid) return;
+
+      const today = new Date();
+      const todayISO = today.toISOString().split('T')[0];
+      const stats = calculateStreakStats(entries, todayISO);
+
+      if (streakCountEl) streakCountEl.textContent = stats.currentStreak;
+      if (totalLoggedEl) totalLoggedEl.textContent = stats.totalLogged;
+      if (bestStreakEl) bestStreakEl.textContent = stats.bestStreak;
+
+      if (streakBadgeEl) {
+        if (stats.currentStreak > 0) {
+          streakBadgeEl.className = "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200";
+          streakBadgeEl.innerHTML = `<span>🔥</span> <span id="streakCount">${stats.currentStreak}</span>-Day Streak`;
+        } else {
+          streakBadgeEl.className = "inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600 border border-slate-200";
+          streakBadgeEl.innerHTML = `<span>💤</span> <span id="streakCount">0</span>-Day Streak`;
+        }
+      }
+
+      // Generate 35 trailing days ending on Sunday of current week (Monday-aligned columns)
+      const ref = new Date(todayISO + 'T00:00:00');
+      const dayOfWeek = ref.getDay(); // 0 = Sun, 1 = Mon ...
+      const daysUntilSunday = (7 - dayOfWeek) % 7;
+      const endOfGrid = new Date(ref);
+      endOfGrid.setDate(ref.getDate() + daysUntilSunday);
+
+      const days = [];
+      for (let i = 34; i >= 0; i--) {
+        const d = new Date(endOfGrid);
+        d.setDate(endOfGrid.getDate() - i);
+        days.push(d.toISOString().split('T')[0]);
+      }
+
+      const entriesByDate = new Map();
+      entries.forEach(e => {
+        if (e.date) entriesByDate.set(e.date, e);
+      });
+
+      const cells = days.map(isoStr => {
+        const dObj = new Date(isoStr + 'T00:00:00');
+        const dayNum = dObj.getDate();
+        const monthShort = dObj.toLocaleDateString(undefined, { month: 'short' });
+        const weekdayShort = dObj.toLocaleDateString(undefined, { weekday: 'short' });
+        const isToday = (isoStr === todayISO);
+        const isFuture = (isoStr > todayISO);
+
+        const entry = entriesByDate.get(isoStr);
+        let colorClass = "";
+        let statusDesc = "";
+        let badgeContent = "";
+
+        if (isFuture) {
+          colorClass = "bg-slate-50 text-slate-300 border border-dashed border-slate-200 opacity-60 cursor-default";
+          statusDesc = "Future date";
+        } else if (!entry) {
+          colorClass = "bg-slate-100 hover:bg-slate-200 text-slate-500 border border-transparent";
+          statusDesc = "Not logged (click to add)";
+        } else {
+          const symptomCount = Array.isArray(entry.symptoms) ? entry.symptoms.length : 0;
+          if (symptomCount === 0) {
+            colorClass = "bg-emerald-100 hover:bg-emerald-200 text-emerald-800 border border-emerald-300 font-semibold";
+            statusDesc = "All Clear (0 symptoms recorded)";
+            badgeContent = "✓";
+          } else if (symptomCount <= 4) {
+            colorClass = "bg-indigo-100 hover:bg-indigo-200 text-indigo-800 border border-indigo-200 font-semibold";
+            statusDesc = `${symptomCount} symptoms recorded`;
+            badgeContent = `${symptomCount}`;
+          } else {
+            colorClass = "bg-indigo-600 hover:bg-indigo-700 text-white border border-indigo-600 font-bold shadow-sm";
+            statusDesc = `${symptomCount} symptoms recorded`;
+            badgeContent = `${symptomCount}`;
+          }
+        }
+
+        const ringClass = isToday ? "ring-2 ring-indigo-500 ring-offset-1 font-bold shadow-sm" : "";
+        const formattedDate = `${weekdayShort}, ${monthShort} ${dayNum}`;
+        const titleText = `${formattedDate} • ${statusDesc}`;
+
+        return `
+          <button type="button"
+            onclick="window.selectDateFromHeatmap('${isoStr}')"
+            title="${escapeHTML(titleText)}"
+            class="h-10 sm:h-11 rounded-lg flex flex-col items-center justify-between py-1 px-0.5 transition-all text-center group relative ${colorClass} ${ringClass}">
+            <span class="text-[10px] leading-tight opacity-75">${dayNum === 1 ? monthShort + ' ' : ''}${dayNum}</span>
+            <span class="text-[10px] leading-tight font-bold">${badgeContent ? badgeContent : '&nbsp;'}</span>
+          </button>
+        `;
+      });
+
+      grid.innerHTML = cells.join('');
+    }
+
+    window.selectDateFromHeatmap = function(dateStr) {
+      if (!dateStr) return;
+      const dateInput = document.getElementById('entryDate');
+      if (dateInput) {
+        dateInput.value = dateStr;
+      }
+
+      const existing = entries.find(item => item.date === dateStr);
+      if (existing) {
+        loadEntryForEditing(existing);
+      } else {
+        exitEditMode(false);
+        if (dateInput) dateInput.value = dateStr;
+        const formTitle = document.getElementById('formTitle');
+        if (formTitle) {
+          const dObj = new Date(dateStr + 'T00:00:00');
+          const formatted = dObj.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+          formTitle.textContent = `Add Daily Entry for ${formatted}`;
+        }
+      }
+
+      const section = document.getElementById('entryFormSection');
+      if (section) {
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    };
+
     // 3. Rendering Functions: Daily Entries
     function renderEntries() {
+      renderHeatmap();
       const container = document.getElementById('entriesContainer');
       const countLabel = document.getElementById('logCount');
       
@@ -1657,7 +1917,7 @@
     };
 
     // 4. Report Generation Logic: ASRS, DASS-21 & 14-Day Timeline Trend
-    window.generateReport = function() {
+    function generateReport() {
       const endInput = document.getElementById('reportEndDate');
       const endDateVal = endInput.value || new Date().toISOString().split('T')[0];
       
@@ -1673,9 +1933,24 @@
       const daysLogged = windowEntries.length;
       const rate = Math.round((daysLogged / 14) * 100);
 
+      // Prior 14-day window calculation (immediately preceding)
+      const priorEndDate = new Date(startDate);
+      priorEndDate.setDate(priorEndDate.getDate() - 1);
+      priorEndDate.setHours(23, 59, 59, 999);
+      const priorStartDate = new Date(priorEndDate);
+      priorStartDate.setDate(priorStartDate.getDate() - 13);
+      priorStartDate.setHours(0, 0, 0, 0);
+
+      const priorStartISO = priorStartDate.toISOString().split('T')[0];
+      const priorEndISO = priorEndDate.toISOString().split('T')[0];
+
+      const priorWindowEntries = entries.filter(e => e.date >= priorStartISO && e.date <= priorEndISO);
+      const priorDaysLogged = priorWindowEntries.length;
+      const hasPriorData = priorDaysLogged > 0;
+
+      // Symptom frequency counts: current period
       const counts = {};
       allSymptoms.forEach(s => counts[s.id] = 0);
-
       windowEntries.forEach(entry => {
         if (entry.symptoms && Array.isArray(entry.symptoms)) {
           entry.symptoms.forEach(s => {
@@ -1684,11 +1959,28 @@
         }
       });
 
-      // 4A. ASRS Calculation
+      // Symptom frequency counts: prior period
+      const priorCounts = {};
+      allSymptoms.forEach(s => priorCounts[s.id] = 0);
+      priorWindowEntries.forEach(entry => {
+        if (entry.symptoms && Array.isArray(entry.symptoms)) {
+          entry.symptoms.forEach(s => {
+            if (priorCounts[s] !== undefined) priorCounts[s]++;
+          });
+        }
+      });
+
+      // 4A. ASRS Calculation: current & prior
       let asrsCriteriaCount = 0;
       asrsConfig.forEach(s => {
         if (counts[s.id] >= s.thresholdDays) asrsCriteriaCount++;
       });
+
+      let priorAsrsCriteriaCount = 0;
+      asrsConfig.forEach(s => {
+        if (priorCounts[s.id] >= s.thresholdDays) priorAsrsCriteriaCount++;
+      });
+      const asrsDelta = asrsCriteriaCount - priorAsrsCriteriaCount;
 
       const formatDateLabel = (d) => d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
       document.getElementById('metricDateRange').textContent = `${formatDateLabel(startDate)} – ${formatDateLabel(endDate)}`;
@@ -1748,19 +2040,26 @@
       }
       chartContainer.innerHTML = dayBars.join('');
 
-      // ASRS Banner
+      // ASRS Banner with longitudinal delta note
       const banner = document.getElementById('screenerScoreBanner');
       const scoreText = document.getElementById('screenerScoreText');
       const scoreBadge = document.getElementById('screenerScoreBadge');
 
+      let asrsComparisonNote = "";
+      if (hasPriorData) {
+        if (asrsDelta < 0) asrsComparisonNote = ` (↓ Improved by ${Math.abs(asrsDelta)} criteria vs prior 14d)`;
+        else if (asrsDelta > 0) asrsComparisonNote = ` (↑ +${asrsDelta} criteria vs prior 14d)`;
+        else asrsComparisonNote = ` (↔ Same criteria as prior 14d)`;
+      }
+
       if (asrsCriteriaCount >= 4) {
         banner.className = "p-4 rounded-xl border mb-6 bg-rose-50/70 border-rose-200";
-        scoreText.textContent = `${asrsCriteriaCount} of 6 Part A questions met clinical threshold. Highly consistent with adult ADHD symptoms in clinical settings.`;
+        scoreText.textContent = `${asrsCriteriaCount} of 6 Part A questions met clinical threshold. Highly consistent with adult ADHD symptoms in clinical settings.${asrsComparisonNote}`;
         scoreBadge.className = "text-xs font-semibold px-2.5 py-1 rounded-full bg-rose-200 text-rose-900";
         scoreBadge.textContent = "Positive ASRS Screener";
       } else {
         banner.className = "p-4 rounded-xl border mb-6 bg-slate-50 border-slate-200";
-        scoreText.textContent = `${asrsCriteriaCount} of 6 Part A questions met threshold (<4 threshold questions). Review specific areas with your provider.`;
+        scoreText.textContent = `${asrsCriteriaCount} of 6 Part A questions met threshold (<4 threshold questions). Review specific areas with your provider.${asrsComparisonNote}`;
         scoreBadge.className = "text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-200 text-slate-700";
         scoreBadge.textContent = "Sub-threshold ASRS";
       }
@@ -1783,6 +2082,25 @@
       const dTotal = dassScores.Depression * 2;
       const aTotal = dassScores.Anxiety * 2;
       const sTotal = dassScores.Stress * 2;
+      const curTotalDass = dTotal + aTotal + sTotal;
+
+      const priorDassScores = { Depression: 0, Anxiety: 0, Stress: 0 };
+      dassConfig.forEach(item => {
+        const count = priorCounts[item.id] || 0;
+        const rating = getDassRating(count);
+        priorDassScores[item.scale] += rating.val;
+      });
+
+      const priorDTotal = priorDassScores.Depression * 2;
+      const priorATotal = priorDassScores.Anxiety * 2;
+      const priorSTotal = priorDassScores.Stress * 2;
+      const priorTotalDass = priorDTotal + priorATotal + priorSTotal;
+
+      const dDelta = dTotal - priorDTotal;
+      const aDelta = aTotal - priorATotal;
+      const sDelta = sTotal - priorSTotal;
+      const dassDelta = curTotalDass - priorTotalDass;
+      const loggingDelta = daysLogged - priorDaysLogged;
 
       function getDassSeverity(scale, score) {
         if (scale === 'Depression') {
@@ -1812,7 +2130,153 @@
       const aSev = getDassSeverity('Anxiety', aTotal);
       const sSev = getDassSeverity('Stress', sTotal);
 
-      // Render DASS Score Cards
+      // Subscale delta pill helper
+      function renderSubscaleDeltaPill(cur, prior) {
+        if (!hasPriorData) return '';
+        const diff = cur - prior;
+        if (diff < 0) {
+          return `<span class="inline-flex items-center gap-0.5 text-[11px] font-semibold px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 border border-emerald-200" title="Prior period score: ${prior} pts">↓ ${Math.abs(diff)} vs prior</span>`;
+        } else if (diff > 0) {
+          return `<span class="inline-flex items-center gap-0.5 text-[11px] font-semibold px-2 py-0.5 rounded bg-rose-100 text-rose-800 border border-rose-200" title="Prior period score: ${prior} pts">↑ +${diff} vs prior</span>`;
+        } else {
+          return `<span class="inline-flex items-center gap-0.5 text-[11px] font-medium px-2 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200" title="Prior period score: ${prior} pts">↔ 0 vs prior</span>`;
+        }
+      }
+
+      // 4D. Render Period Comparison Card
+      const comparisonWindowEl = document.getElementById('comparisonWindowLabel');
+      const comparisonGridEl = document.getElementById('comparisonMetricsGrid');
+      const comparisonTakeawayEl = document.getElementById('comparisonTakeaway');
+
+      function formatSymptomDeltaPill(delta, unit = "pts") {
+        if (delta < 0) {
+          return `<span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded text-[11px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">
+            <span>↓</span> ${Math.abs(delta)} ${unit} (Improved)
+          </span>`;
+        } else if (delta > 0) {
+          return `<span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded text-[11px] font-semibold bg-rose-100 text-rose-800 border border-rose-200">
+            <span>↑</span> +${delta} ${unit} (Elevated)
+          </span>`;
+        } else {
+          return `<span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded text-[11px] font-medium bg-slate-100 text-slate-600 border border-slate-200">
+            <span>↔</span> 0 ${unit} (Stable)
+          </span>`;
+        }
+      }
+
+      if (comparisonWindowEl) {
+        comparisonWindowEl.textContent = hasPriorData
+          ? `Prior Window: ${formatDateLabel(priorStartDate)} – ${formatDateLabel(priorEndDate)} (${priorDaysLogged} / 14 d)`
+          : `Prior Window: ${formatDateLabel(priorStartDate)} – ${formatDateLabel(priorEndDate)} (0 / 14 d recorded)`;
+      }
+
+      if (comparisonGridEl) {
+        if (!hasPriorData) {
+          comparisonGridEl.innerHTML = `
+            <div class="p-3 rounded-lg border border-slate-200 bg-white">
+              <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Days Logged</div>
+              <div class="text-lg font-bold text-slate-900 mt-1">${daysLogged} / 14</div>
+              <div class="text-[11px] text-slate-400 mt-0.5">Prior: 0 logs</div>
+            </div>
+            <div class="p-3 rounded-lg border border-slate-200 bg-white">
+              <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">ASRS Criteria</div>
+              <div class="text-lg font-bold text-slate-900 mt-1">${asrsCriteriaCount} / 6</div>
+              <div class="text-[11px] text-slate-400 mt-0.5">Prior: Baseline</div>
+            </div>
+            <div class="p-3 rounded-lg border border-slate-200 bg-white">
+              <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">DASS-21 Total</div>
+              <div class="text-lg font-bold text-slate-900 mt-1">${curTotalDass} / 126</div>
+              <div class="text-[11px] text-slate-400 mt-0.5">Prior: Baseline</div>
+            </div>
+            <div class="p-3 rounded-lg border border-slate-200 bg-white">
+              <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Trajectory</div>
+              <div class="text-lg font-bold text-indigo-600 mt-1">Baseline</div>
+              <div class="text-[11px] text-slate-400 mt-0.5">Initial 14-day cycle</div>
+            </div>
+          `;
+        } else {
+          let trajectoryLabel = "Stable";
+          let trajectoryBadge = "bg-slate-100 text-slate-700 border-slate-200";
+          let trajectoryIcon = "↔";
+          
+          if (dassDelta < 0 && asrsDelta <= 0) {
+            trajectoryLabel = "Improving";
+            trajectoryBadge = "bg-emerald-100 text-emerald-800 border-emerald-200";
+            trajectoryIcon = "↓";
+          } else if (dassDelta <= 0 && asrsDelta < 0) {
+            trajectoryLabel = "Improving";
+            trajectoryBadge = "bg-emerald-100 text-emerald-800 border-emerald-200";
+            trajectoryIcon = "↓";
+          } else if (dassDelta > 0 || asrsDelta > 0) {
+            trajectoryLabel = "Elevated";
+            trajectoryBadge = "bg-rose-100 text-rose-800 border-rose-200";
+            trajectoryIcon = "↑";
+          }
+
+          comparisonGridEl.innerHTML = `
+            <div class="p-3 rounded-lg border border-slate-200 bg-white">
+              <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Days Logged</div>
+              <div class="text-lg font-bold text-slate-900 mt-0.5">${daysLogged} <span class="text-xs font-normal text-slate-500">vs ${priorDaysLogged}</span></div>
+              <div class="mt-1">
+                <span class="inline-flex items-center text-[11px] font-semibold px-1.5 py-0.5 rounded ${loggingDelta >= 0 ? 'bg-emerald-50 text-emerald-700' : 'bg-amber-50 text-amber-700'}">
+                  ${loggingDelta >= 0 ? '+' + loggingDelta : loggingDelta} d consistency
+                </span>
+              </div>
+            </div>
+
+            <div class="p-3 rounded-lg border border-slate-200 bg-white">
+              <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">ASRS Criteria</div>
+              <div class="text-lg font-bold text-slate-900 mt-0.5">${asrsCriteriaCount} <span class="text-xs font-normal text-slate-500">vs ${priorAsrsCriteriaCount} / 6</span></div>
+              <div class="mt-1">
+                ${formatSymptomDeltaPill(asrsDelta, 'criteria')}
+              </div>
+            </div>
+
+            <div class="p-3 rounded-lg border border-slate-200 bg-white">
+              <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">DASS Total Burden</div>
+              <div class="text-lg font-bold text-slate-900 mt-0.5">${curTotalDass} <span class="text-xs font-normal text-slate-500">vs ${priorTotalDass} pts</span></div>
+              <div class="mt-1">
+                ${formatSymptomDeltaPill(dassDelta, 'pts')}
+              </div>
+            </div>
+
+            <div class="p-3 rounded-lg border border-slate-200 bg-white">
+              <div class="text-[11px] font-semibold uppercase tracking-wider text-slate-500">Overall Trajectory</div>
+              <div class="text-lg font-bold text-slate-900 mt-0.5 flex items-center gap-1.5">
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-bold border ${trajectoryBadge}">
+                  ${trajectoryIcon} ${trajectoryLabel}
+                </span>
+              </div>
+              <div class="text-[11px] text-slate-500 mt-1">Period-over-period</div>
+            </div>
+          `;
+        }
+      }
+
+      if (comparisonTakeawayEl) {
+        if (!hasPriorData) {
+          comparisonTakeawayEl.innerHTML = `
+            <p class="leading-relaxed">
+              <span class="font-semibold text-slate-800">Baseline Window:</span> No entries recorded in the immediately preceding 14-day window (${formatDateLabel(priorStartDate)} – ${formatDateLabel(priorEndDate)}). Continue daily logging across consecutive periods to reveal longitudinal trends, score deltas, and trajectory insights.
+            </p>
+          `;
+        } else {
+          const dChangeStr = dDelta < 0 ? `Depression down ${Math.abs(dDelta)} pts` : dDelta > 0 ? `Depression up ${dDelta} pts` : `Depression unchanged`;
+          const aChangeStr = aDelta < 0 ? `Anxiety down ${Math.abs(aDelta)} pts` : aDelta > 0 ? `Anxiety up ${aDelta} pts` : `Anxiety unchanged`;
+          const sChangeStr = sDelta < 0 ? `Stress down ${Math.abs(sDelta)} pts` : sDelta > 0 ? `Stress up ${sDelta} pts` : `Stress unchanged`;
+          const asrsChangeStr = asrsDelta < 0 ? `met ${Math.abs(asrsDelta)} fewer ADHD criteria` : asrsDelta > 0 ? `met ${asrsDelta} more ADHD criteria` : `held steady at ${asrsCriteriaCount} ADHD criteria`;
+          const trajDirection = (dassDelta < 0 || asrsDelta < 0) && !(dassDelta > 0 || asrsDelta > 0) ? 'improving' : (dassDelta > 0 || asrsDelta > 0) ? 'elevated' : 'stable';
+
+          comparisonTakeawayEl.innerHTML = `
+            <p class="leading-relaxed">
+              <span class="font-semibold text-slate-800">Clinical Trajectory Takeaway:</span> 
+              Across this 14-day window compared to the prior 14 days (${formatDateLabel(priorStartDate)} – ${formatDateLabel(priorEndDate)}), your symptoms <strong>${asrsChangeStr}</strong> and overall psychological distress is <strong>${trajDirection}</strong> (${dChangeStr}, ${aChangeStr}, ${sChangeStr}; total DASS ${dassDelta < 0 ? '↓ ' + Math.abs(dassDelta) : dassDelta > 0 ? '↑ +' + dassDelta : '↔ 0'} pts).
+            </p>
+          `;
+        }
+      }
+
+      // Render DASS Score Cards with delta comparison pills
       const dassCardContainer = document.getElementById('dassScoreCards');
       dassCardContainer.innerHTML = `
         <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/75">
@@ -1820,9 +2284,12 @@
             <span class="text-xs font-bold uppercase tracking-wider text-slate-700">Depression (DASS-D)</span>
             <span class="text-xs font-semibold px-2 py-0.5 rounded border ${dSev.color}">${dSev.label}</span>
           </div>
-          <div class="flex items-baseline gap-2 mt-2">
-            <span class="text-2xl font-bold text-slate-900">${dTotal}</span>
-            <span class="text-xs text-slate-500">/ 42 points</span>
+          <div class="flex items-baseline justify-between gap-2 mt-2">
+            <div class="flex items-baseline gap-1.5">
+              <span class="text-2xl font-bold text-slate-900">${dTotal}</span>
+              <span class="text-xs text-slate-500">/ 42 points</span>
+            </div>
+            ${renderSubscaleDeltaPill(dTotal, priorDTotal)}
           </div>
           <p class="text-[11px] text-slate-500 mt-1">Normal: 0-9 | Mild: 10-13 | Mod: 14-20 | Sev: 21-27 | Ex: 28+</p>
         </div>
@@ -1832,9 +2299,12 @@
             <span class="text-xs font-bold uppercase tracking-wider text-slate-700">Anxiety (DASS-A)</span>
             <span class="text-xs font-semibold px-2 py-0.5 rounded border ${aSev.color}">${aSev.label}</span>
           </div>
-          <div class="flex items-baseline gap-2 mt-2">
-            <span class="text-2xl font-bold text-slate-900">${aTotal}</span>
-            <span class="text-xs text-slate-500">/ 42 points</span>
+          <div class="flex items-baseline justify-between gap-2 mt-2">
+            <div class="flex items-baseline gap-1.5">
+              <span class="text-2xl font-bold text-slate-900">${aTotal}</span>
+              <span class="text-xs text-slate-500">/ 42 points</span>
+            </div>
+            ${renderSubscaleDeltaPill(aTotal, priorATotal)}
           </div>
           <p class="text-[11px] text-slate-500 mt-1">Normal: 0-7 | Mild: 8-9 | Mod: 10-14 | Sev: 15-19 | Ex: 20+</p>
         </div>
@@ -1844,9 +2314,12 @@
             <span class="text-xs font-bold uppercase tracking-wider text-slate-700">Stress (DASS-S)</span>
             <span class="text-xs font-semibold px-2 py-0.5 rounded border ${sSev.color}">${sSev.label}</span>
           </div>
-          <div class="flex items-baseline gap-2 mt-2">
-            <span class="text-2xl font-bold text-slate-900">${sTotal}</span>
-            <span class="text-xs text-slate-500">/ 42 points</span>
+          <div class="flex items-baseline justify-between gap-2 mt-2">
+            <div class="flex items-baseline gap-1.5">
+              <span class="text-2xl font-bold text-slate-900">${sTotal}</span>
+              <span class="text-xs text-slate-500">/ 42 points</span>
+            </div>
+            ${renderSubscaleDeltaPill(sTotal, priorSTotal)}
           </div>
           <p class="text-[11px] text-slate-500 mt-1">Normal: 0-14 | Mild: 15-18 | Mod: 19-25 | Sev: 26-33 | Ex: 34+</p>
         </div>
@@ -1982,7 +2455,8 @@
           }).join('');
         }
       }
-    };
+    }
+    window.generateReport = generateReport;
 
     function getRating(days) {
       if (days === 0) return { label: "Never", badgeClass: "bg-slate-100 text-slate-600" };
@@ -2058,6 +2532,45 @@
           const r = getRating(c).label;
           summary += `${q.name}: ${c}/14d -> ${r}\n`;
         });
+      }
+
+      // Prior window longitudinal comparison for clinical summary
+      const priorEndDate = new Date(startDate);
+      priorEndDate.setDate(priorEndDate.getDate() - 1);
+      priorEndDate.setHours(23, 59, 59, 999);
+      const priorStartDate = new Date(priorEndDate);
+      priorStartDate.setDate(priorStartDate.getDate() - 13);
+      priorStartDate.setHours(0, 0, 0, 0);
+
+      const priorStartISO = priorStartDate.toISOString().split('T')[0];
+      const priorEndISO = priorEndDate.toISOString().split('T')[0];
+      const priorWindowEntries = entries.filter(e => e.date >= priorStartISO && e.date <= priorEndISO);
+      
+      if (priorWindowEntries.length > 0) {
+        const priorCounts = {};
+        allSymptoms.forEach(s => priorCounts[s.id] = 0);
+        priorWindowEntries.forEach(e => {
+          (e.symptoms || []).forEach(s => {
+            if (priorCounts[s] !== undefined) priorCounts[s]++;
+          });
+        });
+        let priorAsrsCount = 0;
+        asrsConfig.forEach(s => {
+          if (priorCounts[s.id] >= s.thresholdDays) priorAsrsCount++;
+        });
+        const priorDassScores = { Depression: 0, Anxiety: 0, Stress: 0 };
+        dassConfig.forEach(i => {
+          priorDassScores[i.scale] += getDassVal(priorCounts[i.id]);
+        });
+        const curDassTotal = (dassScores.Depression + dassScores.Anxiety + dassScores.Stress) * 2;
+        const priorDassTotal = (priorDassScores.Depression + priorDassScores.Anxiety + priorDassScores.Stress) * 2;
+        const dassDelta = curDassTotal - priorDassTotal;
+        const asrsDelta = asrsCount - priorAsrsCount;
+
+        summary += `\n--- Period-over-Period Trend (vs. Prior 14 Days) ---\n`;
+        summary += `Prior Window: ${priorStartDate.toLocaleDateString()} to ${priorEndDate.toLocaleDateString()} (${priorWindowEntries.length}/14d)\n`;
+        summary += `ASRS Criteria: ${asrsCount} vs ${priorAsrsCount} (${asrsDelta >= 0 ? '+' + asrsDelta : asrsDelta})\n`;
+        summary += `DASS-21 Total: ${curDassTotal} vs ${priorDassTotal} pts (${dassDelta >= 0 ? '+' + dassDelta : dassDelta} pts)\n`;
       }
 
       if (navigator.clipboard && navigator.clipboard.writeText) {
@@ -2512,6 +3025,7 @@
       renderCustomCheckboxes();
       renderCustomQuestionsList();
       renderEntries();
+      generateReport();
       registerServiceWorker();
 
       form.addEventListener('change', updateSectionSelectedCounts);
