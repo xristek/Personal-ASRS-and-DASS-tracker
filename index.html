@@ -261,19 +261,16 @@
 
     <!-- TAB 1: DAILY ENTRY & RECENT LOGS -->
     <div id="viewDaily" class="space-y-6">
-      <!-- Activity & Consistency Overview -->
-      <section id="activityOverviewCard" class="bg-white rounded-xl shadow-sm border border-slate-200 p-5 space-y-4">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pb-3 border-b border-slate-100">
-          <div>
-            <div class="flex items-center gap-2 flex-wrap">
-              <span class="text-base font-bold text-slate-900">Habit &amp; Activity Tracker</span>
-              <span id="streakBadge" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">
-                <span>🔥</span> <span id="streakCount">0</span>-Day Streak
-              </span>
-            </div>
-            <p class="text-xs text-slate-500 mt-0.5">Click any day on the calendar to view, edit, or backfill daily logs.</p>
+      <!-- Activity & Consistency Overview (Collapsible) -->
+      <details open id="activityOverviewCard" class="group border border-slate-200 rounded-xl bg-white overflow-hidden shadow-sm transition-all">
+        <summary class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 sm:p-4.5 bg-slate-50/90 hover:bg-slate-100/80 cursor-pointer list-none select-none transition-colors [&::-webkit-details-marker]:hidden">
+          <div class="flex items-center gap-2.5 flex-wrap">
+            <span class="text-sm sm:text-base font-bold text-slate-900">Habit &amp; Activity Tracker</span>
+            <span id="streakBadge" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 border border-amber-200">
+              <span>🔥</span> <span id="streakCount">0</span>-Day Streak
+            </span>
           </div>
-          <div class="flex items-center gap-3 text-xs text-slate-600">
+          <div class="flex items-center gap-3 text-xs text-slate-600 flex-shrink-0">
             <div>
               <span class="font-semibold text-slate-800" id="statTotalLogged">0</span>
               <span class="text-slate-400 ml-0.5">total logs</span>
@@ -283,33 +280,40 @@
               <span class="font-semibold text-slate-800" id="statBestStreak">0</span>
               <span class="text-slate-400 ml-0.5">best streak</span>
             </div>
+            <svg class="w-4 h-4 text-slate-500 transition-transform duration-200 group-open:rotate-180 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </div>
+        </summary>
+
+        <div class="p-4 sm:p-5 border-t border-slate-100 space-y-3">
+          <p class="text-xs text-slate-500">Click any day on the calendar to view, edit, or backfill daily logs.</p>
+
+          <!-- 35-Day (5-Week) Trailing Heatmap -->
+          <div class="space-y-2">
+            <div class="flex items-center justify-between text-xs flex-wrap gap-2">
+              <span class="font-semibold text-slate-700">Past 5 Weeks Activity (Trailing 35 Days)</span>
+              <div class="flex items-center gap-2.5 text-[11px] text-slate-500 flex-wrap">
+                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-slate-100 border border-slate-200"></span> Unlogged</span>
+                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-emerald-100 border border-emerald-300"></span> All Clear</span>
+                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-indigo-100 border border-indigo-300"></span> 1–4</span>
+                <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-indigo-500 text-white"></span> 5+</span>
+              </div>
+            </div>
+
+            <div class="border border-slate-100 rounded-lg p-2.5 bg-slate-50/50">
+              <!-- Day of Week Headers -->
+              <div class="grid grid-cols-7 gap-1 text-center text-[11px] font-semibold text-slate-400 mb-1">
+                <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+              </div>
+              <!-- Heatmap Grid Cells -->
+              <div id="heatmapGrid" class="grid grid-cols-7 gap-1 text-center text-xs">
+                <!-- Rendered via JavaScript -->
+              </div>
+            </div>
           </div>
         </div>
-
-        <!-- 35-Day (5-Week) Trailing Heatmap -->
-        <div class="space-y-2">
-          <div class="flex items-center justify-between text-xs flex-wrap gap-2">
-            <span class="font-semibold text-slate-700">Past 5 Weeks Activity (Trailing 35 Days)</span>
-            <div class="flex items-center gap-2.5 text-[11px] text-slate-500 flex-wrap">
-              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-slate-100 border border-slate-200"></span> Unlogged</span>
-              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-emerald-100 border border-emerald-300"></span> All Clear</span>
-              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-indigo-100 border border-indigo-300"></span> 1–4</span>
-              <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded bg-indigo-500 text-white"></span> 5+</span>
-            </div>
-          </div>
-
-          <div class="border border-slate-100 rounded-lg p-2.5 bg-slate-50/50">
-            <!-- Day of Week Headers -->
-            <div class="grid grid-cols-7 gap-1 text-center text-[11px] font-semibold text-slate-400 mb-1">
-              <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
-            </div>
-            <!-- Heatmap Grid Cells -->
-            <div id="heatmapGrid" class="grid grid-cols-7 gap-1 text-center text-xs">
-              <!-- Rendered via JavaScript -->
-            </div>
-          </div>
-        </div>
-      </section>
+      </details>
 
       <!-- Main Entry Form -->
       <section id="entryFormSection" class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
