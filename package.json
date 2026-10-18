@@ -1,0 +1,14 @@
+{
+  "name": "personal-asrs-and-dass-tracker",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Daily logging and 14-day questionnaire helper for ASRS v1.1 & DASS-21",
+  "scripts": {
+    "test": "node --test tests/unit/*.test.js",
+    "test:unit": "node --test tests/unit/*.test.js",
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.0"
+  }
+}
