@@ -1595,21 +1595,23 @@
               <span>Rating Scales (1–10)</span>
             </div>
             <div class="space-y-2.5">
-              ${scaleQs.map(q => `
+              ${scaleQs.map(q => {
+                const safeQId = sanitizeId(q.id);
+                return `
                 <div class="p-3 bg-slate-50/80 border border-slate-200 rounded-xl space-y-2">
                   <div class="flex items-center justify-between gap-2">
                     <div>
                       <span class="text-xs font-bold text-slate-900">${escapeHTML(q.name)}</span>
                       ${q.question ? `<p class="text-[11px] text-slate-500 mt-0.5">${escapeHTML(q.question)}</p>` : ''}
                     </div>
-                    <button type="button" id="clear_scale_${q.id}" onclick="clearCustomScale('${q.id}')" class="hidden text-[11px] font-semibold text-slate-400 hover:text-rose-600 transition-colors">
+                    <button type="button" id="clear_scale_${safeQId}" onclick="clearCustomScale('${safeQId}')" class="hidden text-[11px] font-semibold text-slate-400 hover:text-rose-600 transition-colors">
                       Clear
                     </button>
                   </div>
-                  <input type="hidden" name="custom_metric" id="metric_${q.id}" data-qid="${q.id}" value="">
+                  <input type="hidden" name="custom_metric" id="metric_${safeQId}" data-qid="${safeQId}" value="">
                   <div class="flex items-center gap-1 sm:gap-1.5 pt-1">
                     ${[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(val => `
-                      <button type="button" data-scale-qid="${q.id}" data-val="${val}" onclick="setCustomScaleValue('${q.id}', ${val})" class="flex-1 py-1.5 px-1 sm:px-2 rounded-lg text-xs font-medium transition-all bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200">
+                      <button type="button" data-scale-qid="${safeQId}" data-val="${val}" onclick="setCustomScaleValue('${safeQId}', ${val})" class="flex-1 py-1.5 px-1 sm:px-2 rounded-lg text-xs font-medium transition-all bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200">
                         ${val}
                       </button>
                     `).join('')}
@@ -1619,7 +1621,7 @@
                     <span>10 (High / Severe)</span>
                   </div>
                 </div>
-              `).join('')}
+              `;}).join('')}
             </div>
           </div>
         `;
@@ -1634,18 +1636,20 @@
               <span>Quantitative Metrics</span>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-              ${numberQs.map(q => `
+              ${numberQs.map(q => {
+                const safeQId = sanitizeId(q.id);
+                return `
                 <div class="p-3 bg-slate-50/80 border border-slate-200 rounded-xl flex items-center justify-between gap-3">
                   <div class="space-y-0.5 flex-1 min-w-0">
                     <span class="text-xs font-bold text-slate-900 block truncate">${escapeHTML(q.name)}</span>
                     ${q.question ? `<p class="text-[11px] text-slate-500 truncate">${escapeHTML(q.question)}</p>` : ''}
                   </div>
                   <div class="flex items-center gap-1.5 flex-shrink-0">
-                    <input type="number" step="any" min="0" name="custom_metric" id="metric_${q.id}" data-qid="${q.id}" placeholder="0" class="w-20 sm:w-24 px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    <input type="number" step="any" min="0" name="custom_metric" id="metric_${safeQId}" data-qid="${safeQId}" placeholder="0" class="w-20 sm:w-24 px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                     ${q.unit ? `<span class="text-xs font-semibold text-slate-600 bg-slate-100 border border-slate-200 px-2 py-1 rounded-md">${escapeHTML(q.unit)}</span>` : ''}
                   </div>
                 </div>
-              `).join('')}
+              `;}).join('')}
             </div>
           </div>
         `;
@@ -1662,15 +1666,17 @@
               </div>
             ` : ''}
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-              ${booleanQs.map(q => `
+              ${booleanQs.map(q => {
+                const safeQId = sanitizeId(q.id);
+                return `
                 <label class="flex items-start gap-2.5 p-2.5 bg-white rounded-lg border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
-                  <input type="checkbox" name="symptom" value="${q.id}" class="mt-0.5 h-3.5 w-3.5 text-purple-600 rounded border-slate-300 focus:ring-purple-500">
+                  <input type="checkbox" name="symptom" value="${safeQId}" class="mt-0.5 h-3.5 w-3.5 text-purple-600 rounded border-slate-300 focus:ring-purple-500">
                   <div>
                     <span class="font-medium text-slate-800">${escapeHTML(q.name)}</span>
                     ${q.question ? `<p class="text-[11px] text-slate-500 mt-0.5">${escapeHTML(q.question)}</p>` : ''}
                   </div>
                 </label>
-              `).join('')}
+              `;}).join('')}
             </div>
           </div>
         `;
@@ -1761,10 +1767,10 @@
               ${q.question ? `<p class="text-xs text-slate-500 pl-4">${escapeHTML(q.question)}</p>` : ''}
             </div>
             <div class="flex items-center gap-2 self-end sm:self-center flex-shrink-0">
-              <button type="button" onclick="editCustomQuestion('${q.id}')" class="px-2.5 py-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 rounded-md transition-colors">
+              <button type="button" onclick="editCustomQuestion('${sanitizeId(q.id)}')" class="px-2.5 py-1 text-xs font-semibold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 rounded-md transition-colors">
                 Edit
               </button>
-              <button type="button" onclick="promptDeleteCustomQuestion('${q.id}')" class="px-2.5 py-1 text-xs font-semibold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 rounded-md transition-colors">
+              <button type="button" onclick="promptDeleteCustomQuestion('${sanitizeId(q.id)}')" class="px-2.5 py-1 text-xs font-semibold text-rose-600 hover:text-rose-800 bg-rose-50 hover:bg-rose-100 rounded-md transition-colors">
                 Remove
               </button>
             </div>
@@ -2155,7 +2161,8 @@
             const qName = qObj ? qObj.name : qId;
             const isScale = qObj && qObj.type === 'scale';
             const unit = (qObj && qObj.unit) ? ` ${escapeHTML(qObj.unit)}` : '';
-            const displayVal = isScale ? `${val}/10` : `${val}${unit}`;
+            const safeVal = escapeHTML(String(val));
+            const displayVal = isScale ? `${safeVal}/10` : `${safeVal}${unit}`;
             return `<span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border bg-amber-50 text-amber-800 border-amber-200">${escapeHTML(qName)}: <strong class="ml-1">${displayVal}</strong></span>`;
           });
           if (items.length > 0) {
@@ -2174,16 +2181,17 @@
           day: 'numeric',
           year: 'numeric'
         });
+        const safeEntryId = sanitizeId(entry.id);
 
         return `
           <div class="bg-white border border-slate-200 rounded-xl p-5 shadow-sm space-y-3">
             <div class="flex items-center justify-between">
               <span class="text-sm font-semibold text-slate-900">${formattedDate}</span>
               <div class="flex items-center gap-3">
-                <button onclick="editEntry('${entry.id}')" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition-colors">
+                <button onclick="editEntry('${safeEntryId}')" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 transition-colors">
                   Edit
                 </button>
-                <button onclick="deleteEntry('${entry.id}')" class="text-xs text-slate-400 hover:text-rose-600 transition-colors">
+                <button onclick="deleteEntry('${safeEntryId}')" class="text-xs text-slate-400 hover:text-rose-600 transition-colors">
                   Remove
                 </button>
               </div>
@@ -2208,7 +2216,7 @@
     }
 
     function escapeHTML(str) {
-      return str.replace(/[&<>'"]/g, 
+      return String(str ?? '').replace(/[&<>'"]/g, 
         tag => ({
           '&': '&amp;',
           '<': '&lt;',
@@ -2217,6 +2225,10 @@
           '"': '&quot;'
         }[tag] || tag)
       );
+    }
+
+    function sanitizeId(id) {
+      return String(id ?? '').replace(/[^a-zA-Z0-9_-]/g, '');
     }
 
     let editingEntryId = null;
@@ -3676,6 +3688,8 @@
     const SYNC_DELETED_IDS_KEY = 'mental_health_tracker_deleted_ids_v1';
     const SYNC_TOKEN_SESSION_KEY = 'mental_health_tracker_gdrive_token_v1';
     const SYNC_PASSPHRASE_SESSION_KEY = 'mental_health_tracker_sync_passphrase_v1';
+    const SYNC_OAUTH_STATE_SESSION_KEY = 'mental_health_tracker_oauth_state_v1';
+    const UNSAFE_OBJECT_KEYS = new Set(['__proto__', 'constructor', 'prototype']);
 
     function uint8ToBase64(bytes) {
       let binary = '';
@@ -3703,12 +3717,21 @@
 
     window.CryptoEngine = {
       PBKDF2_ITERATIONS: 100000,
+      MIN_PBKDF2_ITERATIONS: 100000,
+      MAX_PBKDF2_ITERATIONS: 1000000,
       SALT_BYTES: 16,
       IV_BYTES: 12,
 
       async deriveKey(passphrase, saltBytes, iterations = 100000) {
         if (!passphrase || typeof passphrase !== 'string') {
           throw new Error('A non-empty encryption passphrase is required.');
+        }
+        const iterCount = Number(iterations);
+        if (!Number.isInteger(iterCount) || iterCount < this.MIN_PBKDF2_ITERATIONS || iterCount > this.MAX_PBKDF2_ITERATIONS) {
+          throw new Error(`Invalid PBKDF2 iteration count: must be between ${this.MIN_PBKDF2_ITERATIONS} and ${this.MAX_PBKDF2_ITERATIONS}.`);
+        }
+        if (!(saltBytes instanceof Uint8Array) || saltBytes.byteLength !== this.SALT_BYTES) {
+          throw new Error(`Invalid salt length: expected ${this.SALT_BYTES} bytes.`);
         }
         const enc = new TextEncoder();
         const keyMaterial = await window.crypto.subtle.importKey(
@@ -3722,7 +3745,7 @@
           {
             name: 'PBKDF2',
             salt: saltBytes,
-            iterations: iterations,
+            iterations: iterCount,
             hash: 'SHA-256'
           },
           keyMaterial,
@@ -3764,10 +3787,28 @@
         ) {
           throw new Error('Invalid encrypted sync envelope.');
         }
+        if (encryptedEnvelope.kdf && encryptedEnvelope.kdf !== 'PBKDF2-SHA256') {
+          throw new Error('Unsupported KDF algorithm in sync envelope.');
+        }
+        if (encryptedEnvelope.cipher && encryptedEnvelope.cipher !== 'AES-GCM-256') {
+          throw new Error('Unsupported cipher algorithm in sync envelope.');
+        }
+        const iterations = encryptedEnvelope.iterations !== undefined
+          ? Number(encryptedEnvelope.iterations)
+          : this.PBKDF2_ITERATIONS;
+        if (!Number.isInteger(iterations) || iterations < this.MIN_PBKDF2_ITERATIONS || iterations > this.MAX_PBKDF2_ITERATIONS) {
+          throw new Error('Invalid PBKDF2 iteration count in sync envelope.');
+        }
+
         const salt = base64ToUint8(encryptedEnvelope.salt);
         const iv = base64ToUint8(encryptedEnvelope.iv);
+        if (salt.byteLength !== this.SALT_BYTES) {
+          throw new Error('Invalid salt length in sync envelope.');
+        }
+        if (iv.byteLength !== this.IV_BYTES) {
+          throw new Error('Invalid IV length in sync envelope.');
+        }
         const ciphertext = base64ToUint8(encryptedEnvelope.ciphertext);
-        const iterations = Number(encryptedEnvelope.iterations) || this.PBKDF2_ITERATIONS;
         const key = await this.deriveKey(passphrase, salt, iterations);
         try {
           const plainBuffer = await window.crypto.subtle.decrypt(
@@ -3797,8 +3838,23 @@
         return { codeVerifier, codeChallenge };
       },
 
-      buildAuthUrl(clientId, redirectUri, state = 'gdrive_sync') {
+      generateOAuthState() {
+        const randomBytes = window.crypto.getRandomValues(new Uint8Array(24));
+        const stateToken = base64UrlEncode(randomBytes);
+        try {
+          sessionStorage.setItem(SYNC_OAUTH_STATE_SESSION_KEY, stateToken);
+        } catch (e) {}
+        return stateToken;
+      },
+
+      buildAuthUrl(clientId, redirectUri, customState = null) {
         const cleanRedirect = redirectUri || (window.location.origin + window.location.pathname);
+        const state = customState || this.generateOAuthState();
+        if (customState) {
+          try {
+            sessionStorage.setItem(SYNC_OAUTH_STATE_SESSION_KEY, customState);
+          } catch (e) {}
+        }
         const params = new URLSearchParams({
           client_id: clientId.trim(),
           redirect_uri: cleanRedirect,
@@ -3835,6 +3891,7 @@
       clearTokenState() {
         try {
           sessionStorage.removeItem(SYNC_TOKEN_SESSION_KEY);
+          sessionStorage.removeItem(SYNC_OAUTH_STATE_SESSION_KEY);
         } catch (e) {}
       },
 
@@ -3853,26 +3910,40 @@
         if (!hash || !hash.includes('access_token=')) return false;
         const params = new URLSearchParams(hash.replace(/^#/, ''));
         const accessToken = params.get('access_token');
+        const returnedState = params.get('state');
         const expiresIn = parseInt(params.get('expires_in') || '3600', 10);
-        if (!accessToken) return false;
 
-        // Clean URL hash immediately so token is not left in address bar
+        // Clean URL hash immediately so token is never left in address bar
         if (window.history && window.history.replaceState) {
           window.history.replaceState(null, document.title, window.location.pathname + window.location.search);
+        }
+
+        if (!accessToken) return false;
+
+        // Verify OAuth CSRF state parameter against sessionStorage
+        let expectedState = null;
+        try {
+          expectedState = sessionStorage.getItem(SYNC_OAUTH_STATE_SESSION_KEY);
+          sessionStorage.removeItem(SYNC_OAUTH_STATE_SESSION_KEY);
+        } catch (e) {}
+
+        if (!expectedState || !returnedState || returnedState !== expectedState) {
+          throw new Error('OAuth state verification failed (potential CSRF attempt blocked).');
         }
 
         let email = 'Connected Google Account';
         try {
           const profile = await this.fetchUserProfile(accessToken);
-          if (profile && profile.email) {
-            email = profile.email;
+          if (profile && typeof profile.email === 'string') {
+            email = profile.email.slice(0, 120);
           }
         } catch (e) {}
 
+        const safeExpiresIn = (Number.isFinite(expiresIn) && expiresIn > 0 && expiresIn <= 86400) ? expiresIn : 3600;
         this.saveTokenState({
           accessToken,
           email,
-          expiresAt: Date.now() + (expiresIn * 1000)
+          expiresAt: Date.now() + (safeExpiresIn * 1000)
         });
 
         const cfg = window.SyncCoordinator.loadConfig();
@@ -4018,46 +4089,53 @@
       },
 
       mergeState(localState, remoteState) {
-        const safeLocal = localState || {};
-        const safeRemote = remoteState || {};
+        const safeLocal = (localState && typeof localState === 'object') ? localState : {};
+        const safeRemote = (remoteState && typeof remoteState === 'object') ? remoteState : {};
 
         const localDeleted = safeLocal.deletedIds || { entries: {}, customQuestions: {} };
         const remoteDeleted = safeRemote.deletedIds || { entries: {}, customQuestions: {} };
 
         const mergedDeleted = {
-          entries: { ...(localDeleted.entries || {}) },
-          customQuestions: { ...(localDeleted.customQuestions || {}) }
+          entries: {},
+          customQuestions: {}
         };
 
-        for (const [id, ts] of Object.entries(remoteDeleted.entries || {})) {
-          if (!mergedDeleted.entries[id] || ts > mergedDeleted.entries[id]) {
-            mergedDeleted.entries[id] = ts;
+        const mergeTombstoneMap = (sourceMap, targetMap) => {
+          if (!sourceMap || typeof sourceMap !== 'object') return;
+          for (const [rawId, ts] of Object.entries(sourceMap)) {
+            const cleanId = sanitizeId(rawId);
+            if (!cleanId || UNSAFE_OBJECT_KEYS.has(cleanId) || typeof ts !== 'string') continue;
+            if (!Object.prototype.hasOwnProperty.call(targetMap, cleanId) || ts > targetMap[cleanId]) {
+              targetMap[cleanId] = ts;
+            }
           }
-        }
-        for (const [id, ts] of Object.entries(remoteDeleted.customQuestions || {})) {
-          if (!mergedDeleted.customQuestions[id] || ts > mergedDeleted.customQuestions[id]) {
-            mergedDeleted.customQuestions[id] = ts;
-          }
-        }
+        };
+
+        mergeTombstoneMap(localDeleted.entries, mergedDeleted.entries);
+        mergeTombstoneMap(remoteDeleted.entries, mergedDeleted.entries);
+        mergeTombstoneMap(localDeleted.customQuestions, mergedDeleted.customQuestions);
+        mergeTombstoneMap(remoteDeleted.customQuestions, mergedDeleted.customQuestions);
 
         const mergeCollectionById = (localArr, remoteArr, tombstones) => {
           const byId = new Map();
           const allItems = [...(Array.isArray(localArr) ? localArr : []), ...(Array.isArray(remoteArr) ? remoteArr : [])];
 
           for (const item of allItems) {
-            if (!item || !item.id) continue;
-            const itemTs = item.updatedAt || '1970-01-01T00:00:00.000Z';
-            const deletedTs = tombstones[item.id];
+            if (!item || typeof item !== 'object' || !item.id) continue;
+            const cleanId = sanitizeId(item.id);
+            if (!cleanId || UNSAFE_OBJECT_KEYS.has(cleanId)) continue;
+            const itemTs = (typeof item.updatedAt === 'string' && item.updatedAt) ? item.updatedAt : '1970-01-01T00:00:00.000Z';
+            const deletedTs = Object.prototype.hasOwnProperty.call(tombstones, cleanId) ? tombstones[cleanId] : null;
             if (deletedTs && deletedTs >= itemTs) {
               continue;
             }
-            const existing = byId.get(item.id);
+            const existing = byId.get(cleanId);
             if (!existing) {
-              byId.set(item.id, { ...item });
+              byId.set(cleanId, { ...item, id: cleanId });
             } else {
-              const existingTs = existing.updatedAt || '1970-01-01T00:00:00.000Z';
+              const existingTs = (typeof existing.updatedAt === 'string' && existing.updatedAt) ? existing.updatedAt : '1970-01-01T00:00:00.000Z';
               if (itemTs > existingTs) {
-                byId.set(item.id, { ...item });
+                byId.set(cleanId, { ...item, id: cleanId });
               }
             }
           }
@@ -4069,11 +4147,27 @@
         // Also deduplicate entries by calendar date (LWW by updatedAt) so each date has at most one canonical log
         const entriesByDate = new Map();
         for (const entry of mergedEntries) {
-          if (!entry.date) continue;
+          if (!entry.date || typeof entry.date !== 'string' || !/^\d{4}-\d{2}-\d{2}$/.test(entry.date)) continue;
+          const cleanMetrics = {};
+          if (entry.metrics && typeof entry.metrics === 'object' && !Array.isArray(entry.metrics)) {
+            for (const [mKey, mVal] of Object.entries(entry.metrics)) {
+              const safeMKey = sanitizeId(mKey);
+              const numVal = Number(mVal);
+              if (safeMKey && !UNSAFE_OBJECT_KEYS.has(safeMKey) && Number.isFinite(numVal)) {
+                cleanMetrics[safeMKey] = numVal;
+              }
+            }
+          }
+          const cleanSymptoms = Array.isArray(entry.symptoms)
+            ? entry.symptoms.filter(s => typeof s === 'string').map(s => sanitizeId(s)).filter(Boolean)
+            : [];
           const normalized = {
-            ...entry,
-            symptoms: Array.isArray(entry.symptoms) ? entry.symptoms : [],
-            metrics: (entry.metrics && typeof entry.metrics === 'object') ? entry.metrics : {}
+            id: sanitizeId(entry.id),
+            date: entry.date,
+            symptoms: cleanSymptoms,
+            metrics: cleanMetrics,
+            notes: typeof entry.notes === 'string' ? entry.notes : '',
+            ...(typeof entry.updatedAt === 'string' ? { updatedAt: entry.updatedAt } : {})
           };
           const existing = entriesByDate.get(normalized.date);
           if (!existing) {
@@ -4088,15 +4182,21 @@
         }
         mergedEntries = Array.from(entriesByDate.values()).sort((a, b) => b.date.localeCompare(a.date));
 
+        const allowedTypes = new Set(['boolean', 'scale', 'number']);
         const mergedCustomQuestions = mergeCollectionById(
           safeLocal.customQuestions,
           safeRemote.customQuestions,
           mergedDeleted.customQuestions
-        ).map(q => ({
-          ...q,
-          type: q.type || 'boolean',
-          unit: q.unit || ''
-        }));
+        )
+          .filter(q => typeof q.name === 'string' && q.name.trim().length > 0)
+          .map(q => ({
+            id: sanitizeId(q.id),
+            name: String(q.name).trim(),
+            question: typeof q.question === 'string' ? q.question : '',
+            type: allowedTypes.has(q.type) ? q.type : 'boolean',
+            unit: typeof q.unit === 'string' ? q.unit : '',
+            ...(typeof q.updatedAt === 'string' ? { updatedAt: q.updatedAt } : {})
+          }));
 
         return {
           schemaVersion: 2,
@@ -4453,6 +4553,11 @@
 
     window.disconnectGoogleDriveAccount = function() {
       window.DriveAuth.clearTokenState();
+      try {
+        sessionStorage.removeItem(SYNC_PASSPHRASE_SESSION_KEY);
+      } catch (e) {}
+      const passInput = document.getElementById('syncPassphraseInput');
+      if (passInput) passInput.value = '';
       const cfg = window.SyncCoordinator.loadConfig();
       cfg.accountEmail = '';
       cfg.remoteFileId = null;
@@ -4490,6 +4595,9 @@
           initSyncControlsFromConfig();
           showSyncStatus('Google Drive account connected! Enter your encryption passphrase and click Sync Now.', 'emerald');
         }
+      }).catch((err) => {
+        switchTab('data');
+        showSyncStatus(err.message || 'OAuth authentication failed.', 'rose');
       });
       registerServiceWorker();
 

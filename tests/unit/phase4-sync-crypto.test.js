@@ -244,3 +244,102 @@ test('Phase 4: Deterministic Last-Write-Wins (LWW) SyncCoordinator.mergeState', 
     assert.equal(merged.entries[0].notes, 'Updated with timestamp');
   });
 });
+
+test('Phase 4 Security Audit: Adversarial Crypto, OAuth CSRF & Injection Defenses', async (t) => {
+  const win = createSyncSandbox();
+  const { CryptoEngine, DriveAuth, SyncCoordinator } = win;
+
+  await t.test('Blocks PBKDF2 iteration downgrade (<100k) and CPU DoS (>1M) in sync envelopes', async () => {
+    const payload = { entries: [] };
+    const validEnv = await CryptoEngine.encryptPayload(payload, 'strong-passphrase-123');
+
+    await assert.rejects(
+      async () => CryptoEngine.decryptPayload({ ...validEnv, iterations: 10 }, 'strong-passphrase-123'),
+      /Invalid PBKDF2 iteration count/
+    );
+
+    await assert.rejects(
+      async () => CryptoEngine.decryptPayload({ ...validEnv, iterations: 50000000 }, 'strong-passphrase-123'),
+      /Invalid PBKDF2 iteration count/
+    );
+
+    await assert.rejects(
+      async () => CryptoEngine.decryptPayload({ ...validEnv, kdf: 'NONE' }, 'strong-passphrase-123'),
+      /Unsupported KDF algorithm/
+    );
+
+    await assert.rejects(
+      async () => CryptoEngine.decryptPayload({ ...validEnv, cipher: 'AES-CBC' }, 'strong-passphrase-123'),
+      /Unsupported cipher algorithm/
+    );
+  });
+
+  await t.test('Blocks OAuth 2.0 Login CSRF when state parameter is missing or mismatched', async () => {
+    // 1. Generate valid OAuth URL (stores expected state in sessionStorage)
+    const authUrl = DriveAuth.buildAuthUrl('client-123.apps.googleusercontent.com', 'https://example.com/app');
+    const urlParams = new URLSearchParams(authUrl.split('?')[1]);
+    const validState = urlParams.get('state');
+    assert.ok(validState && validState.length >= 20, 'Must generate high-entropy OAuth state');
+
+    // 2. Simulate attacker redirecting with forged state
+    win.location.hash = '#access_token=attacker_token_123&expires_in=3600&state=forged_attacker_state';
+    await assert.rejects(
+      async () => DriveAuth.handleOAuthRedirectHash(),
+      /OAuth state verification failed/
+    );
+    assert.equal(DriveAuth.getTokenState(), null, 'Must not store token when state verification fails');
+  });
+
+  await t.test('Sanitizes XSS payloads in IDs and blocks prototype pollution in mergeState', () => {
+    const maliciousRemote = {
+      entries: [
+        {
+          id: "entry-1'); alert(1); //",
+          date: '2026-10-21',
+          symptoms: ["restless", "<script>alert(1)</script>"],
+          metrics: JSON.parse('{"__proto__": 999, "constructor": 888, "custom_1": "7.5", "bad_metric": "not-a-number"}'),
+          notes: '<img src=x onerror=alert(1)>',
+          updatedAt: '2026-10-21T12:00:00.000Z'
+        },
+        {
+          id: 'bad-date-entry',
+          date: '2026-10-21"><script>',
+          symptoms: [],
+          updatedAt: '2026-10-21T12:00:00.000Z'
+        }
+      ],
+      customQuestions: [
+        {
+          id: "cq_1'); alert(2); //",
+          name: 'Mood',
+          type: 'invalid_type_injection',
+          unit: 'hrs',
+          updatedAt: '2026-10-21T12:00:00.000Z'
+        }
+      ],
+      deletedIds: {
+        entries: JSON.parse('{"__proto__": "2099-01-01T00:00:00.000Z", "valid_del": "2026-10-21T00:00:00.000Z"}'),
+        customQuestions: {}
+      }
+    };
+
+    const merged = SyncCoordinator.mergeState({ entries: [], customQuestions: [] }, maliciousRemote);
+
+    // Invalid date entry rejected; valid date entry has sanitized ID
+    assert.equal(merged.entries.length, 1);
+    assert.equal(merged.entries[0].id, 'entry-1alert1');
+    assert.equal(Object.prototype.hasOwnProperty.call(merged.entries[0].metrics, '__proto__'), false);
+    assert.equal(Object.prototype.hasOwnProperty.call(merged.entries[0].metrics, 'constructor'), false);
+    assert.equal(merged.entries[0].metrics.custom_1, 7.5);
+    assert.equal(merged.entries[0].metrics.bad_metric, undefined);
+
+    // Custom question ID and type sanitized
+    assert.equal(merged.customQuestions.length, 1);
+    assert.equal(merged.customQuestions[0].id, 'cq_1alert2');
+    assert.equal(merged.customQuestions[0].type, 'boolean');
+
+    // Tombstone map free of __proto__ pollution
+    assert.equal(Object.prototype.hasOwnProperty.call(merged.deletedIds.entries, '__proto__'), false);
+    assert.equal(merged.deletedIds.entries.valid_del, '2026-10-21T00:00:00.000Z');
+  });
+});
