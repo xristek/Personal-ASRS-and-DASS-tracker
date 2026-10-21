@@ -80,6 +80,10 @@ test('Repository Code & Asset Integrity', async (t) => {
       'reportTableBody', 'dassTableBody', 'customReportTableBody',
       // Settings & Custom Questions
       'customQuestionForm', 'customQName', 'customQPrompt', 'customQType', 'customQUnit', 'customQuestionsList',
+      // Storage Mode & Zero-Knowledge Google Drive Sync (Phase 4)
+      'syncHeaderBadge', 'storageModeBadge', 'modeLocalCard', 'modeGdriveCard', 'gdriveSyncPanel',
+      'gdriveClientId', 'gdriveAccountStatus', 'connectGdriveBtn', 'switchGdriveAccountBtn', 'disconnectGdriveBtn',
+      'syncPassphraseInput', 'rememberPassphraseSession', 'autoSyncCheckbox', 'syncNowBtn', 'lastSyncedLabel', 'syncStatusMessage',
       // Theme Toggle & PWA
       'themeToggleBtn', 'themeIconSun', 'themeIconMoon', 'pwaInstallBtn'
     ];

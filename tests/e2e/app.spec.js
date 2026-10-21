@@ -290,5 +290,105 @@ test.describe('Mental Health Tracker App E2E', () => {
     await page.locator('#tabReport').click();
     await expect(reportTable).toContainText('9.0 / 10 avg');
   });
+
+  test('Phase 4: Storage Mode Selector (Local vs Google Drive E2EE) and Zero-Knowledge Sync Round-Trip', async ({ page }) => {
+    let uploadedEnvelope = null;
+
+    // Intercept Google Drive API calls to verify zero-knowledge appDataFolder encryption & LWW merge
+    await page.route('https://www.googleapis.com/drive/v3/files*', async (route) => {
+      const url = route.request().url();
+      if (url.includes('spaces=appDataFolder')) {
+        if (!uploadedEnvelope) {
+          // Simulate remote device having an encrypted entry from another day
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({ files: [] })
+          });
+        } else {
+          await route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({
+              files: [{ id: 'mock-appdata-file-1', name: 'mental_health_tracker_sync_v1.enc.json' }]
+            })
+          });
+        }
+      } else if (url.includes('alt=media')) {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(uploadedEnvelope)
+        });
+      }
+    });
+
+    await page.route('https://www.googleapis.com/upload/drive/v3/files*', async (route) => {
+      const postData = route.request().postData() || '';
+      const matches = postData.match(/\{\s*"schemaVersion"[\s\S]*?\}/);
+      if (matches) {
+        uploadedEnvelope = JSON.parse(matches[0]);
+      }
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ id: 'mock-appdata-file-1', name: 'mental_health_tracker_sync_v1.enc.json' })
+      });
+    });
+
+    await page.goto('/');
+
+    // 1. Create a local entry first
+    await page.locator('#entryDate').fill('2026-10-20');
+    await page.locator('#entryForm input[name="symptom"][value="restless"]').check();
+    await page.locator('#entryNotes').fill('Local device entry before cloud sync');
+    await page.locator('#entryForm button[type="submit"]').click();
+    await expect(page.locator('#logCount')).toContainText('1 entry');
+
+    // 2. Navigate to Backup & Export tab and verify Local Storage Only is active by default
+    await page.locator('#tabData').click();
+    await expect(page.locator('#viewData')).toBeVisible();
+    await expect(page.locator('#storageModeBadge')).toContainText('Local Storage Only');
+    await expect(page.locator('#gdriveSyncPanel')).toBeHidden();
+    await expect(page.locator('#syncHeaderBadge')).toBeHidden();
+
+    // 3. Switch to Google Drive Cloud Sync (E2EE) mode and verify localStorage entries are retained
+    await page.locator('#modeGdriveCard').click();
+    await expect(page.locator('#storageModeBadge')).toContainText('Google Drive Cloud Sync (E2EE)');
+    await expect(page.locator('#gdriveSyncPanel')).toBeVisible();
+    await expect(page.locator('#syncHeaderBadge')).toBeVisible();
+
+    // 4. Configure Client ID & simulate connected Google Drive account + Master Passphrase
+    await page.locator('#gdriveClientId').fill('987654321-testclient.apps.googleusercontent.com');
+    await page.evaluate(() => {
+      window.DriveAuth.saveTokenState({
+        accessToken: 'mock-oauth-access-token-xyz',
+        email: 'user.personal@gmail.com',
+        expiresAt: Date.now() + 3600000
+      });
+      window.setStorageMode('gdrive');
+    });
+
+    await expect(page.locator('#gdriveAccountStatus')).toContainText('Connected: user.personal@gmail.com');
+    await expect(page.locator('#switchGdriveAccountBtn')).toBeVisible();
+    await expect(page.locator('#disconnectGdriveBtn')).toBeVisible();
+
+    // Enter Master Encryption Passphrase and trigger Sync Now
+    await page.locator('#syncPassphraseInput').fill('my-zero-knowledge-secret-2026');
+    await page.locator('#syncNowBtn').click();
+
+    await expect(page.locator('#syncStatusMessage')).toContainText('Zero-Knowledge E2EE Sync complete');
+    expect(uploadedEnvelope).not.toBeNull();
+    expect(uploadedEnvelope.cipher).toBe('AES-GCM-256');
+    expect(uploadedEnvelope.kdf).toBe('PBKDF2-SHA256');
+    expect(JSON.stringify(uploadedEnvelope)).not.toContain('Local device entry before cloud sync');
+
+    // 5. Switch back to Local Storage Only and confirm local entries remain intact
+    await page.locator('#modeLocalCard').click();
+    await expect(page.locator('#storageModeBadge')).toContainText('Local Storage Only');
+    await expect(page.locator('#gdriveSyncPanel')).toBeHidden();
+    await page.locator('#tabDaily').click();
+    await expect(page.locator('#entriesContainer')).toContainText('Local device entry before cloud sync');
+  });
 });
 

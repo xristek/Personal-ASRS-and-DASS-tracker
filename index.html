@@ -222,11 +222,15 @@
     <header class="mb-8">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
         <div>
-          <div class="flex items-center gap-2.5">
+          <div class="flex items-center gap-2.5 flex-wrap">
             <h1 class="text-2xl font-bold text-slate-900 tracking-tight">Daily Mental Health Tracker</h1>
             <span id="offlineStatusBadge" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200" title="All operations run offline directly in your browser">
               <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Offline Ready
             </span>
+            <button type="button" id="syncHeaderBadge" onclick="switchTab('data')" class="hidden inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold bg-indigo-100 text-indigo-800 border border-indigo-200 hover:bg-indigo-200 transition-colors" title="Zero-Knowledge Google Drive E2EE Sync Status">
+              <span id="syncHeaderDot" class="w-1.5 h-1.5 rounded-full bg-indigo-500"></span>
+              <span id="syncHeaderText">Cloud Sync</span>
+            </button>
           </div>
           <p class="text-sm text-slate-600 mt-1">Daily logging and 14-day questionnaire helper for <strong>ASRS v1.1</strong> &amp; <strong>DASS-21</strong>.</p>
         </div>
@@ -1055,6 +1059,140 @@
 
     <!-- TAB 4: BACKUP & DATA MANAGEMENT -->
     <div id="viewData" class="hidden space-y-6">
+      <!-- Storage Mode & Zero-Knowledge Cloud Sync Section -->
+      <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-6 space-y-5">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+          <div>
+            <h2 class="text-lg font-semibold text-slate-900">Storage Mode &amp; Multi-Device Portability</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Choose whether to keep your data strictly in browser <code class="px-1 py-0.5 bg-slate-100 rounded text-[11px]">localStorage</code> or enable Zero-Knowledge End-to-End Encrypted (<code class="px-1 py-0.5 bg-slate-100 rounded text-[11px]">AES-GCM-256</code>) sync to your own Google Drive.</p>
+          </div>
+          <span id="storageModeBadge" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200 self-start sm:self-center">
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span>Local Storage Only</span>
+          </span>
+        </div>
+
+        <!-- Storage Mode Selector Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" role="radiogroup" aria-label="Storage Mode Selection">
+          <button type="button" id="modeLocalCard" onclick="setStorageMode('local')" class="text-left p-4 rounded-xl border-2 border-indigo-600 bg-indigo-50/40 transition-all space-y-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-7 h-7 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs">🔒</span>
+                <span class="text-sm font-bold text-slate-900">Local Storage Only (Default)</span>
+              </div>
+              <span id="modeLocalIndicator" class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-indigo-600 text-white">Active</span>
+            </div>
+            <p class="text-xs text-slate-600 leading-relaxed">
+              100% browser-local storage (<code class="text-[11px]">localStorage</code>). Zero external network calls or cloud accounts required. Use manual JSON/CSV exports to transfer data.
+            </p>
+          </button>
+
+          <button type="button" id="modeGdriveCard" onclick="setStorageMode('gdrive')" class="text-left p-4 rounded-xl border border-slate-200 bg-slate-50/60 hover:border-slate-300 transition-all space-y-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2">
+                <span class="w-7 h-7 rounded-lg bg-indigo-100 text-indigo-700 flex items-center justify-center font-bold text-xs">☁️</span>
+                <span class="text-sm font-bold text-slate-900">Google Drive Cloud Sync (E2EE)</span>
+              </div>
+              <span id="modeGdriveIndicator" class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-slate-200 text-slate-700">Select</span>
+            </div>
+            <p class="text-xs text-slate-600 leading-relaxed">
+              Retains instant <code class="text-[11px]">localStorage</code> access while syncing an <code class="text-[11px]">AES-GCM-256</code> encrypted vault directly to your chosen Google Drive's hidden <code class="text-[11px]">appDataFolder</code>.
+            </p>
+          </button>
+        </div>
+
+        <!-- Google Drive Cloud Sync Configuration Panel (shown when mode === 'gdrive') -->
+        <div id="gdriveSyncPanel" class="hidden pt-4 border-t border-slate-200 space-y-5">
+          <div class="p-3.5 rounded-xl bg-indigo-50/70 border border-indigo-100 text-xs text-indigo-950 space-y-1">
+            <div class="font-bold flex items-center gap-1.5">
+              <span>🛡️</span>
+              <span>Zero-Knowledge Privacy Guarantee</span>
+            </div>
+            <p class="text-indigo-900/90 leading-relaxed">
+              Your tracking logs and custom questions are encrypted in your browser using <strong>PBKDF2 (100,000 SHA-256 iterations)</strong> and <strong>AES-GCM-256</strong> before any upload. No data is ever sent to this website's host, and Google Drive only receives an opaque ciphertext blob in your private <code class="px-1 py-0.5 bg-white/80 rounded text-[11px]">appDataFolder</code>.
+            </p>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            <!-- Step 1: Google Drive Account & OAuth Client ID -->
+            <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/70 space-y-3.5">
+              <div class="flex items-center justify-between gap-2">
+                <div>
+                  <h3 class="text-sm font-bold text-slate-900">1. Google Drive Account Selection</h3>
+                  <p class="text-xs text-slate-500">Specify which Google Drive account stores your encrypted sync file.</p>
+                </div>
+                <span id="gdriveAccountStatus" class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-slate-200 text-slate-700">Not connected</span>
+              </div>
+
+              <div class="space-y-1.5">
+                <label for="gdriveClientId" class="block text-xs font-semibold text-slate-700">Google OAuth 2.0 Web Client ID</label>
+                <input type="text" id="gdriveClientId" oninput="handleSyncConfigChange()" placeholder="e.g. 1234567890-abc.apps.googleusercontent.com" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+              </div>
+
+              <details id="gdriveSetupGuide" class="text-xs text-slate-600 bg-white border border-slate-200 rounded-lg p-2.5">
+                <summary class="font-semibold text-indigo-600 cursor-pointer select-none">How to create a free Google OAuth Client ID (2 mins)</summary>
+                <ol class="list-decimal pl-4 mt-2 space-y-1 text-[11px] text-slate-600 leading-relaxed">
+                  <li>Open the <a href="https://console.cloud.google.com/apis/library/drive.googleapis.com" target="_blank" rel="noopener noreferrer" class="text-indigo-600 underline">Google Cloud Console</a> and enable the <strong>Google Drive API</strong>.</li>
+                  <li>Go to <strong>APIs &amp; Services &rarr; Credentials &rarr; Create Credentials &rarr; OAuth client ID</strong> (Web application).</li>
+                  <li>Add your app URL (e.g. <code class="px-1 bg-slate-100 rounded">https://xristek.github.io</code> or <code class="px-1 bg-slate-100 rounded">http://localhost:8080</code>) under <strong>Authorized JavaScript origins</strong> and <strong>Authorized redirect URIs</strong>.</li>
+                  <li>Paste the generated Client ID above and click <strong>Select Google Drive Account</strong>.</li>
+                </ol>
+              </details>
+
+              <div class="flex flex-wrap items-center gap-2 pt-1">
+                <button type="button" id="connectGdriveBtn" onclick="connectGoogleDriveAccount(false)" class="flex-1 py-2 px-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-xs font-semibold transition-colors shadow-sm flex items-center justify-center gap-1.5">
+                  <span>Select Google Drive Account</span>
+                </button>
+                <button type="button" id="switchGdriveAccountBtn" onclick="connectGoogleDriveAccount(true)" class="hidden py-2 px-3 bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 rounded-lg text-xs font-semibold transition-colors">
+                  Switch Account
+                </button>
+                <button type="button" id="disconnectGdriveBtn" onclick="disconnectGoogleDriveAccount()" class="hidden py-2 px-3 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 rounded-lg text-xs font-semibold transition-colors">
+                  Disconnect
+                </button>
+              </div>
+            </div>
+
+            <!-- Step 2: Zero-Knowledge Passphrase & Sync Actions -->
+            <div class="p-4 rounded-xl border border-slate-200 bg-slate-50/70 space-y-3.5">
+              <div>
+                <h3 class="text-sm font-bold text-slate-900">2. Encryption Passphrase &amp; Sync Controls</h3>
+                <p class="text-xs text-slate-500">Used locally to derive your 256-bit <code class="text-[11px]">AES-GCM</code> key. Never transmitted.</p>
+              </div>
+
+              <div class="space-y-1.5">
+                <label for="syncPassphraseInput" class="block text-xs font-semibold text-slate-700">Master Encryption Passphrase</label>
+                <div class="flex items-center gap-1.5">
+                  <input type="password" id="syncPassphraseInput" oninput="handleSyncPassphraseInput()" placeholder="Enter strong passphrase (min 8 characters)..." class="flex-1 px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                  <button type="button" id="togglePassphraseBtn" onclick="toggleSyncPassphraseVisibility()" class="px-2.5 py-2 bg-white hover:bg-slate-100 text-slate-600 border border-slate-300 rounded-lg text-xs font-semibold transition-colors">
+                    Show
+                  </button>
+                </div>
+              </div>
+
+              <div class="space-y-2 pt-0.5">
+                <label class="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
+                  <input type="checkbox" id="rememberPassphraseSession" onchange="handleSyncConfigChange()" class="h-3.5 w-3.5 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500">
+                  <span>Remember passphrase in <code class="text-[11px]">sessionStorage</code> until browser tab closes</span>
+                </label>
+                <label class="flex items-center gap-2 text-xs text-slate-700 cursor-pointer">
+                  <input type="checkbox" id="autoSyncCheckbox" onchange="handleSyncConfigChange()" class="h-3.5 w-3.5 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500" checked>
+                  <span>Automatically sync with Google Drive when entries or questions change</span>
+                </label>
+              </div>
+
+              <div class="pt-1 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                <button type="button" id="syncNowBtn" onclick="triggerManualSync()" class="py-2.5 px-4 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold transition-colors shadow-sm flex items-center justify-center gap-1.5">
+                  <span>🔄 Sync Now (Encrypt &amp; Merge)</span>
+                </button>
+                <span id="lastSyncedLabel" class="text-[11px] text-slate-500 font-medium">Last synced: Never</span>
+              </div>
+            </div>
+          </div>
+
+          <div id="syncStatusMessage" class="hidden p-3 rounded-lg text-xs font-medium"></div>
+        </div>
+      </section>
+
       <section class="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
         <h2 class="text-lg font-semibold text-slate-900 mb-1">Data Backup &amp; PWA Configuration</h2>
         <p class="text-xs text-slate-500 mb-6">Manage data backups or configure offline Progressive Web App installation for your mobile device.</p>
@@ -1321,13 +1459,16 @@
       refreshSymptomRegistry();
     }
 
-    function saveCustomQuestions() {
+    function saveCustomQuestions(skipAutoSync = false) {
       try {
         localStorage.setItem('mental_health_tracker_custom_questions_v2', JSON.stringify(customQuestions));
       } catch (e) {
         console.warn('Unable to persist custom questions to localStorage', e);
       }
       refreshSymptomRegistry();
+      if (!skipAutoSync && window.SyncCoordinator && typeof window.SyncCoordinator.scheduleAutoSync === 'function') {
+        window.SyncCoordinator.scheduleAutoSync();
+      }
     }
 
     refreshSymptomRegistry();
@@ -1371,11 +1512,14 @@
       }
     }
 
-    function saveToStorage() {
+    function saveToStorage(skipAutoSync = false) {
       try {
         localStorage.setItem('mental_health_tracker_entries_v6', JSON.stringify(entries));
       } catch (e) {
         console.warn('Unable to persist to localStorage', e);
+      }
+      if (!skipAutoSync && window.SyncCoordinator && typeof window.SyncCoordinator.scheduleAutoSync === 'function') {
+        window.SyncCoordinator.scheduleAutoSync();
       }
     }
 
@@ -1668,6 +1812,7 @@
 
       if (!name) return;
 
+      const nowIso = new Date().toISOString();
       if (editId) {
         const qIndex = customQuestions.findIndex(q => q.id === editId);
         if (qIndex >= 0) {
@@ -1675,7 +1820,9 @@
           customQuestions[qIndex].question = prompt;
           customQuestions[qIndex].type = type;
           customQuestions[qIndex].unit = unit;
+          customQuestions[qIndex].updatedAt = nowIso;
         }
+        if (window.SyncCoordinator) window.SyncCoordinator.clearDeletion('customQuestions', editId);
         statusEl.textContent = 'Question updated successfully!';
       } else {
         const newId = 'custom_' + Date.now();
@@ -1684,8 +1831,10 @@
           name: name,
           question: prompt,
           type: type,
-          unit: unit
+          unit: unit,
+          updatedAt: nowIso
         });
+        if (window.SyncCoordinator) window.SyncCoordinator.clearDeletion('customQuestions', newId);
         statusEl.textContent = 'Question added!';
       }
 
@@ -1755,6 +1904,9 @@
 
     window.executeDeleteCustomQuestion = function() {
       if (!pendingDeleteCustomQId) return;
+      if (window.SyncCoordinator) {
+        window.SyncCoordinator.recordDeletion('customQuestions', pendingDeleteCustomQId);
+      }
       customQuestions = customQuestions.filter(q => q.id !== pendingDeleteCustomQId);
       saveCustomQuestions();
       closeDeleteCustomQModal();
@@ -2178,6 +2330,9 @@
     window.deleteEntry = function(id) {
       if (editingEntryId === id) {
         exitEditMode(true);
+      }
+      if (window.SyncCoordinator) {
+        window.SyncCoordinator.recordDeletion('entries', id);
       }
       entries = entries.filter(item => item.id !== id);
       saveToStorage();
@@ -3516,6 +3671,800 @@
       }
     }
 
+    // 7B. Zero-Knowledge E2EE Cloud Sync Engine (SubtleCrypto + Google Drive AppData + LWW Merge)
+    const SYNC_CONFIG_STORAGE_KEY = 'mental_health_tracker_sync_config_v1';
+    const SYNC_DELETED_IDS_KEY = 'mental_health_tracker_deleted_ids_v1';
+    const SYNC_TOKEN_SESSION_KEY = 'mental_health_tracker_gdrive_token_v1';
+    const SYNC_PASSPHRASE_SESSION_KEY = 'mental_health_tracker_sync_passphrase_v1';
+
+    function uint8ToBase64(bytes) {
+      let binary = '';
+      for (let i = 0; i < bytes.byteLength; i++) {
+        binary += String.fromCharCode(bytes[i]);
+      }
+      return btoa(binary);
+    }
+
+    function base64ToUint8(base64Str) {
+      const binary = atob(base64Str);
+      const bytes = new Uint8Array(binary.length);
+      for (let i = 0; i < binary.length; i++) {
+        bytes[i] = binary.charCodeAt(i);
+      }
+      return bytes;
+    }
+
+    function base64UrlEncode(bytes) {
+      return uint8ToBase64(bytes)
+        .replace(/\+/g, '-')
+        .replace(/\//g, '_')
+        .replace(/=+$/, '');
+    }
+
+    window.CryptoEngine = {
+      PBKDF2_ITERATIONS: 100000,
+      SALT_BYTES: 16,
+      IV_BYTES: 12,
+
+      async deriveKey(passphrase, saltBytes, iterations = 100000) {
+        if (!passphrase || typeof passphrase !== 'string') {
+          throw new Error('A non-empty encryption passphrase is required.');
+        }
+        const enc = new TextEncoder();
+        const keyMaterial = await window.crypto.subtle.importKey(
+          'raw',
+          enc.encode(passphrase),
+          { name: 'PBKDF2' },
+          false,
+          ['deriveKey']
+        );
+        return window.crypto.subtle.deriveKey(
+          {
+            name: 'PBKDF2',
+            salt: saltBytes,
+            iterations: iterations,
+            hash: 'SHA-256'
+          },
+          keyMaterial,
+          { name: 'AES-GCM', length: 256 },
+          false,
+          ['encrypt', 'decrypt']
+        );
+      },
+
+      async encryptPayload(plaintextObj, passphrase) {
+        const salt = window.crypto.getRandomValues(new Uint8Array(this.SALT_BYTES));
+        const iv = window.crypto.getRandomValues(new Uint8Array(this.IV_BYTES));
+        const key = await this.deriveKey(passphrase, salt, this.PBKDF2_ITERATIONS);
+        const encodedPlaintext = new TextEncoder().encode(JSON.stringify(plaintextObj));
+        const cipherBuffer = await window.crypto.subtle.encrypt(
+          { name: 'AES-GCM', iv: iv },
+          key,
+          encodedPlaintext
+        );
+        return {
+          schemaVersion: 1,
+          kdf: 'PBKDF2-SHA256',
+          iterations: this.PBKDF2_ITERATIONS,
+          cipher: 'AES-GCM-256',
+          salt: uint8ToBase64(salt),
+          iv: uint8ToBase64(iv),
+          ciphertext: uint8ToBase64(new Uint8Array(cipherBuffer)),
+          encryptedAt: new Date().toISOString()
+        };
+      },
+
+      async decryptPayload(encryptedEnvelope, passphrase) {
+        if (
+          !encryptedEnvelope ||
+          typeof encryptedEnvelope !== 'object' ||
+          !encryptedEnvelope.salt ||
+          !encryptedEnvelope.iv ||
+          !encryptedEnvelope.ciphertext
+        ) {
+          throw new Error('Invalid encrypted sync envelope.');
+        }
+        const salt = base64ToUint8(encryptedEnvelope.salt);
+        const iv = base64ToUint8(encryptedEnvelope.iv);
+        const ciphertext = base64ToUint8(encryptedEnvelope.ciphertext);
+        const iterations = Number(encryptedEnvelope.iterations) || this.PBKDF2_ITERATIONS;
+        const key = await this.deriveKey(passphrase, salt, iterations);
+        try {
+          const plainBuffer = await window.crypto.subtle.decrypt(
+            { name: 'AES-GCM', iv: iv },
+            key,
+            ciphertext
+          );
+          const decodedText = new TextDecoder().decode(plainBuffer);
+          return JSON.parse(decodedText);
+        } catch (err) {
+          throw new Error('Decryption failed: invalid passphrase or tampered ciphertext.');
+        }
+      }
+    };
+
+    window.DriveAuth = {
+      SCOPES: 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/userinfo.email',
+
+      async generatePKCE() {
+        const randomBytes = window.crypto.getRandomValues(new Uint8Array(32));
+        const codeVerifier = base64UrlEncode(randomBytes);
+        const digestBuffer = await window.crypto.subtle.digest(
+          'SHA-256',
+          new TextEncoder().encode(codeVerifier)
+        );
+        const codeChallenge = base64UrlEncode(new Uint8Array(digestBuffer));
+        return { codeVerifier, codeChallenge };
+      },
+
+      buildAuthUrl(clientId, redirectUri, state = 'gdrive_sync') {
+        const cleanRedirect = redirectUri || (window.location.origin + window.location.pathname);
+        const params = new URLSearchParams({
+          client_id: clientId.trim(),
+          redirect_uri: cleanRedirect,
+          response_type: 'token',
+          scope: this.SCOPES,
+          include_granted_scopes: 'true',
+          prompt: 'select_account',
+          state: state
+        });
+        return `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
+      },
+
+      getTokenState() {
+        try {
+          const raw = sessionStorage.getItem(SYNC_TOKEN_SESSION_KEY);
+          if (!raw) return null;
+          const parsed = JSON.parse(raw);
+          if (parsed.expiresAt && Date.now() > parsed.expiresAt) {
+            sessionStorage.removeItem(SYNC_TOKEN_SESSION_KEY);
+            return null;
+          }
+          return parsed;
+        } catch (e) {
+          return null;
+        }
+      },
+
+      saveTokenState(tokenData) {
+        try {
+          sessionStorage.setItem(SYNC_TOKEN_SESSION_KEY, JSON.stringify(tokenData));
+        } catch (e) {}
+      },
+
+      clearTokenState() {
+        try {
+          sessionStorage.removeItem(SYNC_TOKEN_SESSION_KEY);
+        } catch (e) {}
+      },
+
+      async fetchUserProfile(accessToken) {
+        const resp = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { Authorization: `Bearer ${accessToken}` }
+        });
+        if (!resp.ok) {
+          throw new Error(`Failed to fetch Google account info (${resp.status})`);
+        }
+        return resp.json();
+      },
+
+      async handleOAuthRedirectHash() {
+        const hash = window.location.hash;
+        if (!hash || !hash.includes('access_token=')) return false;
+        const params = new URLSearchParams(hash.replace(/^#/, ''));
+        const accessToken = params.get('access_token');
+        const expiresIn = parseInt(params.get('expires_in') || '3600', 10);
+        if (!accessToken) return false;
+
+        // Clean URL hash immediately so token is not left in address bar
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState(null, document.title, window.location.pathname + window.location.search);
+        }
+
+        let email = 'Connected Google Account';
+        try {
+          const profile = await this.fetchUserProfile(accessToken);
+          if (profile && profile.email) {
+            email = profile.email;
+          }
+        } catch (e) {}
+
+        this.saveTokenState({
+          accessToken,
+          email,
+          expiresAt: Date.now() + (expiresIn * 1000)
+        });
+
+        const cfg = window.SyncCoordinator.loadConfig();
+        cfg.mode = 'gdrive';
+        cfg.accountEmail = email;
+        window.SyncCoordinator.saveConfig(cfg);
+        return true;
+      }
+    };
+
+    window.DriveClient = {
+      SYNC_FILENAME: 'mental_health_tracker_sync_v1.enc.json',
+
+      async findSyncFile(accessToken) {
+        const q = encodeURIComponent(`name = '${this.SYNC_FILENAME}' and trashed = false`);
+        const url = `https://www.googleapis.com/drive/v3/files?spaces=appDataFolder&q=${q}&fields=files(id,name,modifiedTime)`;
+        const resp = await fetch(url, {
+          headers: { Authorization: `Bearer ${accessToken}` }
+        });
+        if (!resp.ok) {
+          throw new Error(`Google Drive list failed (${resp.status})`);
+        }
+        const data = await resp.json();
+        const files = Array.isArray(data.files) ? data.files : [];
+        return files.length > 0 ? files[0] : null;
+      },
+
+      async downloadFile(accessToken, fileId) {
+        const url = `https://www.googleapis.com/drive/v3/files/${encodeURIComponent(fileId)}?alt=media`;
+        const resp = await fetch(url, {
+          headers: { Authorization: `Bearer ${accessToken}` }
+        });
+        if (!resp.ok) {
+          throw new Error(`Google Drive download failed (${resp.status})`);
+        }
+        return resp.json();
+      },
+
+      async uploadFile(accessToken, encryptedEnvelope, existingFileId = null) {
+        const metadata = existingFileId
+          ? { name: this.SYNC_FILENAME }
+          : { name: this.SYNC_FILENAME, parents: ['appDataFolder'] };
+
+        const boundary = '-------mht_sync_boundary_' + Date.now();
+        const delimiter = `\r\n--${boundary}\r\n`;
+        const closeDelimiter = `\r\n--${boundary}--`;
+
+        const multipartBody =
+          delimiter +
+          'Content-Type: application/json; charset=UTF-8\r\n\r\n' +
+          JSON.stringify(metadata) +
+          delimiter +
+          'Content-Type: application/json; charset=UTF-8\r\n\r\n' +
+          JSON.stringify(encryptedEnvelope) +
+          closeDelimiter;
+
+        const endpoint = existingFileId
+          ? `https://www.googleapis.com/upload/drive/v3/files/${encodeURIComponent(existingFileId)}?uploadType=multipart&fields=id,name,modifiedTime`
+          : 'https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,modifiedTime';
+
+        const method = existingFileId ? 'PATCH' : 'POST';
+        const resp = await fetch(endpoint, {
+          method,
+          headers: {
+            Authorization: `Bearer ${accessToken}`,
+            'Content-Type': `multipart/related; boundary=${boundary}`
+          },
+          body: multipartBody
+        });
+
+        if (!resp.ok) {
+          throw new Error(`Google Drive upload failed (${resp.status})`);
+        }
+        return resp.json();
+      }
+    };
+
+    window.SyncCoordinator = {
+      autoSyncTimer: null,
+      isSyncing: false,
+
+      loadConfig() {
+        const defaults = {
+          mode: 'local',
+          clientId: '',
+          accountEmail: '',
+          autoSync: true,
+          rememberPassphrase: false,
+          lastSyncedAt: null,
+          remoteFileId: null
+        };
+        try {
+          const raw = localStorage.getItem(SYNC_CONFIG_STORAGE_KEY);
+          if (!raw) return defaults;
+          return { ...defaults, ...JSON.parse(raw) };
+        } catch (e) {
+          return defaults;
+        }
+      },
+
+      saveConfig(cfg) {
+        try {
+          localStorage.setItem(SYNC_CONFIG_STORAGE_KEY, JSON.stringify(cfg));
+        } catch (e) {}
+      },
+
+      loadDeletedIds() {
+        const defaults = { entries: {}, customQuestions: {} };
+        try {
+          const raw = localStorage.getItem(SYNC_DELETED_IDS_KEY);
+          if (!raw) return defaults;
+          const parsed = JSON.parse(raw);
+          return {
+            entries: (parsed && typeof parsed.entries === 'object') ? parsed.entries : {},
+            customQuestions: (parsed && typeof parsed.customQuestions === 'object') ? parsed.customQuestions : {}
+          };
+        } catch (e) {
+          return defaults;
+        }
+      },
+
+      saveDeletedIds(deletedIds) {
+        try {
+          localStorage.setItem(SYNC_DELETED_IDS_KEY, JSON.stringify(deletedIds));
+        } catch (e) {}
+      },
+
+      recordDeletion(collection, id, timestampIso) {
+        if (!id) return;
+        const deleted = this.loadDeletedIds();
+        if (!deleted[collection]) deleted[collection] = {};
+        deleted[collection][id] = timestampIso || new Date().toISOString();
+        this.saveDeletedIds(deleted);
+      },
+
+      clearDeletion(collection, id) {
+        if (!id) return;
+        const deleted = this.loadDeletedIds();
+        if (deleted[collection] && deleted[collection][id]) {
+          delete deleted[collection][id];
+          this.saveDeletedIds(deleted);
+        }
+      },
+
+      mergeState(localState, remoteState) {
+        const safeLocal = localState || {};
+        const safeRemote = remoteState || {};
+
+        const localDeleted = safeLocal.deletedIds || { entries: {}, customQuestions: {} };
+        const remoteDeleted = safeRemote.deletedIds || { entries: {}, customQuestions: {} };
+
+        const mergedDeleted = {
+          entries: { ...(localDeleted.entries || {}) },
+          customQuestions: { ...(localDeleted.customQuestions || {}) }
+        };
+
+        for (const [id, ts] of Object.entries(remoteDeleted.entries || {})) {
+          if (!mergedDeleted.entries[id] || ts > mergedDeleted.entries[id]) {
+            mergedDeleted.entries[id] = ts;
+          }
+        }
+        for (const [id, ts] of Object.entries(remoteDeleted.customQuestions || {})) {
+          if (!mergedDeleted.customQuestions[id] || ts > mergedDeleted.customQuestions[id]) {
+            mergedDeleted.customQuestions[id] = ts;
+          }
+        }
+
+        const mergeCollectionById = (localArr, remoteArr, tombstones) => {
+          const byId = new Map();
+          const allItems = [...(Array.isArray(localArr) ? localArr : []), ...(Array.isArray(remoteArr) ? remoteArr : [])];
+
+          for (const item of allItems) {
+            if (!item || !item.id) continue;
+            const itemTs = item.updatedAt || '1970-01-01T00:00:00.000Z';
+            const deletedTs = tombstones[item.id];
+            if (deletedTs && deletedTs >= itemTs) {
+              continue;
+            }
+            const existing = byId.get(item.id);
+            if (!existing) {
+              byId.set(item.id, { ...item });
+            } else {
+              const existingTs = existing.updatedAt || '1970-01-01T00:00:00.000Z';
+              if (itemTs > existingTs) {
+                byId.set(item.id, { ...item });
+              }
+            }
+          }
+          return Array.from(byId.values());
+        };
+
+        let mergedEntries = mergeCollectionById(safeLocal.entries, safeRemote.entries, mergedDeleted.entries);
+
+        // Also deduplicate entries by calendar date (LWW by updatedAt) so each date has at most one canonical log
+        const entriesByDate = new Map();
+        for (const entry of mergedEntries) {
+          if (!entry.date) continue;
+          const normalized = {
+            ...entry,
+            symptoms: Array.isArray(entry.symptoms) ? entry.symptoms : [],
+            metrics: (entry.metrics && typeof entry.metrics === 'object') ? entry.metrics : {}
+          };
+          const existing = entriesByDate.get(normalized.date);
+          if (!existing) {
+            entriesByDate.set(normalized.date, normalized);
+          } else {
+            const existingTs = existing.updatedAt || '1970-01-01T00:00:00.000Z';
+            const candidateTs = normalized.updatedAt || '1970-01-01T00:00:00.000Z';
+            if (candidateTs > existingTs) {
+              entriesByDate.set(normalized.date, normalized);
+            }
+          }
+        }
+        mergedEntries = Array.from(entriesByDate.values()).sort((a, b) => b.date.localeCompare(a.date));
+
+        const mergedCustomQuestions = mergeCollectionById(
+          safeLocal.customQuestions,
+          safeRemote.customQuestions,
+          mergedDeleted.customQuestions
+        ).map(q => ({
+          ...q,
+          type: q.type || 'boolean',
+          unit: q.unit || ''
+        }));
+
+        return {
+          schemaVersion: 2,
+          entries: mergedEntries,
+          customQuestions: mergedCustomQuestions,
+          deletedIds: mergedDeleted,
+          syncedAt: new Date().toISOString()
+        };
+      },
+
+      getPassphrase() {
+        const input = document.getElementById('syncPassphraseInput');
+        if (input && input.value) return input.value;
+        try {
+          return sessionStorage.getItem(SYNC_PASSPHRASE_SESSION_KEY) || '';
+        } catch (e) {
+          return '';
+        }
+      },
+
+      async syncNow(options = {}) {
+        if (this.isSyncing) return null;
+        const cfg = this.loadConfig();
+        if (cfg.mode !== 'gdrive') {
+          showSyncStatus('Switch Storage Mode to Google Drive Cloud Sync first.', 'amber');
+          return null;
+        }
+
+        const tokenState = window.DriveAuth.getTokenState();
+        const accessToken = options.accessToken || (tokenState && tokenState.accessToken);
+        if (!accessToken) {
+          showSyncStatus('Please select and connect a Google Drive account before syncing.', 'amber');
+          updateSyncUI();
+          return null;
+        }
+
+        const passphrase = options.passphrase || this.getPassphrase();
+        if (!passphrase || passphrase.length < 8) {
+          showSyncStatus('Please enter your Master Encryption Passphrase (at least 8 characters).', 'amber');
+          return null;
+        }
+
+        this.isSyncing = true;
+        updateSyncUI('syncing');
+        if (!options.silent) {
+          showSyncStatus('Encrypting & syncing with Google Drive appDataFolder...', 'indigo');
+        }
+
+        try {
+          const existingFile = await window.DriveClient.findSyncFile(accessToken);
+          let remoteState = null;
+
+          if (existingFile && existingFile.id) {
+            const encryptedRemote = await window.DriveClient.downloadFile(accessToken, existingFile.id);
+            if (encryptedRemote && encryptedRemote.ciphertext) {
+              remoteState = await window.CryptoEngine.decryptPayload(encryptedRemote, passphrase);
+            }
+          }
+
+          const localState = {
+            entries: entries,
+            customQuestions: customQuestions,
+            deletedIds: this.loadDeletedIds()
+          };
+
+          const mergedState = remoteState
+            ? this.mergeState(localState, remoteState)
+            : this.mergeState(localState, { entries: [], customQuestions: [], deletedIds: { entries: {}, customQuestions: {} } });
+
+          // Persist merged state locally without re-triggering auto-sync loop
+          entries = mergedState.entries;
+          customQuestions = mergedState.customQuestions;
+          this.saveDeletedIds(mergedState.deletedIds);
+          saveCustomQuestions(true);
+          saveToStorage(true);
+          renderCustomCheckboxes();
+          renderCustomQuestionsList();
+          renderEntries();
+          generateReport();
+
+          // Encrypt merged state with fresh salt + IV and upload to Google Drive appDataFolder
+          const encryptedBlob = await window.CryptoEngine.encryptPayload(mergedState, passphrase);
+          const uploadedMeta = await window.DriveClient.uploadFile(
+            accessToken,
+            encryptedBlob,
+            existingFile ? existingFile.id : null
+          );
+
+          cfg.lastSyncedAt = new Date().toISOString();
+          if (uploadedMeta && uploadedMeta.id) {
+            cfg.remoteFileId = uploadedMeta.id;
+          }
+          if (tokenState && tokenState.email) {
+            cfg.accountEmail = tokenState.email;
+          }
+          this.saveConfig(cfg);
+
+          this.isSyncing = false;
+          updateSyncUI('synced');
+          showSyncStatus(
+            `Zero-Knowledge E2EE Sync complete (${entries.length} entries, ${customQuestions.length} custom questions).`,
+            'emerald'
+          );
+          return mergedState;
+        } catch (err) {
+          this.isSyncing = false;
+          updateSyncUI('error');
+          showSyncStatus(`Sync error: ${err.message || 'Unable to complete sync.'}`, 'rose');
+          throw err;
+        }
+      },
+
+      scheduleAutoSync() {
+        const cfg = this.loadConfig();
+        if (cfg.mode !== 'gdrive' || !cfg.autoSync) return;
+        const tokenState = window.DriveAuth.getTokenState();
+        const passphrase = this.getPassphrase();
+        if (!tokenState || !tokenState.accessToken || !passphrase || passphrase.length < 8) return;
+
+        if (this.autoSyncTimer) {
+          clearTimeout(this.autoSyncTimer);
+        }
+        this.autoSyncTimer = setTimeout(() => {
+          this.syncNow({ silent: true }).catch(() => {});
+        }, 400);
+      }
+    };
+
+    function showSyncStatus(message, tone = 'indigo') {
+      const el = document.getElementById('syncStatusMessage');
+      if (!el) return;
+      const toneMap = {
+        emerald: 'bg-emerald-50 text-emerald-800 border border-emerald-200',
+        amber: 'bg-amber-50 text-amber-800 border border-amber-200',
+        rose: 'bg-rose-50 text-rose-800 border border-rose-200',
+        indigo: 'bg-indigo-50 text-indigo-800 border border-indigo-200'
+      };
+      el.className = `p-3 rounded-lg text-xs font-medium ${toneMap[tone] || toneMap.indigo}`;
+      el.textContent = message;
+      el.classList.remove('hidden');
+    }
+
+    function updateSyncUI(transientState = null) {
+      const cfg = window.SyncCoordinator.loadConfig();
+      const tokenState = window.DriveAuth.getTokenState();
+      const isGdrive = cfg.mode === 'gdrive';
+      const isConnected = Boolean(tokenState && tokenState.accessToken);
+      const email = (tokenState && tokenState.email) || cfg.accountEmail || '';
+
+      const modeLocalCard = document.getElementById('modeLocalCard');
+      const modeGdriveCard = document.getElementById('modeGdriveCard');
+      const modeLocalIndicator = document.getElementById('modeLocalIndicator');
+      const modeGdriveIndicator = document.getElementById('modeGdriveIndicator');
+      const storageModeBadge = document.getElementById('storageModeBadge');
+      const gdriveSyncPanel = document.getElementById('gdriveSyncPanel');
+      const syncHeaderBadge = document.getElementById('syncHeaderBadge');
+      const syncHeaderText = document.getElementById('syncHeaderText');
+      const syncHeaderDot = document.getElementById('syncHeaderDot');
+
+      if (modeLocalCard && modeGdriveCard) {
+        if (isGdrive) {
+          modeGdriveCard.className = 'text-left p-4 rounded-xl border-2 border-indigo-600 bg-indigo-50/40 transition-all space-y-2 focus:outline-none focus:ring-2 focus:ring-indigo-500';
+          modeLocalCard.className = 'text-left p-4 rounded-xl border border-slate-200 bg-slate-50/60 hover:border-slate-300 transition-all space-y-2 focus:outline-none focus:ring-2 focus:ring-indigo-500';
+          if (modeGdriveIndicator) {
+            modeGdriveIndicator.textContent = 'Active';
+            modeGdriveIndicator.className = 'text-[11px] font-bold px-2 py-0.5 rounded-full bg-indigo-600 text-white';
+          }
+          if (modeLocalIndicator) {
+            modeLocalIndicator.textContent = 'Select';
+            modeLocalIndicator.className = 'text-[11px] font-semibold px-2 py-0.5 rounded-full bg-slate-200 text-slate-700';
+          }
+        } else {
+          modeLocalCard.className = 'text-left p-4 rounded-xl border-2 border-indigo-600 bg-indigo-50/40 transition-all space-y-2 focus:outline-none focus:ring-2 focus:ring-indigo-500';
+          modeGdriveCard.className = 'text-left p-4 rounded-xl border border-slate-200 bg-slate-50/60 hover:border-slate-300 transition-all space-y-2 focus:outline-none focus:ring-2 focus:ring-indigo-500';
+          if (modeLocalIndicator) {
+            modeLocalIndicator.textContent = 'Active';
+            modeLocalIndicator.className = 'text-[11px] font-bold px-2 py-0.5 rounded-full bg-indigo-600 text-white';
+          }
+          if (modeGdriveIndicator) {
+            modeGdriveIndicator.textContent = 'Select';
+            modeGdriveIndicator.className = 'text-[11px] font-semibold px-2 py-0.5 rounded-full bg-slate-200 text-slate-700';
+          }
+        }
+      }
+
+      if (storageModeBadge) {
+        if (isGdrive) {
+          storageModeBadge.className = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 self-start sm:self-center';
+          storageModeBadge.innerHTML = `<span class="w-2 h-2 rounded-full ${isConnected ? 'bg-emerald-500' : 'bg-amber-500'}"></span><span>Google Drive Cloud Sync (E2EE)</span>`;
+        } else {
+          storageModeBadge.className = 'inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-700 border border-slate-200 self-start sm:self-center';
+          storageModeBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span><span>Local Storage Only</span>`;
+        }
+      }
+
+      if (gdriveSyncPanel) {
+        if (isGdrive) gdriveSyncPanel.classList.remove('hidden');
+        else gdriveSyncPanel.classList.add('hidden');
+      }
+
+      if (syncHeaderBadge) {
+        if (isGdrive) {
+          syncHeaderBadge.classList.remove('hidden');
+          if (transientState === 'syncing') {
+            if (syncHeaderText) syncHeaderText.textContent = 'Syncing E2EE...';
+            if (syncHeaderDot) syncHeaderDot.className = 'w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse';
+          } else if (transientState === 'error') {
+            if (syncHeaderText) syncHeaderText.textContent = 'Sync Error';
+            if (syncHeaderDot) syncHeaderDot.className = 'w-1.5 h-1.5 rounded-full bg-rose-500';
+          } else if (isConnected) {
+            if (syncHeaderText) syncHeaderText.textContent = email ? `Synced (${email})` : 'Cloud Sync Ready';
+            if (syncHeaderDot) syncHeaderDot.className = 'w-1.5 h-1.5 rounded-full bg-emerald-500';
+          } else {
+            if (syncHeaderText) syncHeaderText.textContent = 'Cloud Sync (Connect Drive)';
+            if (syncHeaderDot) syncHeaderDot.className = 'w-1.5 h-1.5 rounded-full bg-amber-500';
+          }
+        } else {
+          syncHeaderBadge.classList.add('hidden');
+        }
+      }
+
+      const accountStatusEl = document.getElementById('gdriveAccountStatus');
+      const connectBtn = document.getElementById('connectGdriveBtn');
+      const switchBtn = document.getElementById('switchGdriveAccountBtn');
+      const disconnectBtn = document.getElementById('disconnectGdriveBtn');
+
+      if (accountStatusEl) {
+        if (isConnected) {
+          accountStatusEl.textContent = email ? `Connected: ${email}` : 'Connected';
+          accountStatusEl.className = 'text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200';
+        } else if (email) {
+          accountStatusEl.textContent = `Session expired (${email})`;
+          accountStatusEl.className = 'text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200';
+        } else {
+          accountStatusEl.textContent = 'Not connected';
+          accountStatusEl.className = 'text-[11px] font-semibold px-2.5 py-0.5 rounded-full bg-slate-200 text-slate-700';
+        }
+      }
+
+      if (connectBtn && switchBtn && disconnectBtn) {
+        if (isConnected) {
+          connectBtn.textContent = 'Reconnect Account';
+          switchBtn.classList.remove('hidden');
+          disconnectBtn.classList.remove('hidden');
+        } else {
+          connectBtn.textContent = 'Select Google Drive Account';
+          if (email) {
+            switchBtn.classList.remove('hidden');
+            disconnectBtn.classList.remove('hidden');
+          } else {
+            switchBtn.classList.add('hidden');
+            disconnectBtn.classList.add('hidden');
+          }
+        }
+      }
+
+      const lastSyncedLabel = document.getElementById('lastSyncedLabel');
+      if (lastSyncedLabel) {
+        if (cfg.lastSyncedAt) {
+          const dt = new Date(cfg.lastSyncedAt);
+          lastSyncedLabel.textContent = `Last synced: ${dt.toLocaleString()}`;
+        } else {
+          lastSyncedLabel.textContent = 'Last synced: Never';
+        }
+      }
+    }
+
+    function initSyncControlsFromConfig() {
+      const cfg = window.SyncCoordinator.loadConfig();
+      const clientIdInput = document.getElementById('gdriveClientId');
+      const autoSyncCb = document.getElementById('autoSyncCheckbox');
+      const rememberCb = document.getElementById('rememberPassphraseSession');
+      const passphraseInput = document.getElementById('syncPassphraseInput');
+
+      if (clientIdInput) clientIdInput.value = cfg.clientId || '';
+      if (autoSyncCb) autoSyncCb.checked = cfg.autoSync !== false;
+      if (rememberCb) rememberCb.checked = Boolean(cfg.rememberPassphrase);
+
+      if (cfg.rememberPassphrase && passphraseInput) {
+        try {
+          const savedPass = sessionStorage.getItem(SYNC_PASSPHRASE_SESSION_KEY);
+          if (savedPass) passphraseInput.value = savedPass;
+        } catch (e) {}
+      }
+      updateSyncUI();
+    }
+
+    window.setStorageMode = function(mode) {
+      const normalized = mode === 'gdrive' ? 'gdrive' : 'local';
+      const cfg = window.SyncCoordinator.loadConfig();
+      cfg.mode = normalized;
+      window.SyncCoordinator.saveConfig(cfg);
+      updateSyncUI();
+    };
+
+    window.handleSyncConfigChange = function() {
+      const cfg = window.SyncCoordinator.loadConfig();
+      const clientIdInput = document.getElementById('gdriveClientId');
+      const autoSyncCb = document.getElementById('autoSyncCheckbox');
+      const rememberCb = document.getElementById('rememberPassphraseSession');
+      const passphraseInput = document.getElementById('syncPassphraseInput');
+
+      if (clientIdInput) cfg.clientId = clientIdInput.value.trim();
+      if (autoSyncCb) cfg.autoSync = Boolean(autoSyncCb.checked);
+      if (rememberCb) cfg.rememberPassphrase = Boolean(rememberCb.checked);
+
+      try {
+        if (cfg.rememberPassphrase && passphraseInput && passphraseInput.value) {
+          sessionStorage.setItem(SYNC_PASSPHRASE_SESSION_KEY, passphraseInput.value);
+        } else if (!cfg.rememberPassphrase) {
+          sessionStorage.removeItem(SYNC_PASSPHRASE_SESSION_KEY);
+        }
+      } catch (e) {}
+
+      window.SyncCoordinator.saveConfig(cfg);
+      updateSyncUI();
+    };
+
+    window.handleSyncPassphraseInput = function() {
+      const cfg = window.SyncCoordinator.loadConfig();
+      const passphraseInput = document.getElementById('syncPassphraseInput');
+      if (cfg.rememberPassphrase && passphraseInput) {
+        try {
+          sessionStorage.setItem(SYNC_PASSPHRASE_SESSION_KEY, passphraseInput.value);
+        } catch (e) {}
+      }
+    };
+
+    window.toggleSyncPassphraseVisibility = function() {
+      const input = document.getElementById('syncPassphraseInput');
+      const btn = document.getElementById('togglePassphraseBtn');
+      if (!input || !btn) return;
+      if (input.type === 'password') {
+        input.type = 'text';
+        btn.textContent = 'Hide';
+      } else {
+        input.type = 'password';
+        btn.textContent = 'Show';
+      }
+    };
+
+    window.connectGoogleDriveAccount = function() {
+      handleSyncConfigChange();
+      const cfg = window.SyncCoordinator.loadConfig();
+      if (!cfg.clientId) {
+        showSyncStatus('Please enter your Google OAuth 2.0 Web Client ID first (see setup guide above).', 'amber');
+        const input = document.getElementById('gdriveClientId');
+        if (input) input.focus();
+        return;
+      }
+      const authUrl = window.DriveAuth.buildAuthUrl(cfg.clientId);
+      window.location.assign(authUrl);
+    };
+
+    window.disconnectGoogleDriveAccount = function() {
+      window.DriveAuth.clearTokenState();
+      const cfg = window.SyncCoordinator.loadConfig();
+      cfg.accountEmail = '';
+      cfg.remoteFileId = null;
+      window.SyncCoordinator.saveConfig(cfg);
+      updateSyncUI();
+      showSyncStatus('Disconnected Google Drive account. Local storage data remains intact.', 'indigo');
+    };
+
+    window.triggerManualSync = function() {
+      return window.SyncCoordinator.syncNow().catch(() => {});
+    };
+
     // 8. Initialization
     document.addEventListener('DOMContentLoaded', () => {
       updateThemeToggleUI();
@@ -3534,6 +4483,14 @@
       renderCustomQuestionsList();
       renderEntries();
       generateReport();
+      initSyncControlsFromConfig();
+      window.DriveAuth.handleOAuthRedirectHash().then((didConnect) => {
+        if (didConnect) {
+          switchTab('data');
+          initSyncControlsFromConfig();
+          showSyncStatus('Google Drive account connected! Enter your encryption passphrase and click Sync Now.', 'emerald');
+        }
+      });
       registerServiceWorker();
 
       form.addEventListener('change', updateSectionSelectedCounts);
@@ -3578,14 +4535,20 @@
 
         const existingIndex = entries.findIndex(item => item.date === selectedDate);
         const isUpdating = (existingIndex >= 0) || Boolean(editingEntryId);
+        const entryId = isUpdating ? (existingIndex >= 0 ? entries[existingIndex].id : editingEntryId) : ('entry-' + Date.now());
 
         const entryPayload = {
-          id: isUpdating ? (existingIndex >= 0 ? entries[existingIndex].id : editingEntryId) : ('entry-' + Date.now()),
+          id: entryId,
           date: selectedDate,
           symptoms: selectedSymptoms,
           metrics: metrics,
-          notes: notes
+          notes: notes,
+          updatedAt: new Date().toISOString()
         };
+
+        if (window.SyncCoordinator) {
+          window.SyncCoordinator.clearDeletion('entries', entryId);
+        }
 
         if (existingIndex >= 0) {
           entries[existingIndex] = entryPayload;
