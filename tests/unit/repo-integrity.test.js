@@ -77,7 +77,9 @@ test('Repository Code & Asset Integrity', async (t) => {
       'reportEndDate', 'screenerScoreBanner', 'screenerScoreText', 'screenerScoreBadge',
       'trendChartContainer', 'periodComparisonCard', 'comparisonWindowLabel',
       'comparisonMetricsGrid', 'comparisonTakeaway', 'dassScoreCards',
-      'reportTableBody', 'dassTableBody',
+      'reportTableBody', 'dassTableBody', 'customReportTableBody',
+      // Settings & Custom Questions
+      'customQuestionForm', 'customQName', 'customQPrompt', 'customQType', 'customQUnit', 'customQuestionsList',
       // Theme Toggle & PWA
       'themeToggleBtn', 'themeIconSun', 'themeIconMoon', 'pwaInstallBtn'
     ];
