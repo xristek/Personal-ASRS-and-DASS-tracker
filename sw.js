@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mental-health-pwa-v14';
+const CACHE_NAME = 'mental-health-pwa-v15';
 const ASSETS = [
   './',
   './index.html',
@@ -31,6 +31,9 @@ self.addEventListener('activate', (e) => {
 });
 
 self.addEventListener('fetch', (e) => {
+  if (e.request.method !== 'GET' || e.request.url.includes('googleapis.com') || e.request.url.includes('accounts.google.com')) {
+    return;
+  }
   e.respondWith(
     caches.match(e.request).then((cached) => cached || fetch(e.request))
   );
