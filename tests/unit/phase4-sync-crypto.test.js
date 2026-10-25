@@ -143,11 +143,24 @@ test('Phase 4: Google Drive OAuth Account Selection & Scope Verification', async
   const { DriveAuth } = win;
 
   await t.test('buildAuthUrl enforces prompt=select_account and restricted drive.appdata scope', () => {
-    const url = DriveAuth.buildAuthUrl('12345-test.apps.googleusercontent.com', 'https://example.com/app');
+    const url = DriveAuth.buildAuthUrl('12345-test.apps.googleusercontent.com', 'https://example.com/app/');
     assert.ok(url.startsWith('https://accounts.google.com/o/oauth2/v2/auth?'));
     assert.ok(url.includes('client_id=12345-test.apps.googleusercontent.com'));
     assert.ok(url.includes('prompt=select_account'), 'Must prompt user to choose which Google account to use');
     assert.ok(url.includes(encodeURIComponent('https://www.googleapis.com/auth/drive.appdata')), 'Must request restricted drive.appdata scope');
+  });
+
+  await t.test('getCanonicalRedirectUri normalizes /index.html to trailing slash directory URL', () => {
+    assert.equal(
+      DriveAuth.getCanonicalRedirectUri('https://xristek.github.io/Personal-ASRS-and-DASS-tracker/index.html'),
+      'https://xristek.github.io/Personal-ASRS-and-DASS-tracker/'
+    );
+    win.location.origin = 'https://xristek.github.io';
+    win.location.pathname = '/Personal-ASRS-and-DASS-tracker/index.html';
+    assert.equal(
+      DriveAuth.getCanonicalRedirectUri(),
+      'https://xristek.github.io/Personal-ASRS-and-DASS-tracker/'
+    );
   });
 
   await t.test('generatePKCE produces valid URL-safe verifier and SHA-256 challenge', async () => {

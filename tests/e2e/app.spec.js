@@ -358,6 +358,11 @@ test.describe('Mental Health Tracker App E2E', () => {
     await expect(page.locator('#gdriveSyncPanel')).toBeVisible();
     await expect(page.locator('#syncHeaderBadge')).toBeVisible();
 
+    // Verify setup guide dynamically populates Authorized JavaScript origin and canonical Redirect URI
+    await page.locator('#gdriveSetupGuide summary').click();
+    await expect(page.locator('#oauthOriginValue')).toHaveText('http://localhost:3000');
+    await expect(page.locator('#oauthRedirectUriValue')).toHaveText('http://localhost:3000/');
+
     // 4. Configure Client ID & simulate connected Google Drive account + Master Passphrase
     await page.locator('#gdriveClientId').fill('987654321-testclient.apps.googleusercontent.com');
     await page.evaluate(() => {
