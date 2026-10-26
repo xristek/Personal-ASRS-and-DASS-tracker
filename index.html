@@ -1131,10 +1131,29 @@
 
               <details id="gdriveSetupGuide" class="text-xs text-slate-600 bg-white border border-slate-200 rounded-lg p-2.5">
                 <summary class="font-semibold text-indigo-600 cursor-pointer select-none">How to create a free Google OAuth Client ID (2 mins)</summary>
-                <ol class="list-decimal pl-4 mt-2 space-y-1 text-[11px] text-slate-600 leading-relaxed">
+                <ol class="list-decimal pl-4 mt-2 space-y-2 text-[11px] text-slate-600 leading-relaxed">
                   <li>Open the <a href="https://console.cloud.google.com/apis/library/drive.googleapis.com" target="_blank" rel="noopener noreferrer" class="text-indigo-600 underline">Google Cloud Console</a> and enable the <strong>Google Drive API</strong>.</li>
+                  <li>Under <a href="https://console.cloud.google.com/apis/credentials/consent" target="_blank" rel="noopener noreferrer" class="text-indigo-600 underline">OAuth consent screen / Audience</a>, keep Publishing status as <strong>Testing</strong> and add your Google email address under <strong>Test users (+ Add users)</strong> so Google allows your account to sign in without app verification.</li>
                   <li>Go to <strong>APIs &amp; Services &rarr; Credentials &rarr; Create Credentials &rarr; OAuth client ID</strong> (Web application).</li>
-                  <li>Add your app URL (e.g. <code class="px-1 bg-slate-100 rounded">https://xristek.github.io</code> or <code class="px-1 bg-slate-100 rounded">http://localhost:8080</code>) under <strong>Authorized JavaScript origins</strong> and <strong>Authorized redirect URIs</strong>.</li>
+                  <li class="space-y-1.5">
+                    <span>Copy these exact values into your OAuth Client ID settings (note that the Redirect URI includes the full path and trailing slash):</span>
+                    <div class="p-2 rounded bg-slate-50 border border-slate-200 space-y-1.5">
+                      <div>
+                        <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-500">Authorized JavaScript origins (Domain only)</span>
+                        <div class="flex items-center justify-between gap-2 mt-0.5">
+                          <code id="oauthOriginValue" class="px-1.5 py-0.5 bg-white border border-slate-200 rounded text-[11px] text-slate-800 break-all flex-1">https://xristek.github.io</code>
+                          <button type="button" id="copyOauthOriginBtn" onclick="copyOAuthConfigValue('origin')" class="px-2 py-0.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded text-[10px] font-semibold flex-shrink-0 transition-colors">Copy</button>
+                        </div>
+                      </div>
+                      <div>
+                        <span class="block text-[10px] font-bold uppercase tracking-wider text-slate-500">Authorized redirect URIs (Full app path with trailing /)</span>
+                        <div class="flex items-center justify-between gap-2 mt-0.5">
+                          <code id="oauthRedirectUriValue" class="px-1.5 py-0.5 bg-white border border-slate-200 rounded text-[11px] text-slate-800 break-all flex-1">https://xristek.github.io/Personal-ASRS-and-DASS-tracker/</code>
+                          <button type="button" id="copyOauthRedirectBtn" onclick="copyOAuthConfigValue('redirect')" class="px-2 py-0.5 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 rounded text-[10px] font-semibold flex-shrink-0 transition-colors">Copy</button>
+                        </div>
+                      </div>
+                    </div>
+                  </li>
                   <li>Paste the generated Client ID above and click <strong>Select Google Drive Account</strong>.</li>
                 </ol>
               </details>
@@ -3847,8 +3866,21 @@
         return stateToken;
       },
 
+      getCanonicalRedirectUri(customUri = null) {
+        if (customUri && typeof customUri === 'string') {
+          return customUri.replace(/\/index\.html$/i, '/');
+        }
+        const origin = (window.location && window.location.origin) ? window.location.origin : '';
+        let pathname = (window.location && window.location.pathname) ? window.location.pathname : '/';
+        pathname = pathname.replace(/\/index\.html$/i, '/');
+        if (!pathname.endsWith('/')) {
+          pathname += '/';
+        }
+        return origin + pathname;
+      },
+
       buildAuthUrl(clientId, redirectUri, customState = null) {
-        const cleanRedirect = redirectUri || (window.location.origin + window.location.pathname);
+        const cleanRedirect = this.getCanonicalRedirectUri(redirectUri);
         const state = customState || this.generateOAuthState();
         if (customState) {
           try {
@@ -4470,6 +4502,15 @@
       const autoSyncCb = document.getElementById('autoSyncCheckbox');
       const rememberCb = document.getElementById('rememberPassphraseSession');
       const passphraseInput = document.getElementById('syncPassphraseInput');
+      const originEl = document.getElementById('oauthOriginValue');
+      const redirectEl = document.getElementById('oauthRedirectUriValue');
+
+      if (originEl && window.location && window.location.origin) {
+        originEl.textContent = window.location.origin;
+      }
+      if (redirectEl && window.DriveAuth && typeof window.DriveAuth.getCanonicalRedirectUri === 'function') {
+        redirectEl.textContent = window.DriveAuth.getCanonicalRedirectUri();
+      }
 
       if (clientIdInput) clientIdInput.value = cfg.clientId || '';
       if (autoSyncCb) autoSyncCb.checked = cfg.autoSync !== false;
@@ -4535,6 +4576,22 @@
       } else {
         input.type = 'password';
         btn.textContent = 'Show';
+      }
+    };
+
+    window.copyOAuthConfigValue = function(kind) {
+      const isOrigin = kind === 'origin';
+      const el = document.getElementById(isOrigin ? 'oauthOriginValue' : 'oauthRedirectUriValue');
+      const btn = document.getElementById(isOrigin ? 'copyOauthOriginBtn' : 'copyOauthRedirectBtn');
+      if (!el) return;
+      const text = el.textContent.trim();
+      if (navigator.clipboard && typeof navigator.clipboard.writeText === 'function') {
+        navigator.clipboard.writeText(text).catch(() => {});
+      }
+      if (btn) {
+        const orig = btn.textContent;
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = orig; }, 1500);
       }
     };
 

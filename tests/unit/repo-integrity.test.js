@@ -82,7 +82,8 @@ test('Repository Code & Asset Integrity', async (t) => {
       'customQuestionForm', 'customQName', 'customQPrompt', 'customQType', 'customQUnit', 'customQuestionsList',
       // Storage Mode & Zero-Knowledge Google Drive Sync (Phase 4)
       'syncHeaderBadge', 'storageModeBadge', 'modeLocalCard', 'modeGdriveCard', 'gdriveSyncPanel',
-      'gdriveClientId', 'gdriveAccountStatus', 'connectGdriveBtn', 'switchGdriveAccountBtn', 'disconnectGdriveBtn',
+      'gdriveClientId', 'oauthOriginValue', 'oauthRedirectUriValue', 'copyOauthOriginBtn', 'copyOauthRedirectBtn',
+      'gdriveAccountStatus', 'connectGdriveBtn', 'switchGdriveAccountBtn', 'disconnectGdriveBtn',
       'syncPassphraseInput', 'rememberPassphraseSession', 'autoSyncCheckbox', 'syncNowBtn', 'lastSyncedLabel', 'syncStatusMessage',
       // Theme Toggle & PWA
       'themeToggleBtn', 'themeIconSun', 'themeIconMoon', 'pwaInstallBtn'
