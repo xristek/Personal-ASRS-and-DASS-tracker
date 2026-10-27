@@ -1126,7 +1126,7 @@
 
               <div class="space-y-1.5">
                 <label for="gdriveClientId" class="block text-xs font-semibold text-slate-700">Google OAuth 2.0 Web Client ID</label>
-                <input type="text" id="gdriveClientId" oninput="handleSyncConfigChange()" placeholder="e.g. 1234567890-abc.apps.googleusercontent.com" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                <input type="text" id="gdriveClientId" name="google_oauth_client_id_config" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" data-lpignore="true" data-1p-ignore="true" data-form-type="other" oninput="handleSyncConfigChange()" placeholder="e.g. 1234567890-abc.apps.googleusercontent.com" class="w-full px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
               </div>
 
               <details id="gdriveSetupGuide" class="text-xs text-slate-600 bg-white border border-slate-200 rounded-lg p-2.5">
@@ -1181,7 +1181,7 @@
               <div class="space-y-1.5">
                 <label for="syncPassphraseInput" class="block text-xs font-semibold text-slate-700">Master Encryption Passphrase</label>
                 <div class="flex items-center gap-1.5">
-                  <input type="password" id="syncPassphraseInput" oninput="handleSyncPassphraseInput()" placeholder="Enter strong passphrase (min 8 characters)..." class="flex-1 px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                  <input type="password" id="syncPassphraseInput" name="e2ee_master_passphrase" autocomplete="new-password" data-lpignore="true" oninput="handleSyncPassphraseInput()" placeholder="Enter strong passphrase (min 8 characters)..." class="flex-1 px-3 py-2 bg-white border border-slate-300 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500">
                   <button type="button" id="togglePassphraseBtn" onclick="toggleSyncPassphraseVisibility()" class="px-2.5 py-2 bg-white hover:bg-slate-100 text-slate-600 border border-slate-300 rounded-lg text-xs font-semibold transition-colors">
                     Show
                   </button>
@@ -3845,6 +3845,20 @@
 
     window.DriveAuth = {
       SCOPES: 'https://www.googleapis.com/auth/drive.appdata https://www.googleapis.com/auth/userinfo.email',
+      CLIENT_ID_REGEX: /^\d+-[a-zA-Z0-9_-]+\.apps\.googleusercontent\.com$/i,
+
+      normalizeAndValidateClientId(rawClientId) {
+        if (!rawClientId || typeof rawClientId !== 'string') {
+          return { valid: false, normalized: '' };
+        }
+        let cleaned = rawClientId.trim().replace(/^["']+|["']+$/g, '').trim();
+        // If user pasted <project-number>-<hash> without the .apps.googleusercontent.com suffix, append it
+        if (/^\d+-[a-zA-Z0-9_-]+$/.test(cleaned)) {
+          cleaned = `${cleaned}.apps.googleusercontent.com`;
+        }
+        const valid = this.CLIENT_ID_REGEX.test(cleaned);
+        return { valid, normalized: cleaned };
+      },
 
       async generatePKCE() {
         const randomBytes = window.crypto.getRandomValues(new Uint8Array(32));
@@ -3862,6 +3876,7 @@
         const stateToken = base64UrlEncode(randomBytes);
         try {
           sessionStorage.setItem(SYNC_OAUTH_STATE_SESSION_KEY, stateToken);
+          localStorage.setItem(SYNC_OAUTH_STATE_SESSION_KEY, stateToken);
         } catch (e) {}
         return stateToken;
       },
@@ -3880,15 +3895,18 @@
       },
 
       buildAuthUrl(clientId, redirectUri, customState = null) {
+        const { valid, normalized } = this.normalizeAndValidateClientId(clientId);
+        const finalClientId = valid ? normalized : String(clientId || '').trim();
         const cleanRedirect = this.getCanonicalRedirectUri(redirectUri);
         const state = customState || this.generateOAuthState();
         if (customState) {
           try {
             sessionStorage.setItem(SYNC_OAUTH_STATE_SESSION_KEY, customState);
+            localStorage.setItem(SYNC_OAUTH_STATE_SESSION_KEY, customState);
           } catch (e) {}
         }
         const params = new URLSearchParams({
-          client_id: clientId.trim(),
+          client_id: finalClientId,
           redirect_uri: cleanRedirect,
           response_type: 'token',
           scope: this.SCOPES,
@@ -3901,10 +3919,11 @@
 
       getTokenState() {
         try {
-          const raw = sessionStorage.getItem(SYNC_TOKEN_SESSION_KEY);
+          const raw = localStorage.getItem(SYNC_TOKEN_SESSION_KEY) || sessionStorage.getItem(SYNC_TOKEN_SESSION_KEY);
           if (!raw) return null;
           const parsed = JSON.parse(raw);
           if (parsed.expiresAt && Date.now() > parsed.expiresAt) {
+            localStorage.removeItem(SYNC_TOKEN_SESSION_KEY);
             sessionStorage.removeItem(SYNC_TOKEN_SESSION_KEY);
             return null;
           }
@@ -3916,13 +3935,17 @@
 
       saveTokenState(tokenData) {
         try {
-          sessionStorage.setItem(SYNC_TOKEN_SESSION_KEY, JSON.stringify(tokenData));
+          const serialized = JSON.stringify(tokenData);
+          localStorage.setItem(SYNC_TOKEN_SESSION_KEY, serialized);
+          sessionStorage.setItem(SYNC_TOKEN_SESSION_KEY, serialized);
         } catch (e) {}
       },
 
       clearTokenState() {
         try {
+          localStorage.removeItem(SYNC_TOKEN_SESSION_KEY);
           sessionStorage.removeItem(SYNC_TOKEN_SESSION_KEY);
+          localStorage.removeItem(SYNC_OAUTH_STATE_SESSION_KEY);
           sessionStorage.removeItem(SYNC_OAUTH_STATE_SESSION_KEY);
         } catch (e) {}
       },
@@ -3952,11 +3975,12 @@
 
         if (!accessToken) return false;
 
-        // Verify OAuth CSRF state parameter against sessionStorage
+        // Verify OAuth CSRF state parameter against sessionStorage / localStorage
         let expectedState = null;
         try {
-          expectedState = sessionStorage.getItem(SYNC_OAUTH_STATE_SESSION_KEY);
+          expectedState = sessionStorage.getItem(SYNC_OAUTH_STATE_SESSION_KEY) || localStorage.getItem(SYNC_OAUTH_STATE_SESSION_KEY);
           sessionStorage.removeItem(SYNC_OAUTH_STATE_SESSION_KEY);
+          localStorage.removeItem(SYNC_OAUTH_STATE_SESSION_KEY);
         } catch (e) {}
 
         if (!expectedState || !returnedState || returnedState !== expectedState) {
@@ -4540,7 +4564,17 @@
       const rememberCb = document.getElementById('rememberPassphraseSession');
       const passphraseInput = document.getElementById('syncPassphraseInput');
 
-      if (clientIdInput) cfg.clientId = clientIdInput.value.trim();
+      if (clientIdInput) {
+        const rawVal = clientIdInput.value.trim();
+        const existingValid = window.DriveAuth.normalizeAndValidateClientId(cfg.clientId).valid;
+        const incomingCheck = window.DriveAuth.normalizeAndValidateClientId(rawVal);
+        // Protect a valid saved Client ID from being clobbered by browser email/username autofill
+        if (incomingCheck.valid) {
+          cfg.clientId = incomingCheck.normalized;
+        } else if (!existingValid || rawVal === '') {
+          cfg.clientId = rawVal;
+        }
+      }
       if (autoSyncCb) cfg.autoSync = Boolean(autoSyncCb.checked);
       if (rememberCb) cfg.rememberPassphrase = Boolean(rememberCb.checked);
 
@@ -4596,15 +4630,41 @@
     };
 
     window.connectGoogleDriveAccount = function() {
-      handleSyncConfigChange();
+      const input = document.getElementById('gdriveClientId');
       const cfg = window.SyncCoordinator.loadConfig();
-      if (!cfg.clientId) {
+      const rawInputVal = input ? input.value.trim() : '';
+
+      // Check input value first; if input was clobbered by browser autofill, fall back to saved cfg.clientId
+      let candidate = rawInputVal || cfg.clientId || '';
+      let check = window.DriveAuth.normalizeAndValidateClientId(candidate);
+      if (!check.valid && cfg.clientId && cfg.clientId !== candidate) {
+        const fallbackCheck = window.DriveAuth.normalizeAndValidateClientId(cfg.clientId);
+        if (fallbackCheck.valid) {
+          check = fallbackCheck;
+        }
+      }
+
+      if (!candidate) {
         showSyncStatus('Please enter your Google OAuth 2.0 Web Client ID first (see setup guide above).', 'amber');
-        const input = document.getElementById('gdriveClientId');
         if (input) input.focus();
         return;
       }
-      const authUrl = window.DriveAuth.buildAuthUrl(cfg.clientId);
+
+      if (!check.valid) {
+        showSyncStatus(
+          'Invalid Google OAuth Client ID format. It must start with your numeric Project ID followed by a hyphen (e.g. 123456789012-abc.apps.googleusercontent.com).',
+          'rose'
+        );
+        if (input) input.focus();
+        return;
+      }
+
+      if (input) input.value = check.normalized;
+      cfg.clientId = check.normalized;
+      window.SyncCoordinator.saveConfig(cfg);
+      handleSyncConfigChange();
+
+      const authUrl = window.DriveAuth.buildAuthUrl(check.normalized);
       window.location.assign(authUrl);
     };
 

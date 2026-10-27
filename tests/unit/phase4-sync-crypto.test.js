@@ -169,6 +169,46 @@ test('Phase 4: Google Drive OAuth Account Selection & Scope Verification', async
     assert.ok(pkce.codeChallenge.length >= 40);
     assert.notEqual(pkce.codeVerifier, pkce.codeChallenge);
   });
+
+  await t.test('normalizeAndValidateClientId validates project-id prefix, auto-appends suffix, and rejects autofilled emails/secrets', () => {
+    const full = DriveAuth.normalizeAndValidateClientId('123456789012-abcDEF123.apps.googleusercontent.com');
+    assert.equal(full.valid, true);
+    assert.equal(full.normalized, '123456789012-abcDEF123.apps.googleusercontent.com');
+
+    const shorthand = DriveAuth.normalizeAndValidateClientId('123456789012-abcDEF123');
+    assert.equal(shorthand.valid, true);
+    assert.equal(shorthand.normalized, '123456789012-abcDEF123.apps.googleusercontent.com');
+
+    const missingProjectId = DriveAuth.normalizeAndValidateClientId('abcDEF123.apps.googleusercontent.com');
+    assert.equal(missingProjectId.valid, false);
+
+    const autofilledEmail = DriveAuth.normalizeAndValidateClientId('xristek@gmail.com');
+    assert.equal(autofilledEmail.valid, false);
+
+    const clientSecret = DriveAuth.normalizeAndValidateClientId('GOCSPX-1234567890abcdef');
+    assert.equal(clientSecret.valid, false);
+  });
+
+  await t.test('persists token state in localStorage across sessionStorage clears until expiresAt', () => {
+    DriveAuth.saveTokenState({
+      accessToken: 'persisted-token-abc',
+      email: 'xristek@gmail.com',
+      expiresAt: Date.now() + 60000
+    });
+    // Simulate mobile browser wiping sessionStorage on reload
+    win.sessionStorage.clear();
+    const recovered = DriveAuth.getTokenState();
+    assert.ok(recovered);
+    assert.equal(recovered.accessToken, 'persisted-token-abc');
+
+    // Simulate expired token
+    DriveAuth.saveTokenState({
+      accessToken: 'expired-token-xyz',
+      email: 'xristek@gmail.com',
+      expiresAt: Date.now() - 1000
+    });
+    assert.equal(DriveAuth.getTokenState(), null);
+  });
 });
 
 test('Phase 4: Deterministic Last-Write-Wins (LWW) SyncCoordinator.mergeState', async (t) => {
