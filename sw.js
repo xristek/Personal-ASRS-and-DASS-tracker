@@ -1,4 +1,4 @@
-const CACHE_NAME = 'mental-health-pwa-v16';
+const CACHE_NAME = 'mental-health-pwa-v17';
 const ASSETS = [
   './',
   './index.html',
